@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>{% block title %}Analyseur de Rapports{% endblock %}</title>
+    <link rel="stylesheet" href="{{ static_url('css/global.css') }}" />
+    {% block extra_head %}{% endblock %}
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    {% set current_month_value = current_month if current_month is defined and current_month else request.args.get('month', '') %}
+    {% set month_qs = ('?month=' ~ current_month_value) if current_month_value else '' %}
+    <a class="skip-link" href="#main-content">Aller au contenu</a>
+    <nav class="topbar" aria-label="Navigation principale" id="topbar">
+      <a class="topbar__brand" href="{{ service_urls.bdc }}{{ month_qs }}">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+          <line x1="12" y1="22.08" x2="12" y2="12"></line>
+        </svg>
+        Camille <span>Reporting</span>
+      </a>
+      <button
+        type="button"
+        class="topbar__toggle"
+        id="navToggle"
+        aria-expanded="false"
+        aria-controls="topbar-links"
+        aria-label="Ouvrir le menu"
+      >
+        <span class="topbar__toggle-icon" aria-hidden="true"></span>
+      </button>
+      <div class="topbar__links" id="topbar-links">
+        <form class="topbar__month" method="get" action="{{ request.path }}" data-month-form>
+          <label class="sr-only" for="globalMonth">Mois cible</label>
+          <input
+            type="month"
+            id="globalMonth"
+            name="month"
+            value="{{ current_month_value }}"
+            aria-label="Mois cible de la mission"
+          />
+          <button type="submit" class="topbar__month-btn">Aller</button>
+        </form>
+        <a href="{{ service_urls.bdc }}{{ month_qs }}" class="{% if active_page == 'bdc' %}active{% endif %}"{% if active_page == 'bdc' %} aria-current="page"{% endif %}>Convertisseur BDC</a>
+        <a href="{{ service_urls.reporting }}{{ month_qs }}" class="{% if active_page == 'reporting' %}active{% endif %}"{% if active_page == 'reporting' %} aria-current="page"{% endif %}>Reporting Vidéos</a>
+        <a href="{{ service_urls.reconciliation }}{{ month_qs }}" class="{% if active_page == 'reconciliation' %}active{% endif %}"{% if active_page == 'reconciliation' %} aria-current="page"{% endif %}>Réconciliation</a>
+      </div>
+    </nav>
+    <div class="topbar__backdrop" id="navBackdrop" hidden></div>
+
+    {% include "_ritual_stepper.html" %}
+
+    <div class="main-content" id="main-content">
+      {% block content %}{% endblock %}
+    </div>
+
+    <div id="toast-container" class="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script src="{{ static_url('js/global.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+  </body>
+</html>

@@ -1,0 +1,119 @@
+/* Dashboard-specific layout (served with global.css) */
+body.dashboard-page {
+  background: radial-gradient(circle at top left, #182132, #0b111a 60%);
+  min-height: 100vh;
+}
+
+.dashboard-main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 48px 20px 80px;
+}
+
+.dashboard-hero {
+  background: var(--bg-panel-solid);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 36px;
+  margin-bottom: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 70% 0%, rgba(244, 91, 105, 0.28), transparent 50%);
+  pointer-events: none;
+}
+
+.dashboard-hero__content {
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-hero h1 {
+  font-size: clamp(2rem, 3vw, 2.6rem);
+  margin: 0 0 0.4rem;
+}
+
+.dashboard-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.dashboard-steps span {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.service-card {
+  background: var(--bg-panel-solid);
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  padding: 28px;
+  box-shadow: 0 22px 45px rgba(5, 8, 15, 0.45);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.service-card h2 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.service-card__status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.status-pill {
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
+.status-pill.running {
+  background: rgba(47, 214, 197, 0.18);
+  color: var(--accent-alt);
+}
+
+.status-pill.stopped {
+  background: rgba(100, 116, 139, 0.22);
+  color: var(--muted);
+}
+
+.dashboard-stop {
+  color: #ffb5be;
+  border-color: rgba(244, 91, 105, 0.35);
+  background: rgba(244, 91, 105, 0.12);
+}
+
+@media (max-width: 640px) {
+  .dashboard-hero {
+    padding: 28px;
+  }
+  .dashboard-steps {
+    flex-direction: column;
+  }
+}

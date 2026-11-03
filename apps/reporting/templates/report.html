@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rapport vidéos - {{ selected }}</title>
+  <link rel="stylesheet" href="/static/css/print-report.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Rapport vidéos ({{ selected }})</h1>
+
+    {% if report %}
+      <div class="card">
+        {% if total_mp4 is not none %}
+          <div class="summary-grid">
+            <div class="stat">
+              <span>Total vidéos .mp4</span>
+              <strong>{{ total_mp4 }}</strong>
+            </div>
+            {% if group_totals %}
+              {% for group_id, count in group_totals.items() %}
+                <div class="stat">
+                  <span>{{ group_id }}</span>
+                  <strong>{{ count }}</strong>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+        {% endif %}
+
+        {% for group in report %}
+          <div class="group-section">
+            <div class="group-header">
+              Lot : {{ group.id_camille }}
+              <span class="pill">{{ group.person }}</span>
+            </div>
+
+            <div class="report-grid">
+              <div class="cat-box">
+                <div class="cat-title">Courte (&lt; 2 min)</div>
+                <div class="cat-count">{{ group.categories['short'].count }}</div>
+                {% if group.categories['short'].files %}
+                  <div class="files">{{ group.categories['short'].files | join('\n') }}</div>
+                {% endif %}
+              </div>
+              <div class="cat-box">
+                <div class="cat-title">Standard (2 - 5 min)</div>
+                <div class="cat-count">{{ group.categories['standard'].count }}</div>
+                {% if group.categories['standard'].files %}
+                  <div class="files">{{ group.categories['standard'].files | join('\n') }}</div>
+                {% endif %}
+              </div>
+              <div class="cat-box">
+                <div class="cat-title">Moyenne (5 - 7 min)</div>
+                <div class="cat-count">{{ group.categories['medium'].count }}</div>
+                {% if group.categories['medium'].files %}
+                  <div class="files">{{ group.categories['medium'].files | join('\n') }}</div>
+                {% endif %}
+              </div>
+              <div class="cat-box">
+                <div class="cat-title">Longue (≥ 7 min)</div>
+                <div class="cat-count">{{ group.categories['long'].count }}</div>
+                {% if group.categories['long'].files %}
+                  <div class="files">{{ group.categories['long'].files | join('\n') }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Aucune donnée pour {{ selected }}.</p>
+    {% endif %}
+  </div>
+</body>
+</html>

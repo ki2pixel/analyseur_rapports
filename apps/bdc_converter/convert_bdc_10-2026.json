@@ -1,0 +1,457 @@
+[
+    {
+        "numero_bdc": "BDC-26-1689",
+        "date_commande": "01/10/2026",
+        "date_livraison": "01/10/2026",
+        "reference": "LOTS 2/7/10/12/15/17",
+        "references": [
+            "LOTS 2",
+            "7",
+            "10",
+            "12",
+            "15",
+            "17"
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "5,00",
+                "unite": "Unité",
+                "taux": "4,00",
+                "montant": "20,00"
+            },
+            {
+                "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+                "quantite": "12,00",
+                "unite": "Unité",
+                "taux": "8,00",
+                "montant": "96,00"
+            }
+        ],
+        "totals": {
+            "subtotal": "116,00",
+            "total": "116,00"
+        },
+        "layout": {
+            "fingerprint": "index | description | quantite | taux | montant",
+            "expected": "index | description | quantite | taux | montant",
+            "changed": false,
+            "columns": [
+                {
+                    "name": "index",
+                    "label": "#"
+                },
+                {
+                    "name": "description",
+                    "label": "Description"
+                },
+                {
+                    "name": "quantite",
+                    "label": "Quantité"
+                },
+                {
+                    "name": "taux",
+                    "label": "Taux"
+                },
+                {
+                    "name": "montant",
+                    "label": "Montant"
+                }
+            ]
+        },
+        "warnings": [],
+        "status": "ok",
+        "source_filename": "BDC-26-1689.pdf"
+    },
+    {
+        "numero_bdc": "BDC-26-1695",
+        "date_commande": "02/10/2026",
+        "date_livraison": "02/10/2026",
+        "reference": "LOTS 18/19/20/23/24/26/27/30/34",
+        "references": [
+            "LOTS 18",
+            "19",
+            "20",
+            "23",
+            "24",
+            "26",
+            "27",
+            "30",
+            "34"
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+                "quantite": "6,00",
+                "unite": "Unité",
+                "taux": "8,00",
+                "montant": "48,00"
+            },
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "5,00",
+                "unite": "Unité",
+                "taux": "4,00",
+                "montant": "20,00"
+            }
+        ],
+        "totals": {
+            "subtotal": "68,00",
+            "total": "68,00"
+        },
+        "layout": {
+            "fingerprint": "index | description | quantite | taux | montant",
+            "expected": "index | description | quantite | taux | montant",
+            "changed": false,
+            "columns": [
+                {
+                    "name": "index",
+                    "label": "#"
+                },
+                {
+                    "name": "description",
+                    "label": "Description"
+                },
+                {
+                    "name": "quantite",
+                    "label": "Quantité"
+                },
+                {
+                    "name": "taux",
+                    "label": "Taux"
+                },
+                {
+                    "name": "montant",
+                    "label": "Montant"
+                }
+            ]
+        },
+        "warnings": [],
+        "status": "ok",
+        "source_filename": "BDC-26-1695.pdf"
+    },
+    {
+        "numero_bdc": "BDC-26-1856",
+        "date_commande": "23/10/2026",
+        "date_livraison": "23/10/2026",
+        "reference": "LOTS 41 à 276",
+        "references": [
+            "LOTS 41 à 276"
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "83,00",
+                "unite": "Unité",
+                "taux": "4,00",
+                "montant": "332,00"
+            },
+            {
+                "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+                "quantite": "96,00",
+                "unite": "Unité",
+                "taux": "8,00",
+                "montant": "768,00"
+            }
+        ],
+        "totals": {
+            "subtotal": "1 100,00",
+            "total": "1 100,00"
+        },
+        "layout": {
+            "fingerprint": "index | description | quantite | taux | montant",
+            "expected": "index | description | quantite | taux | montant",
+            "changed": false,
+            "columns": [
+                {
+                    "name": "index",
+                    "label": "#"
+                },
+                {
+                    "name": "description",
+                    "label": "Description"
+                },
+                {
+                    "name": "quantite",
+                    "label": "Quantité"
+                },
+                {
+                    "name": "taux",
+                    "label": "Taux"
+                },
+                {
+                    "name": "montant",
+                    "label": "Montant"
+                }
+            ]
+        },
+        "warnings": [],
+        "status": "ok",
+        "source_filename": "BDC-26-1856.pdf"
+    },
+    {
+        "numero_bdc": "BDC-26-1862",
+        "date_commande": "26/10/2026",
+        "date_livraison": "26/10/2026",
+        "reference": "LOTS 286/287/291/293/295/298/300/303",
+        "references": [
+            "LOTS 286",
+            "287",
+            "291",
+            "293",
+            "295",
+            "298",
+            "300",
+            "303"
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "7,00",
+                "unite": "Unité",
+                "taux": "4,00",
+                "montant": "28,00"
+            },
+            {
+                "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+                "quantite": "7,00",
+                "unite": "Unité",
+                "taux": "8,00",
+                "montant": "56,00"
+            }
+        ],
+        "totals": {
+            "subtotal": "84,00",
+            "total": "84,00"
+        },
+        "layout": {
+            "fingerprint": "index | description | quantite | taux | montant",
+            "expected": "index | description | quantite | taux | montant",
+            "changed": false,
+            "columns": [
+                {
+                    "name": "index",
+                    "label": "#"
+                },
+                {
+                    "name": "description",
+                    "label": "Description"
+                },
+                {
+                    "name": "quantite",
+                    "label": "Quantité"
+                },
+                {
+                    "name": "taux",
+                    "label": "Taux"
+                },
+                {
+                    "name": "montant",
+                    "label": "Montant"
+                }
+            ]
+        },
+        "warnings": [],
+        "status": "ok",
+        "source_filename": "BDC-26-1862.pdf"
+    },
+    {
+        "numero_bdc": "BDC-26-1867",
+        "date_commande": "29/10/2026",
+        "date_livraison": "29/10/2026",
+        "reference": "LOTS 304/305/309/313/315/322/325/328/335",
+        "references": [
+            "LOTS 304",
+            "305",
+            "309",
+            "313",
+            "315",
+            "322",
+            "325",
+            "328",
+            "335"
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "5,00",
+                "unite": "Unité",
+                "taux": "4,00",
+                "montant": "20,00"
+            },
+            {
+                "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+                "quantite": "23,00",
+                "unite": "Unité",
+                "taux": "8,00",
+                "montant": "184,00"
+            },
+            {
+                "description": "Recadrage - vidéo longue (plus de 8 minutes)",
+                "quantite": "1,00",
+                "unite": "Unité",
+                "taux": "16,00",
+                "montant": "16,00"
+            }
+        ],
+        "totals": {
+            "subtotal": "220,00",
+            "total": "220,00"
+        },
+        "layout": {
+            "fingerprint": "index | description | quantite | taux | montant",
+            "expected": "index | description | quantite | taux | montant",
+            "changed": false,
+            "columns": [
+                {
+                    "name": "index",
+                    "label": "#"
+                },
+                {
+                    "name": "description",
+                    "label": "Description"
+                },
+                {
+                    "name": "quantite",
+                    "label": "Quantité"
+                },
+                {
+                    "name": "taux",
+                    "label": "Taux"
+                },
+                {
+                    "name": "montant",
+                    "label": "Montant"
+                }
+            ]
+        },
+        "warnings": [],
+        "status": "ok",
+        "source_filename": "BDC-26-1867.pdf"
+    },
+    {
+        "numero_bdc": "BDC-26-1872",
+        "date_commande": "30/10/2026",
+        "date_livraison": "30/10/2026",
+        "reference": "LOTS 354/355/356/357/358/359/364/367",
+        "references": [
+            "LOTS 354",
+            "355",
+            "356",
+            "357",
+            "358",
+            "359",
+            "364",
+            "367"
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+                "quantite": "5,00",
+                "unite": "Unité",
+                "taux": "8,00",
+                "montant": "40,00"
+            },
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "7,00",
+                "unite": "Unité",
+                "taux": "4,00",
+                "montant": "28,00"
+            }
+        ],
+        "totals": {
+            "subtotal": "68,00",
+            "total": "68,00"
+        },
+        "layout": {
+            "fingerprint": "index | description | quantite | taux | montant",
+            "expected": "index | description | quantite | taux | montant",
+            "changed": false,
+            "columns": [
+                {
+                    "name": "index",
+                    "label": "#"
+                },
+                {
+                    "name": "description",
+                    "label": "Description"
+                },
+                {
+                    "name": "quantite",
+                    "label": "Quantité"
+                },
+                {
+                    "name": "taux",
+                    "label": "Taux"
+                },
+                {
+                    "name": "montant",
+                    "label": "Montant"
+                }
+            ]
+        },
+        "warnings": [],
+        "status": "ok",
+        "source_filename": "BDC-26-1872.pdf"
+    },
+    {
+        "numero_bdc": "BDC-26-1879",
+        "date_commande": "03/11/2026",
+        "date_livraison": "03/11/2026",
+        "reference": "309 310 septembre",
+        "references": [
+            "309 310 septembre"
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "3,00",
+                "unite": "Unité",
+                "taux": "4,00",
+                "montant": "12,00"
+            },
+            {
+                "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+                "quantite": "1,00",
+                "unite": "Unité",
+                "taux": "8,00",
+                "montant": "8,00"
+            }
+        ],
+        "totals": {
+            "subtotal": "20,00",
+            "total": "20,00"
+        },
+        "layout": {
+            "fingerprint": "index | description | quantite | taux | montant",
+            "expected": "index | description | quantite | taux | montant",
+            "changed": false,
+            "columns": [
+                {
+                    "name": "index",
+                    "label": "#"
+                },
+                {
+                    "name": "description",
+                    "label": "Description"
+                },
+                {
+                    "name": "quantite",
+                    "label": "Quantité"
+                },
+                {
+                    "name": "taux",
+                    "label": "Taux"
+                },
+                {
+                    "name": "montant",
+                    "label": "Montant"
+                }
+            ]
+        },
+        "warnings": [],
+        "status": "ok",
+        "source_filename": "BDC-26-1879.pdf"
+    }
+]

@@ -1,0 +1,16 @@
+# Python
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.cache/
+
+# Données locales / artefacts
+data/
+archives/
+
+# Secrets
+.env
+.env.local

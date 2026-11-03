@@ -1,0 +1,953 @@
+{% set analysis = analysis|default({}, true) %}
+{% set vm = view_model|default({}, true) %}
+{% set meta = meta|default({}, true) %}
+{% set pdf_mode = pdf_mode|default(false) %}
+{% set certification = analysis.certification|default({}, true) %}
+{% set conformity = analysis.conformity|default({}, true) %}
+{% set is_certified = certification.is_certified|default(false) %}
+{% set blocking_issues = certification.blocking_issues|default(analysis.issues_count|default(0)) %}
+{% set score = conformity.score|default(0) %}
+{% set total_orders = conformity.total_orders|default(0) %}
+{% set compliant_orders = conformity.compliant_orders|default(0) %}
+{% set justified_orders = conformity.justified_orders|default(0) %}
+{% set issues_count = analysis.issues_count|default(0) %}
+{% set balance = analysis.balance|default({}, true) %}
+{% set reporting_totals = analysis.reporting.totals|default({}, true) if analysis.reporting else {} %}
+{% set bdc_totals = analysis.bdc.totals|default({}, true) if analysis.bdc else {} %}
+{% set categories = [
+  ("short", "Courte", "< 2 min", "Courtes"),
+  ("standard", "Standard", "2 – 5 min", "Standards"),
+  ("medium", "Moyenne", "5 – 7 min", "Moyennes"),
+  ("long", "Longue", "≥ 7 min", "Longues")
+] %}
+{% set differences = vm.cluster_differences|default([], true) %}
+{% set all_clusters = vm.cluster_results_sorted|default(vm.cluster_results|default(differences, true), true) %}
+{% set review_clusters = vm.review_clusters|default([], true) %}
+{% set review_count = review_clusters|length if review_clusters else conformity.review_clusters|default(0) %}
+{% set reporting_groups = vm.reporting_groups_sorted|default(vm.reporting_groups|default([], true), true) %}
+{% set overlaps = vm.overlapping_bdc_lots|default(analysis.overlapping_bdc_lots|default([], true), true) %}
+{% set unexpected = vm.unexpected_ids|default([], true) %}
+{% set missing = vm.missing_invoices|default([], true) %}
+{% set group_count = analysis.reporting.group_count|default(reporting_groups|length) if analysis.reporting else reporting_groups|length %}
+{% set cluster_count = analysis.bdc.cluster_count|default(all_clusters|length) if analysis.bdc else all_clusters|length %}
+{% set order_count = analysis.bdc.order_count|default(total_orders) if analysis.bdc else total_orders %}
+{% set month_label = (meta.month|fr_month) if meta.month else "Mois non précisé" %}
+{% set generated_label = (analysis.generated_at|fr_datetime) if analysis.generated_at else "—" %}
+{% set balance_totals = namespace(billed=0, actual=0, surplus=0, missing=0) %}
+{% for cat, label, threshold, plural in categories %}
+  {% set item = balance[cat] if balance and cat in balance else {} %}
+  {% set balance_totals.billed = balance_totals.billed + (item.billed|default(0)|int) %}
+  {% set balance_totals.actual = balance_totals.actual + (item.actual|default(0)|int) %}
+  {% set cat_delta = item.delta|default(0)|int %}
+  {% if cat_delta > 0 %}
+    {% set balance_totals.surplus = balance_totals.surplus + cat_delta %}
+  {% elif cat_delta < 0 %}
+    {% set balance_totals.missing = balance_totals.missing + (cat_delta|abs) %}
+  {% endif %}
+{% endfor %}
+{% set annex = vm.annex|default({}, true) %}
+{% set annex_billed_total = annex.cluster_billed_total|default(0)|int %}
+{% set annex_actual_total = annex.cluster_actual_total|default(0)|int %}
+{% set overlap_actual = annex.overlap_actual|default(0)|int %}
+{% set unattached_billed = annex.unattached_billed|default(0)|int %}
+{% set unattached_actual = annex.unattached_actual|default(0)|int %}
+{% set grand_billed = annex.grand_billed|default(bdc_totals.overall|default(annex_billed_total))|int %}
+{% set grand_actual = annex.grand_actual|default(reporting_totals.overall|default(annex_actual_total))|int %}
+{% set annex_delta = annex.grand_delta|default(grand_actual - grand_billed)|int %}
+{% set unknown_billed = annex.unknown_billed|default(analysis.unknown_billed|default(0))|int %}
+{% set balance_missing = balance_totals.missing + unknown_billed %}
+{% set balance_total_billed = balance_totals.billed + unknown_billed %}
+{% set balance_total_delta = balance_totals.actual - balance_total_billed %}
+{% set has_attention = vm.has_attention|default((overlaps|length > 0) or (unexpected|length > 0) or (missing|length > 0)) %}
+{% set has_blocking = has_attention or (differences|length > 0 and not is_certified) %}
+
+{% macro svg_icon(name, size=20) -%}
+<svg class="icon icon--{{ name }}" width="{{ size }}" height="{{ size }}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+  {%- if name == "check" -%}
+    <circle cx="12" cy="12" r="9"/><path d="m8.5 12.5 2.5 2.5 4.5-5"/>
+  {%- elif name == "alert" -%}
+    <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+  {%- elif name == "score" -%}
+    <circle cx="12" cy="12" r="9"/><path d="M12 12l4-4"/><path d="M12 3v2"/><path d="M21 12h-2"/><path d="M12 21v-2"/><path d="M3 12h2"/>
+  {%- elif name == "file" -%}
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/>
+  {%- elif name == "folder" -%}
+    <path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+  {%- elif name == "layers" -%}
+    <path d="m12 2 9 5-9 5-9-5 9-5z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/>
+  {%- elif name == "clock" -%}
+    <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+  {%- elif name == "shield" -%}
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/>
+  {%- elif name == "info" -%}
+    <circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/>
+  {%- elif name == "box" -%}
+    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>
+  {%- elif name == "arrow" -%}
+    <path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>
+  {%- endif -%}
+</svg>
+{%- endmacro %}
+
+{% macro delta_badge(delta) -%}
+  {%- set value = delta|default(0)|int -%}
+  {%- if value == 0 -%}
+    <span class="delta is-ok text-positive">
+      <span class="delta__icon">✓</span>
+      <span class="delta__text">En règle (0)</span>
+      <span class="delta__compact">0</span>
+    </span>
+  {%- elif value > 0 -%}
+    <span class="delta is-warn text-warn">
+      <span class="delta__icon">⚠</span>
+      <span class="delta__text">+{{ value }} non facturée{{ "s" if value > 1 else "" }}</span>
+      <span class="delta__compact">+{{ value }}</span>
+    </span>
+  {%- else -%}
+    <span class="delta is-danger text-negative">
+      <span class="delta__icon">🚨</span>
+      <span class="delta__text">−{{ value|abs }} manquante{{ "s" if value|abs > 1 else "" }}</span>
+      <span class="delta__compact">−{{ value|abs }}</span>
+    </span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro delta_total_badge(delta) -%}
+  {%- set value = delta|default(0)|int -%}
+  {%- if value == 0 -%}
+    <span class="delta is-ok text-positive">
+      <span class="delta__icon">✓</span>
+      <span class="delta__text">Écart net : 0</span>
+      <span class="delta__compact">0</span>
+    </span>
+  {%- elif value > 0 -%}
+    <span class="delta is-warn text-warn">
+      <span class="delta__icon">⚠</span>
+      <span class="delta__text">Écart net : +{{ value }}</span>
+      <span class="delta__compact">+{{ value }}</span>
+    </span>
+  {%- else -%}
+    <span class="delta is-danger text-negative">
+      <span class="delta__icon">🚨</span>
+      <span class="delta__text">Écart net : −{{ value|abs }}</span>
+      <span class="delta__compact">−{{ value|abs }}</span>
+    </span>
+  {%- endif -%}
+{%- endmacro %}
+
+{% macro delta_value(delta) -%}
+  {%- set value = delta|default(0)|int -%}
+  <span class="delta-value {{ 'text-positive' if value == 0 else ('text-warn' if value > 0 else 'text-negative') }}">
+    {{- "%+d"|format(value) if value != 0 else "0" -}}
+  </span>
+{%- endmacro %}
+
+{% macro category_table(billed, actual, delta, billed_total, actual_total, categories) -%}
+  <div class="table-scroll">
+    <table class="data-table delta-table">
+      <caption class="sr-only">Écarts par catégorie de durée</caption>
+      <thead>
+        <tr>
+          <th scope="col">Catégorie</th>
+          <th scope="col" class="num">Facturé</th>
+          <th scope="col" class="num">Réalisé</th>
+          <th scope="col">Écart</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cat, label, threshold, plural in categories %}
+          {% set b = (billed[cat]|default(0)) if billed and cat in billed else 0 %}
+          {% set a = (actual[cat]|default(0)) if actual and cat in actual else 0 %}
+          {% set d = (delta[cat]|default(0)) if delta and cat in delta else 0 %}
+          <tr>
+            <th scope="row">
+              <span class="cat-label">{{ label }}</span>
+              <span class="cat-threshold">{{ threshold }}</span>
+            </th>
+            <td class="num">{{ b }}</td>
+            <td class="num">{{ a }}</td>
+            <td>{{ delta_badge(d) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot>
+        <tr>
+          <th scope="row">Total</th>
+          <td class="num">{{ billed_total|default(0) }}</td>
+          <td class="num">{{ actual_total|default(0) }}</td>
+          <td>{{ delta_total_badge((actual_total|default(0)|int) - (billed_total|default(0)|int)) }}</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+{%- endmacro %}
+
+{% macro file_list(group, categories) -%}
+  {% if group and group|lot_total > 0 %}
+    <ul class="file-grid">
+      {% for cat, label, threshold, plural in categories %}
+        {% set cat_data = group.categories[cat] if group.categories and cat in group.categories else {} %}
+        {% set details = cat_data.file_details|default([], true) %}
+        {% if details %}
+          {% for detail in details %}
+            {% set is_suspect = detail.is_suspect|default(false) %}
+            <li class="file-chip{% if is_suspect %} is-suspect{% endif %}">
+              <span class="file-chip__name">{{ detail.name }}</span>
+              <span class="file-chip__meta">
+                <span class="file-cat">{{ label }}</span>
+                {% if detail.duration_sec is not none %}
+                  <span class="file-duration">{{ "%.1f"|format(detail.duration_sec) }} s</span>
+                {% endif %}
+                {% if detail.is_duplicate|default(false) %}
+                  <span class="flag flag--warn" title="Nom de fichier présent plusieurs fois">doublon</span>
+                {% endif %}
+                {% if detail.is_jingle|default(false) %}
+                  <span class="flag flag--danger" title="Jingle ou habillage exclu">jingle</span>
+                {% endif %}
+                {% if detail.is_near_boundary|default(false) %}
+                  <span class="flag flag--warn" title="Durée proche d’un seuil de catégorie">
+                    seuil{% if detail.near_threshold %} {{ detail.near_threshold|int }} s{% endif %}
+                  </span>
+                {% endif %}
+              </span>
+            </li>
+          {% endfor %}
+        {% elif cat_data.files|default([], true) %}
+          {% for fname in cat_data.files %}
+            <li class="file-chip">
+              <span class="file-chip__name">{{ fname }}</span>
+              <span class="file-chip__meta"><span class="file-cat">{{ label }}</span></span>
+            </li>
+          {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="muted file-empty">Aucun fichier détaillé pour ce lot.</p>
+  {% endif %}
+{%- endmacro %}
+
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>
+    {% if is_certified %}Certificat de rapprochement{% else %}Rapport de rapprochement{% endif %} — {{ month_label }}
+  </title>
+  <style>
+{% include "export_styles.css" %}
+{% if pdf_mode %}
+{% include "export_pdf_styles.css" %}
+{% endif %}
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#contenu">Aller au contenu</a>
+
+  <div class="page">
+    <header class="cover">
+      <div class="cover__rail" aria-hidden="true"></div>
+      <div class="cover__top">
+        <span class="brand">
+          <span class="brand__mark">{{ svg_icon("box", 20) }}</span>
+          Camille <span>Reporting</span>
+        </span>
+        <span class="doc-label">Rituel mensuel · Acte 3</span>
+      </div>
+
+      <div class="cover__main">
+        <div class="cover__title">
+          <p class="eyebrow">Rapprochement Reporting ↔ BDC</p>
+          <h1>
+            {% if is_certified %}
+              Certificat de rapprochement mensuel
+            {% else %}
+              Rapport de rapprochement mensuel
+            {% endif %}
+          </h1>
+          <p class="cover__month">{{ month_label }}</p>
+        </div>
+
+        <div class="status {{ 'status--ok' if is_certified else 'status--danger' }}">
+          <span class="status__icon">
+            {{ svg_icon("shield" if is_certified else "alert", 24) }}
+          </span>
+          <div>
+            <strong>{{ "Mois certifié" if is_certified else "Certification non délivrée" }}</strong>
+            <span>
+              {% if is_certified %}
+                Tous les bons de commande sont conformes{% if justified_orders %}, dont {{ justified_orders }} écart{{ "s" if justified_orders > 1 else "" }} justifié{{ "s" if justified_orders > 1 else "" }} par doublon ou jingle{% endif %}.
+              {% else %}
+                {{ blocking_issues }} signalement{{ "s" if blocking_issues > 1 else "" }} bloquant{{ "s" if blocking_issues > 1 else "" }} à traiter.
+              {% endif %}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <dl class="meta-grid">
+        <div>
+          <dt>Généré le</dt>
+          <dd><time datetime="{{ analysis.generated_at|default('') }}">{{ generated_label }}</time></dd>
+        </div>
+        <div>
+          <dt>Source production</dt>
+          <dd><code>{{ meta.reporting_name|default("—") }}</code></dd>
+        </div>
+        <div>
+          <dt>Source BDC</dt>
+          <dd><code>{{ meta.bdc_name|default("—") }}</code></dd>
+        </div>
+      </dl>
+    </header>
+
+    {% if meta.session_notice %}
+      <p class="table-note" role="status">{{ meta.session_notice }}</p>
+    {% endif %}
+
+    <nav class="toc" aria-label="Sommaire">
+      <span class="toc__label">Sommaire</span>
+      <a href="#synthese">Synthèse</a>
+      <a href="#balance">Balance</a>
+      <a href="#attention">Points d’attention</a>
+      <a href="#ecarts">Écarts par BDC</a>
+      <a href="#lots">Lots produits</a>
+      <a href="#fichiers">Fichiers</a>
+      <a href="#bdc">Tous les BDC</a>
+    </nav>
+
+    <main id="contenu">
+      <section id="synthese" class="section">
+        <header class="section__head">
+          <p class="eyebrow">Vue d’ensemble</p>
+          <h2>Synthèse du mois</h2>
+          <p class="section__intro">
+            Le score mesure la part des bons de commande dont les volumes facturés correspondent
+            aux vidéos produites, catégorie par catégorie. Un écart de doublon ou de jingle
+            justifié est accepté ; un volume manquant ne l’est jamais.
+          </p>
+        </header>
+
+        <div class="kpi-grid">
+          <article class="kpi kpi--score{% if is_certified %} is-perfect{% endif %}">
+            <span class="kpi__label">{{ svg_icon("score", 16) }} Score de conformité</span>
+            <strong class="kpi__value">{{ "%.1f"|format(score)|replace(".", ",") }}<span>%</span></strong>
+            <span class="kpi__hint">{{ compliant_orders }} / {{ total_orders }} BDC conformes{% if justified_orders %} (dont {{ justified_orders }} justifié{{ "s" if justified_orders > 1 else "" }}){% endif %}</span>
+            <div class="gauge" role="progressbar" aria-label="Score de conformité" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ score }}" aria-valuetext="{{ '%.1f'|format(score)|replace('.', ',') }} % de conformité">
+              <span class="gauge__fill" style="width: {{ score }}%"></span>
+            </div>
+          </article>
+
+          <article class="kpi">
+            <span class="kpi__label">{{ svg_icon("check", 16) }} BDC conformes</span>
+            <strong class="kpi__value">{{ compliant_orders }}<span> / {{ total_orders }}</span></strong>
+            <span class="kpi__hint">
+              {% if justified_orders %}
+                Dont {{ justified_orders }} écart{{ "s" if justified_orders > 1 else "" }} justifié{{ "s" if justified_orders > 1 else "" }} par doublon ou jingle
+              {% else %}
+                Regroupements de lots validés
+              {% endif %}
+            </span>
+          </article>
+
+          <article class="kpi {{ 'kpi--warn' if review_count > 0 else 'kpi--ok' }}">
+            <span class="kpi__label">{{ svg_icon("alert", 16) }} BDC à inspecter</span>
+            <strong class="kpi__value">{{ review_count }}</strong>
+            <span class="kpi__hint">Écart, chevauchement ou lot manquant</span>
+          </article>
+
+          <article class="kpi {{ 'kpi--danger' if issues_count > 0 else 'kpi--ok' }}">
+            <span class="kpi__label">{{ svg_icon("info", 16) }} Signalements</span>
+            <strong class="kpi__value">{{ issues_count }}</strong>
+            <span class="kpi__hint">Un même lot peut générer plusieurs signalements</span>
+          </article>
+        </div>
+
+        <div class="volume-strip">
+          <span><strong>{{ group_count }}</strong> lots produits</span>
+          <span><strong>{{ cluster_count }}</strong> BDC</span>
+          <span><strong>{{ order_count }}</strong> commandes</span>
+          <span><strong>{{ overlaps|length }}</strong> chevauchement{{ "s" if overlaps|length > 1 else "" }}</span>
+        </div>
+
+        {% if is_certified %}
+          <div class="certificate-strip">
+            <span class="certificate-strip__icon">{{ svg_icon("shield", 26) }}</span>
+            <div>
+              <strong>Attestation de conformité</strong>
+              <p>
+                Tous les bons de commande du mois sont conformes aux lots produits.
+                {% if justified_orders %}
+                  {{ justified_orders }} écart{{ "s" if justified_orders > 1 else "" }} de doublon ou de jingle
+                  {{ "ont" if justified_orders > 1 else "a" }} été justifié{{ "s" if justified_orders > 1 else "" }}.
+                {% endif %}
+                Aucun signalement bloquant ne subsiste.
+              </p>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+
+      <section id="balance" class="section">
+        <header class="section__head">
+          <p class="eyebrow">Balance globale</p>
+          <h2>Équilibre facturé / réalisé</h2>
+          <p class="section__intro">
+            Écart = réalisé − facturé. Un écart nul signifie que la production et la facturation
+            sont alignées. Le total du mois est un solde net : les écarts positifs et négatifs
+            se compensent. Les barres comparent les volumes, toutes catégories confondues.
+          </p>
+        </header>
+
+        <div class="balance-card">
+          <div class="balance-legend">
+            <span><i class="swatch swatch--billed"></i> Facturé</span>
+            <span><i class="swatch swatch--actual"></i> Réalisé</span>
+            <span class="balance-legend__rule">Réalisé − Facturé = écart</span>
+          </div>
+
+          <div class="balance-rows">
+            {% for cat, label, threshold, plural in categories %}
+              {% set item = balance[cat] if balance and cat in balance else {} %}
+              {% set billed_value = item.billed|default(0)|int %}
+              {% set actual_value = item.actual|default(0)|int %}
+              {% set delta_value = item.delta|default(0)|int %}
+              {% set max_value = [billed_value, actual_value, 1]|max %}
+              <div class="balance-row">
+                <div class="balance-row__label">
+                  <strong>{{ plural }}</strong>
+                  <span>{{ threshold }}</span>
+                </div>
+                <div class="balance-row__bars">
+                  <div class="bar-line">
+                    <span class="bar-line__label">Facturé</span>
+                    <span class="bar"><span class="bar__fill bar__fill--billed" style="width: {{ (billed_value / max_value * 100)|round(0)|int }}%"></span></span>
+                    <span class="bar-line__value">{{ billed_value }}</span>
+                  </div>
+                  <div class="bar-line">
+                    <span class="bar-line__label">Réalisé</span>
+                    <span class="bar"><span class="bar__fill bar__fill--actual" style="width: {{ (actual_value / max_value * 100)|round(0)|int }}%"></span></span>
+                    <span class="bar-line__value">{{ actual_value }}</span>
+                  </div>
+                </div>
+                <div class="balance-row__delta">{{ delta_badge(delta_value) }}</div>
+              </div>
+            {% endfor %}
+          </div>
+
+          <div class="balance-total">
+            <span class="balance-total__label">Total du mois</span>
+            <span>Facturé <strong>{{ balance_total_billed }}</strong></span>
+            <span>Réalisé <strong>{{ balance_totals.actual }}</strong></span>
+            {% if balance_totals.surplus and balance_missing %}
+              <span class="balance-total__detail">
+                {{ balance_totals.surplus }} non facturée{{ "s" if balance_totals.surplus > 1 else "" }}
+                − {{ balance_missing }} manquante{{ "s" if balance_missing > 1 else "" }}
+                = {{ "%+d"|format(balance_total_delta) }}
+              </span>
+            {% endif %}
+            {{ delta_total_badge(balance_total_delta) }}
+          </div>
+        </div>
+      </section>
+
+      <section id="attention" class="section{% if not has_blocking %} section--ok{% endif %}">
+        <header class="section__head">
+          <p class="eyebrow">{{ "À traiter" if has_blocking else "Contrôle" }}</p>
+          <h2>Points d’attention</h2>
+          <p class="section__intro">
+            {% if has_attention %}
+              Ces situations empêchent la certification du mois ou nécessitent une vérification
+              manuelle avant validation.
+            {% elif differences and is_certified %}
+              Les écarts de volume restants sont justifiés par des doublons ; ils sont détaillés
+              dans la section suivante et ne bloquent pas la certification.
+            {% elif differences %}
+              Des écarts de volume empêchent la certification du mois ; ils sont détaillés
+              dans la section suivante.
+            {% else %}
+              Aucune situation bloquante n’a été détectée pour ce mois.
+            {% endif %}
+          </p>
+        </header>
+
+        {% if has_attention %}
+          <div class="attention-grid">
+            {% if overlaps %}
+              <article class="attention attention--warn">
+                <header class="attention__head">
+                  <span class="attention__icon">{{ svg_icon("layers", 20) }}</span>
+                  <h3>Chevauchements de BDC</h3>
+                  <span class="count">{{ overlaps|length }}</span>
+                </header>
+                <p>Plusieurs bons de commande revendiquent les mêmes lots.</p>
+                <ul class="chips">
+                  {% for overlap in overlaps %}
+                    <li>
+                      <span class="chip">Lot {{ overlap.lot }}</span>
+                      <span class="chip__meta">{{ overlap.bdc_numbers|default([])|join(" · ") }}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </article>
+            {% endif %}
+
+            {% if unexpected %}
+              <article class="attention attention--danger">
+                <header class="attention__head">
+                  <span class="attention__icon">{{ svg_icon("file", 20) }}</span>
+                  <h3>Lots facturés sans dossier vidéo</h3>
+                  <span class="count">{{ unexpected|length }}</span>
+                </header>
+                <p>Ces lots apparaissent sur un BDC mais aucun dossier de production ne leur correspond.</p>
+                <ul class="chips">
+                  {% for gid in unexpected %}
+                    <li><span class="chip">Lot {{ gid }}</span></li>
+                  {% endfor %}
+                </ul>
+              </article>
+            {% endif %}
+
+            {% if missing %}
+              <article class="attention attention--warn">
+                <header class="attention__head">
+                  <span class="attention__icon">{{ svg_icon("folder", 20) }}</span>
+                  <h3>Lots produits en attente de BDC</h3>
+                  <span class="count">{{ missing|length }}</span>
+                </header>
+                <p>Ces lots existent dans la production mais ne sont rattachés à aucun BDC du mois.</p>
+                <ul class="chips">
+                  {% for group in missing %}
+                    <li>
+                      <span class="chip">Lot {{ group.id_camille }}</span>
+                      <span class="chip__meta">{{ group.person }}{% if group|lot_total %} · {{ group|lot_total }} vidéo{{ "s" if group|lot_total > 1 else "" }}{% endif %}</span>
+                    </li>
+                  {% endfor %}
+                </ul>
+              </article>
+            {% endif %}
+          </div>
+
+          {% if missing %}
+            <div class="table-card">
+              <div class="table-scroll">
+                <table class="data-table">
+                  <caption>Lots produits en attente de rattachement à un BDC</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Lot</th>
+                      <th scope="col">Personne</th>
+                      <th scope="col" class="num">Vidéos</th>
+                      <th scope="col">Mois adjacent</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for group in missing %}
+                      <tr>
+                        <th scope="row">Lot {{ group.id_camille }}</th>
+                        <td><span class="person">{{ group.person }}</span></td>
+                        <td class="num">{{ group|lot_total }}</td>
+                        <td>
+                          {% if group.adjacent_month %}
+                            <span class="inline-info">
+                              {{ svg_icon("clock", 14) }}
+                              {% if group.adjacent_month.in_report %}
+                                Présent en {{ group.adjacent_month.month|fr_month }}
+                              {% else %}
+                                Facturé sur {{ group.adjacent_month.month|fr_month }}
+                              {% endif %}
+                              {% if group.adjacent_month.bdc_numbers %}
+                                · {{ group.adjacent_month.bdc_numbers|join(", ") }}
+                              {% endif %}
+                            </span>
+                          {% else %}
+                            <span class="muted">—</span>
+                          {% endif %}
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endif %}
+        {% elif differences %}
+          <div class="empty-state empty-state--warn">
+            <span class="empty-state__icon">{{ svg_icon("alert", 24) }}</span>
+            <div>
+              <strong>Des écarts de volume restent à traiter</strong>
+              <p>
+                Ils sont détaillés dans la section « Écarts par bon de commande » ci-dessous.
+              </p>
+            </div>
+          </div>
+        {% else %}
+          <div class="empty-state empty-state--ok">
+            <span class="empty-state__icon">{{ svg_icon("check", 24) }}</span>
+            <div>
+              <strong>Aucun point d’attention</strong>
+              <p>Aucun chevauchement, lot manquant ou lot facturé sans production n’a été détecté.</p>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+
+      <section id="ecarts" class="section">
+        <header class="section__head">
+          <p class="eyebrow">Bons de commande (Regroupements de lots)</p>
+          <h2>Écarts par bon de commande</h2>
+          <p class="section__intro">
+            Seuls les regroupements qui présentent un écart, un lot manquant ou un chevauchement
+            sont détaillés ici. Un écart ne peut être justifié que s’il est causé par un doublon
+            ou un jingle identifié ; un volume manquant reste bloquant. L’annexe reprend
+            l’ensemble des BDC du mois.
+          </p>
+        </header>
+
+        {% if differences %}
+          <div class="cluster-list">
+            {% for cluster in differences %}
+              {% set state = "is-justified" if cluster.justified|default(false) else ("is-danger" if cluster.requires_review|default(false) else "is-ok") %}
+              {% set is_justified = cluster.justified|default(false) %}
+              <article class="cluster-card {{ state }}">
+                <header class="cluster-card__head">
+                  <div class="cluster-card__title">
+                    <h3>{{ cluster.label|default("Regroupement") }}</h3>
+                    <p class="cluster-card__meta">
+                      {% if cluster.bdc_numbers|default([]) %}
+                        <span class="pill pill--bdc">{{ cluster.bdc_numbers|join(" · ") }}</span>
+                      {% endif %}
+                      {% if cluster.source_references|default([]) %}
+                        <span class="ref">Réf. {{ cluster.source_references[0] }}</span>
+                      {% endif %}
+                    </p>
+                  </div>
+                  <div class="badges">
+                    {% if is_justified %}
+                      <span class="badge badge--ok">📌 Écart justifié (doublon / jingle)</span>
+                    {% elif cluster.requires_review|default(false) %}
+                      <span class="badge badge--warn">⚠ À inspecter</span>
+                    {% else %}
+                      <span class="badge badge--ok">✓ Conforme</span>
+                    {% endif %}
+                    {% if cluster.overlaps_with_bdc|default(false) %}
+                      <span class="badge badge--warn">Chevauchement BDC</span>
+                    {% endif %}
+                    {% if cluster.has_jingle_or_duplicate|default(false) and not is_justified %}
+                      <span class="badge badge--danger">Jingle / doublon</span>
+                    {% endif %}
+                    {% if cluster.found_in_adjacent_month|default(false) %}
+                      <span class="badge badge--neutral">Inter-mois</span>
+                    {% endif %}
+                  </div>
+                </header>
+
+                {% if cluster.missing_reporting_ids|default([]) %}
+                  <div class="callout callout--danger">
+                    {{ svg_icon("alert", 16) }}
+                    <p>
+                      <strong>Lots facturés sans dossier vidéo :</strong>
+                      {{ cluster.missing_reporting_ids|join(", ") }}
+                    </p>
+                  </div>
+                {% endif %}
+
+                <div class="cluster-card__body">
+                  {{ category_table(
+                    cluster.billed|default({}, true),
+                    cluster.actual|default({}, true),
+                    cluster.delta|default({}, true),
+                    cluster.billed_total|default(0),
+                    cluster.actual_total|default(0),
+                    categories
+                  ) }}
+
+                  {% set diagnostics = cluster.diagnostics|default([], true) %}
+                  {% if not diagnostics and cluster.diagnostic %}
+                    {% set diagnostics = [cluster.diagnostic] %}
+                  {% endif %}
+                  {% for diagnostic in diagnostics %}
+                    <div class="diagnostic diagnostic--{{ diagnostic.severity|default('info') }}">
+                      <strong>{{ diagnostic.title|default("Diagnostic") }}</strong>
+                      <p>{{ diagnostic.message|default("") }}</p>
+                    </div>
+                  {% endfor %}
+
+                  {% if cluster.production_lots|default([]) %}
+                    <div class="production-block">
+                      <div class="production-block__head">
+                        <h4>{{ svg_icon("folder", 16) }} Production rattachée</h4>
+                        <span>{{ cluster.actual_total|default(0) }} vidéo{{ "s" if cluster.actual_total|default(0) > 1 else "" }}</span>
+                      </div>
+                      {% if pdf_mode %}
+                        <p class="muted file-empty">
+                          Le détail fichier par fichier figure dans l’annexe 1.
+                        </p>
+                      {% endif %}
+                      <div class="production-lots">
+                        {% for lot in cluster.production_lots %}
+                          <div class="production-lot">
+                            <div class="production-lot__head">
+                              <strong>Lot {{ lot.id_camille }}</strong>
+                              <span class="person">{{ lot.person }}</span>
+                              <span>{{ lot|lot_total }} vidéo{{ "s" if lot|lot_total > 1 else "" }}</span>
+                              {% if lot.has_suspects|default(false) %}
+                                <span class="badge badge--warn badge--xs">À vérifier</span>
+                              {% endif %}
+                            </div>
+                            {% if not pdf_mode %}
+                              {{ file_list(lot, categories) }}
+                            {% endif %}
+                          </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state empty-state--ok">
+            <span class="empty-state__icon">{{ svg_icon("check", 24) }}</span>
+            <div>
+              <strong>Tous les bons de commande sont conformes</strong>
+              <p>Aucun écart de volume, lot manquant ou chevauchement à signaler pour ce mois.</p>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+
+      <section id="lots" class="section">
+        <header class="section__head">
+          <p class="eyebrow">Lots produits (Dossiers monteur)</p>
+          <h2>Détail des lots produits</h2>
+          <p class="section__intro">
+            Volumes produits par lot et par catégorie de durée. Le détail fichier par fichier
+            figure dans l’annexe suivante.
+          </p>
+        </header>
+
+        <div class="table-card">
+          <div class="table-scroll">
+            <table class="data-table lots-table">
+              <caption>Volumes produits par lot et par catégorie</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Lot</th>
+                  <th scope="col">Personne</th>
+                  <th scope="col" class="num">Courte</th>
+                  <th scope="col" class="num">Standard</th>
+                  <th scope="col" class="num">Moyenne</th>
+                  <th scope="col" class="num">Longue</th>
+                  <th scope="col" class="num">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for group in reporting_groups %}
+                  <tr>
+                    <th scope="row"><span class="lot-id">Lot {{ group.id_camille }}</span></th>
+                    <td><span class="person">{{ group.person|default("—") }}</span></td>
+                    {% for cat, label, threshold, plural in categories %}
+                      <td class="num">{{ group.categories[cat].count|default(0) if group.categories and cat in group.categories else 0 }}</td>
+                    {% endfor %}
+                    <td class="num strong">{{ group|lot_total }}</td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="7" class="muted">Aucun lot produit pour ce mois.</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row">Total</th>
+                  <td></td>
+                  {% for cat, label, threshold, plural in categories %}
+                    <td class="num">{{ reporting_totals[cat]|default(0) }}</td>
+                  {% endfor %}
+                  <td class="num strong">{{ reporting_totals.overall|default(0) }}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="fichiers" class="section section--appendix">
+        <header class="section__head">
+          <p class="eyebrow">Annexe 1</p>
+          <h2>Fichiers par lot</h2>
+          <p class="section__intro">
+            Détail des vidéos prises en compte dans l’analyse, avec catégorie, durée et
+            signalements éventuels.
+          </p>
+        </header>
+
+        <div class="lot-files-grid">
+          {% for group in reporting_groups %}
+            {% if group|lot_total > 0 %}
+              <article class="lot-files">
+                <header class="lot-files__head">
+                  <div>
+                    <h3>Lot {{ group.id_camille }}</h3>
+                    <span class="person">{{ group.person|default("—") }}</span>
+                  </div>
+                  <span class="lot-files__count">{{ group|lot_total }} vidéo{{ "s" if group|lot_total > 1 else "" }}</span>
+                </header>
+                {{ file_list(group, categories) }}
+              </article>
+            {% endif %}
+          {% else %}
+            <p class="muted">Aucun fichier détaillé pour ce mois.</p>
+          {% endfor %}
+        </div>
+      </section>
+
+      <section id="bdc" class="section section--appendix">
+        <header class="section__head">
+          <p class="eyebrow">Annexe 2</p>
+          <h2>Tous les bons de commande</h2>
+          <p class="section__intro">
+            Vue exhaustive des regroupements analysés, y compris ceux qui sont conformes.
+          </p>
+        </header>
+
+        <div class="table-card">
+          <div class="table-scroll">
+            <table class="data-table bdc-table">
+              <caption>Statut de chaque bon de commande</caption>
+              <thead>
+                <tr>
+                  <th scope="col">BDC</th>
+                  <th scope="col">Lots concernés</th>
+                  <th scope="col" class="num">Facturé</th>
+                  <th scope="col" class="num">Réalisé</th>
+                  <th scope="col">Écart</th>
+                  <th scope="col">Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for cluster in all_clusters %}
+                  {% set c_delta = (cluster.actual_total|default(0)|int) - (cluster.billed_total|default(0)|int) %}
+                  <tr>
+                    <th scope="row"><span class="bdc-ref">{{ cluster.bdc_numbers|default([])|join(" · ") or "—" }}</span></th>
+                    <td><span class="lot-list">{{ cluster.label|default(cluster.cluster_ids|default([])|join(", ")) }}</span></td>
+                    <td class="num">{{ cluster.billed_total|default(0) }}</td>
+                    <td class="num">{{ cluster.actual_total|default(0) }}</td>
+                    <td class="num">{{ delta_value(c_delta) }}</td>
+                    <td>
+                      {% if cluster.justified|default(false) %}
+                        <span class="badge badge--ok">📌 Justifié (doublon / jingle)</span>
+                      {% elif cluster.requires_review|default(false) %}
+                        <span class="badge badge--warn">⚠ À inspecter</span>
+                      {% else %}
+                        <span class="badge badge--ok">✓ Conforme</span>
+                      {% endif %}
+                      {% if cluster.overlaps_with_bdc|default(false) %}
+                        <span class="badge badge--warn">Chevauchement</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% else %}
+                  <tr>
+                    <td colspan="6" class="muted">Aucun bon de commande analysé.</td>
+                  </tr>
+                {% endfor %}
+                {% if overlap_actual %}
+                  <tr class="row-overlap">
+                    <th scope="row"><span class="bdc-ref">Chevauchements</span></th>
+                    <td><span class="lot-list">Lots revendiqués par plusieurs BDC</span></td>
+                    <td class="num">0</td>
+                    <td class="num">−{{ overlap_actual }}</td>
+                    <td class="num">{{ delta_value(-overlap_actual) }}</td>
+                    <td><span class="badge badge--warn">Déjà comptés</span></td>
+                  </tr>
+                {% endif %}
+                {% if unattached_billed != 0 or unattached_actual != 0 %}
+                  <tr class="row-unattached">
+                    <th scope="row"><span class="bdc-ref">Hors BDC</span></th>
+                    <td>
+                      <span class="lot-list">
+                        {{ missing|map(attribute="id_camille")|join(", ") if missing else "—" }}
+                      </span>
+                    </td>
+                    <td class="num">{{ unattached_billed }}</td>
+                    <td class="num">{{ unattached_actual }}</td>
+                    <td class="num">{{ delta_value(unattached_actual - unattached_billed) }}</td>
+                    <td><span class="badge badge--warn">En attente de BDC</span></td>
+                  </tr>
+                {% endif %}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row">Total</th>
+                  <td></td>
+                  <td class="num">{{ grand_billed }}</td>
+                  <td class="num">{{ grand_actual }}</td>
+                  <td class="num">{{ delta_value(annex_delta) }}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+          {% if overlap_actual %}
+            <p class="table-note">
+              Les lignes BDC comptent chaque bon de commande séparément. La ligne
+              « Chevauchements » retire les {{ overlap_actual }} vidéos déjà comptées
+              dans plusieurs regroupements pour retrouver le total global dédupliqué.
+            </p>
+          {% endif %}
+          {% if unattached_billed != 0 or unattached_actual != 0 %}
+            <p class="table-note">
+              La ligne « Hors BDC » regroupe les lots produits non rattachés à un bon de commande
+              du mois. Elle permet de retrouver les volumes de la balance globale.
+            </p>
+          {% endif %}
+          {% if unknown_billed %}
+            <p class="table-note">
+              {{ unknown_billed }} vidéo{{ "s" if unknown_billed > 1 else "" }} facturée{{ "s" if unknown_billed > 1 else "" }}
+              sur un article BDC non reconnu{{ "s" if unknown_billed > 1 else "" }} ne peu{{ "vent" if unknown_billed > 1 else "t" }}
+              pas être comparée{{ "s" if unknown_billed > 1 else "" }} aux catégories de durée : la certification reste bloquée.
+            </p>
+          {% endif %}
+          {% if balance_totals.surplus and balance_missing %}
+            <p class="table-note">
+              Le total est un solde net :
+              {{ balance_totals.surplus }} non facturée{{ "s" if balance_totals.surplus > 1 else "" }}
+              − {{ balance_missing }} manquante{{ "s" if balance_missing > 1 else "" }}
+              = {{ "%+d"|format(annex_delta) }}.
+            </p>
+          {% endif %}
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="footer__legend">
+        <h2>Comment lire les écarts</h2>
+        <ul>
+          <li>{{ delta_badge(0) }} <span>Le réalisé correspond exactement au facturé.</span></li>
+          <li>{{ delta_badge(1) }} <span>Des vidéos ont été produites mais ne sont pas facturées.</span></li>
+          <li>{{ delta_badge(-1) }} <span>Des vidéos sont facturées sans production correspondante.</span></li>
+        </ul>
+      </div>
+      <div class="footer__method">
+        <p>
+          <strong>Méthode.</strong> Les écarts sont calculés à partir du rapport de production et
+          des bons de commande du mois. Les ajustements réalisés dans l’inspecteur — fichiers exclus
+          et écarts justifiés — sont appliqués à cette analyse. Un même lot peut générer plusieurs
+          signalements.
+        </p>
+        <p class="footer__meta">
+          <span>{{ svg_icon("shield", 14) }} Document autonome, sans connexion requise.</span>
+          <span>Généré le <time datetime="{{ analysis.generated_at|default('') }}">{{ generated_label }}</time>.</span>
+          <span>Sources : <code>{{ meta.reporting_name|default("—") }}</code> · <code>{{ meta.bdc_name|default("—") }}</code></span>
+        </p>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

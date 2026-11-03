@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "corpus": "BDC Media Solution 2026-10/11",
+  "documents": [
+    {
+      "filename": "BDC-26-1689.pdf",
+      "sha256": "4b2723911e83f61948d4aa07d293aa686b0d27575e58402b4a35bd9327c98b1e",
+      "expected": "BDC-26-1689.json",
+      "external": "external/parseur/BDC-26-1689.json",
+      "notes": "Date PDF 01/10/2026 = 1er octobre. Parseur indique 2026-01-10 (lecture US erronée)."
+    },
+    {
+      "filename": "BDC-26-1695.pdf",
+      "sha256": "51dbd32d8c240dd486fc4e59d38da87023828cb605364faf971deb5794001c38",
+      "expected": "BDC-26-1695.json",
+      "external": "external/parseur/BDC-26-1695.json",
+      "notes": "Date PDF 02/10/2026 = 2 octobre. Parseur indique 2026-02-10 (lecture US erronée)."
+    },
+    {
+      "filename": "BDC-26-1856.pdf",
+      "sha256": "6f122ca22643c6a1817458bdd0e0fc151ec16947edc6ef91d11bfb4a1536132e",
+      "expected": "BDC-26-1856.json",
+      "external": "external/parseur/BDC-26-1856.json",
+      "notes": "Annotation client 'Correction du BDC' et 'Total +44 €' dans la cellule des totaux."
+    },
+    {
+      "filename": "BDC-26-1862.pdf",
+      "sha256": "31472d7d3c405bdd469ee3180c47ce4d8679afd19476d6d821216b62ca9e9442",
+      "expected": "BDC-26-1862.json",
+      "external": "external/parseur/BDC-26-1862.json",
+      "notes": "Référence coupée autour de 'N° de réf :' ; notre parseur recolle la liste."
+    },
+    {
+      "filename": "BDC-26-1867.pdf",
+      "sha256": "25ba464bc75b17c9d800d28c8a0f82d1196b04e4c89bfa48c1d649980458c092",
+      "expected": "BDC-26-1867.json",
+      "external": "external/parseur/BDC-26-1867.json",
+      "notes": "Annotation client 'correction 4 5 courtes. + 4 €' après le total."
+    },
+    {
+      "filename": "BDC-26-1872.pdf",
+      "sha256": "138290f58da61a3a04edd52cb522714abd953d9de3a50a041a788c7717df3028",
+      "expected": "BDC-26-1872.json",
+      "external": "external/parseur/BDC-26-1872.json",
+      "notes": "Référence coupée autour de 'N° de réf :' ; notre parseur recolle la liste."
+    },
+    {
+      "filename": "BDC-26-1879.pdf",
+      "sha256": "2187e3dd3d416f36cd6b17409c91e47aaefd604c627fe814dc9435345b7bd552",
+      "expected": "BDC-26-1879.json",
+      "external": "external/parseur/BDC-26-1879.json",
+      "notes": "Date PDF 03/11/2026 = 3 novembre. Parseur indique 2026-03-11 (lecture US erronée). Référence libre '309 310 septembre'."
+    }
+  ]
+}

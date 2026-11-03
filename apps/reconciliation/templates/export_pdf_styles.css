@@ -1,0 +1,58 @@
+/* ==========================================================================
+   Export PDF réconciliation — ajustements de pagination et de densité.
+   Ce partial est inliné uniquement pour l'export PDF, après export_styles.css.
+   WeasyPrint reste beaucoup plus rapide avec ces blocs en flux simple.
+   ========================================================================== */
+
+@media print {
+  .file-grid,
+  .lot-files-grid,
+  .production-lots {
+    display: block !important;
+  }
+
+  .file-chip,
+  .file-chip__meta,
+  .production-lot__head,
+  .cluster-card__head,
+  .badges,
+  .cluster-card__meta,
+  .lot-files__head,
+  .production-block__head {
+    display: block !important;
+  }
+
+  .file-chip__name {
+    overflow-wrap: break-word !important;
+    word-break: normal !important;
+  }
+
+  .file-chip {
+    margin-bottom: 2px;
+  }
+
+  #ecarts {
+    break-before: auto !important;
+  }
+
+  #ecarts .section__head {
+    break-after: auto !important;
+  }
+
+  /* WeasyPrint ne centre pas correctement l'icône dans un badge inline-flex. */
+  .brand__mark {
+    display: inline-block !important;
+    width: 34px !important;
+    height: 34px !important;
+    padding: 7px !important;
+    border-radius: 10px !important;
+    line-height: 0 !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  .brand__mark .icon {
+    display: block !important;
+    margin: 0 auto !important;
+  }
+}

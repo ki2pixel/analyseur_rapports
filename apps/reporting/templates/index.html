@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+{% block title %}Rapport vidéos - Camille{% endblock %}
+{% set active_page = 'reporting' %}
+
+{% block extra_head %}
+<meta name="selected-month" content="{{ selected or '' }}" />
+{% endblock %}
+
+{% block content %}
+<main class="container animate-fade-in">
+  <section class="panel panel--stack">
+    <div>
+      <p class="eyebrow">Service reporting</p>
+      <h1>Rapport vidéos mensuel</h1>
+      <p class="muted lead">Choisissez un mois pour générer les indicateurs de production, exporter les données et préparer le rapprochement avec la facturation.</p>
+      {% if current_month %}
+        <span class="badge badge--neutral">📅 Mois cible : {{ current_month }}</span>
+      {% endif %}
+    </div>
+    <form class="form-grid" method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div>
+        <label for="month">Sélection du mois</label>
+        <select id="month" name="month" required {% if not months %}disabled{% endif %}>
+          {% if not months %}
+            <option value="">Aucun mois disponible</option>
+          {% endif %}
+          {% for m in months %}
+            <option value="{{ m }}" {% if m == selected %}selected{% endif %}>{{ m }}</option>
+          {% endfor %}
+        </select>
+        {% if not months %}
+          <p class="muted muted--tight">Déposez des archives ou un batch JSON pour commencer.</p>
+        {% endif %}
+      </div>
+      <div class="flex-row">
+        <button class="primary" type="submit" {% if not months %}disabled{% endif %}>Analyser le mois</button>
+        {% if selected %}
+          <span class="muted">Mois sélectionné : {{ selected }}</span>
+          <div class="flex-row">
+            <a href="/export?month={{ selected }}" class="btn btn-secondary">Exporter HTML</a>
+            <button type="button" id="generate-json-btn" class="btn btn-secondary" data-month="{{ selected }}">Générer JSON</button>
+          </div>
+        {% endif %}
+      </div>
+    </form>
+  </section>
+
+  {% if error %}
+    <div class="alert alert--error">{{ error }}</div>
+  {% endif %}
+
+  {% if report is not none %}
+    {% if batch_meta %}
+      <article class="panel panel--batch">
+        <div class="flex-between mb-md">
+          <div>
+            <p class="eyebrow">Index mensuel consolidé</p>
+            <h2>Données issues de l’index {{ batch_meta.batch_id }}</h2>
+          </div>
+          <a class="btn btn-secondary" href="/export?month={{ batch_meta.batch_id }}">Recalculer</a>
+        </div>
+        <div class="stats-grid">
+          <div class="stat--plain">
+            <span class="stat__label">Généré le</span>
+            <strong class="stat__value--md">{{ batch_meta.generated_at }}</strong>
+          </div>
+          <div class="stat--plain">
+            <span class="stat__label">Sources</span>
+            <strong class="stat__value--md">{{ batch_meta.sources | join(', ') }}</strong>
+          </div>
+          <div class="stat--plain">
+            <span class="stat__label">Bons de commande</span>
+            <strong class="stat__value--md">{{ batch_meta.orders }}</strong>
+          </div>
+          <div class="stat--plain">
+            <span class="stat__label">Entrées d’index</span>
+            <strong class="stat__value--md">{{ batch_meta.video_entries }}</strong>
+          </div>
+        </div>
+        {% if batch_meta.warnings %}
+          <details class="file-drawer">
+            <summary>Fichiers écartés ou atypiques ({{ batch_meta.warnings|length }})</summary>
+            <ul>
+              {% for warning in batch_meta.warnings %}
+                <li>{{ warning }}</li>
+              {% endfor %}
+            </ul>
+          </details>
+        {% endif %}
+      </article>
+    {% endif %}
+
+    <section class="panel">
+      {% if total_mp4 is not none %}
+        <div class="accordion">
+          <button
+            id="toggleSummary"
+            class="accordion__toggle"
+            aria-expanded="false"
+            aria-controls="summaryContent"
+            type="button"
+          >
+            <span class="accordion__chevron chevron" aria-hidden="true">▶</span>
+            <div>
+              <p class="eyebrow">Synthèse .mp4</p>
+              <strong>Total vidéos : {{ total_mp4 }}</strong>
+            </div>
+          </button>
+          {% if group_totals %}
+            <div id="summaryContent" class="accordion__panel" role="region" aria-labelledby="toggleSummary">
+              {% for group_id, count in group_totals.items() %}
+                <div class="accordion__row">
+                  <span>{{ group_id }}</span>
+                  <span>{{ count }} vidéo(s)</span>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="divider"></div>
+      {% endif %}
+
+      {% if category_total %}
+        <div class="flex-between mb-md">
+          <div>
+            <p class="eyebrow">Répartition par durée</p>
+            <h2 class="mb-0">Barre de production</h2>
+          </div>
+          <span class="muted">{{ category_total }} vidéos catégorisées</span>
+        </div>
+        <div class="stacked-bar" role="img" aria-label="Répartition des vidéos par catégorie de durée">
+          {% for cat, label in [
+            ("short", "Courte (<2 min)"),
+            ("standard", "Standard (2-5 min)"),
+            ("medium", "Moyenne (5-7 min)"),
+            ("long", "Longue (≥7 min)")
+          ] %}
+            {% if category_totals[cat] %}
+              <span
+                class="stacked-bar__segment stacked-bar__segment--{{ cat }}"
+                style="width: {{ category_shares[cat] }}%"
+                title="{{ label }} : {{ category_totals[cat] }}"
+              ></span>
+            {% endif %}
+          {% endfor %}
+        </div>
+        <div class="stacked-legend">
+          {% for cat, label in [
+            ("short", "Courte"),
+            ("standard", "Standard"),
+            ("medium", "Moyenne"),
+            ("long", "Longue")
+          ] %}
+            <span><span class="stacked-legend__dot stacked-legend__dot--{{ cat }}"></span>{{ label }} : {{ category_totals[cat] }}</span>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="card-grid">
+        {% for group in report %}
+          <article class="lot-card">
+            <header class="flex-between">
+              <div>
+                <p class="eyebrow">Lot produit</p>
+                <h3>{{ group.id_camille }}</h3>
+              </div>
+              <div>
+                {{ group.person }}
+                {% if batch_meta %}
+                  <span class="pill pill--batch">batch</span>
+                {% endif %}
+              </div>
+            </header>
+            {% set group_id = "%s %s"|format(group.id_camille, group.person) %}
+            {% if group_totals.get(group_id) is not none %}
+              <p class="muted">Total vidéos : {{ group_totals[group_id] }}</p>
+            {% endif %}
+            <div class="stack--tight">
+              <div>
+                <p class="muted metric-label">Courte (&lt;2 min)</p>
+                <p class="metric-value">{{ group.categories['short'].count|fmt_count }}</p>
+                {% if group.categories['short'].files %}
+                  <div class="file-dump">{{ group.categories['short'].files | join('\n') }}</div>
+                {% endif %}
+              </div>
+              <div>
+                <p class="muted metric-label">Standard (2-5 min)</p>
+                <p class="metric-value">{{ group.categories['standard'].count|fmt_count }}</p>
+                {% if group.categories['standard'].files %}
+                  <div class="file-dump">{{ group.categories['standard'].files | join('\n') }}</div>
+                {% endif %}
+              </div>
+              <div>
+                <p class="muted metric-label">Moyenne (5-7 min)</p>
+                <p class="metric-value">{{ group.categories['medium'].count|fmt_count }}</p>
+                {% if group.categories['medium'].files %}
+                  <div class="file-dump">{{ group.categories['medium'].files | join('\n') }}</div>
+                {% endif %}
+              </div>
+              <div>
+                <p class="muted metric-label">Longue (≥7 min)</p>
+                <p class="metric-value">{{ group.categories['long'].count|fmt_count }}</p>
+                {% if group.categories['long'].files %}
+                  <div class="file-dump">{{ group.categories['long'].files | join('\n') }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ static_url('js/reporting.js') }}"></script>
+{% endblock %}

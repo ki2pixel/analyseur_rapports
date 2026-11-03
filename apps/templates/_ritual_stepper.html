@@ -1,0 +1,56 @@
+{% set current_step = {'bdc': 1, 'reporting': 2, 'reconciliation': 3}.get(active_page|default(''), 0) %}
+<section class="ritual-shell" aria-label="Mission mensuelle en trois actes">
+  <div class="ritual-shell__context">
+    <p class="eyebrow">Mission mensuelle</p>
+    <strong>
+      {% if current_month_value %}Mois cible : {{ current_month_value }}{% else %}Sélectionnez un mois{% endif %}
+    </strong>
+  </div>
+  <ol class="ritual-stepper">
+    <li class="ritual-step {% if current_step == 1 %}is-active{% elif current_step > 1 %}is-done{% endif %}">
+      <a
+        href="{{ service_urls.bdc }}{{ month_qs }}"
+        {% if current_step == 1 %}aria-current="step"{% endif %}
+      >
+        <span class="ritual-step__index" aria-hidden="true">{% if current_step > 1 %}✓{% else %}1{% endif %}</span>
+        <span class="ritual-step__body">
+          <strong>Acte 1 · Réception commandes</strong>
+          <small>Scanner les PDF et vérifier les chevauchements BDC</small>
+        </span>
+        <span class="ritual-step__state">
+          {% if current_step == 1 %}En cours{% elif current_step > 1 %}Terminé{% else %}À venir{% endif %}
+        </span>
+      </a>
+    </li>
+    <li class="ritual-step {% if current_step == 2 %}is-active{% elif current_step > 2 %}is-done{% endif %}">
+      <a
+        href="{{ service_urls.reporting }}{{ month_qs }}"
+        {% if current_step == 2 %}aria-current="step"{% endif %}
+      >
+        <span class="ritual-step__index" aria-hidden="true">{% if current_step > 2 %}✓{% else %}2{% endif %}</span>
+        <span class="ritual-step__body">
+          <strong>Acte 2 · Scan production</strong>
+          <small>Analyser les lots produits et écarter jingles/doublons</small>
+        </span>
+        <span class="ritual-step__state">
+          {% if current_step == 2 %}En cours{% elif current_step > 2 %}Terminé{% else %}À venir{% endif %}
+        </span>
+      </a>
+    </li>
+    <li class="ritual-step {% if current_step == 3 %}is-active{% endif %}">
+      <a
+        href="{{ service_urls.reconciliation }}{{ month_qs }}"
+        {% if current_step == 3 %}aria-current="step"{% endif %}
+      >
+        <span class="ritual-step__index" aria-hidden="true">3</span>
+        <span class="ritual-step__body">
+          <strong>Acte 3 · Équilibrage &amp; victoire</strong>
+          <small>Réconcilier, inspecter les écarts et certifier le mois</small>
+        </span>
+        <span class="ritual-step__state">
+          {% if current_step == 3 %}En cours{% elif current_step > 3 %}Terminé{% else %}À venir{% endif %}
+        </span>
+      </a>
+    </li>
+  </ol>
+</section>

@@ -1,0 +1,50 @@
+[project]
+name = "camille-reporting"
+version = "0.1.0"
+description = "Monorepo regroupant l'analyse des rapports vidéo et la conversion BDC"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "KidPixel" }]
+dependencies = [
+    "Flask>=3.0,<4",
+    "Jinja2>=3.1,<4",
+    "Flask-WTF>=1.2,<2",
+    "python-dotenv>=1.0,<2",
+]
+
+[project.optional-dependencies]
+pdf = [
+    "pdfplumber>=0.11",
+    "weasyprint>=62,<67"
+]
+dev = [
+    "pytest>=8.0",
+    "black>=24.0",
+    "mypy>=1.5"
+]
+cli = [
+    "click>=8.1"
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+testpaths = [
+    "tests",
+    "."
+]
+addopts = "-q"
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+
+[tool.setuptools.packages.find]
+include = ["apps.*", "libs.*"]
+exclude = ["archives*", "data*", "tests*", "venv*"]

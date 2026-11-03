@@ -1,0 +1,39 @@
+{
+  "numero_bdc": "BDC-26-1862",
+  "date_commande": "26/10/2026",
+  "date_livraison": "26/10/2026",
+  "reference": "LOTS 286/287/291/293/295/298/300/303",
+  "references": [
+    "LOTS 286",
+    "287",
+    "291",
+    "293",
+    "295",
+    "298",
+    "300",
+    "303"
+  ],
+  "articles": [
+    {
+      "description": "Recadrage - vidéo courte (moins de 2 min)",
+      "quantite": "7,00",
+      "unite": "Unité",
+      "taux": "4,00",
+      "montant": "28,00"
+    },
+    {
+      "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+      "quantite": "7,00",
+      "unite": "Unité",
+      "taux": "8,00",
+      "montant": "56,00"
+    }
+  ],
+  "totals": {
+    "subtotal": "84,00",
+    "total": "84,00"
+  },
+  "expected_layout_fingerprint": "index | description | quantite | taux | montant",
+  "expected_status": "ok",
+  "expected_warnings": []
+}

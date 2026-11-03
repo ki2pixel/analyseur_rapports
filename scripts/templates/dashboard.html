@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <title>Camille • Lanceur de services</title>
+    <link rel="stylesheet" href="{{ static_url('css/global.css') }}" />
+    <link rel="stylesheet" href="{{ static_url('css/dashboard.css') }}" />
+  </head>
+  <body class="no-topbar dashboard-page">
+    <div id="toast-container" class="toast-container" role="status" aria-live="polite" aria-atomic="true"></div>
+    <main class="dashboard-main">
+      <section class="dashboard-hero">
+        <div class="dashboard-hero__content">
+          <p class="eyebrow">Suite Camille</p>
+          <h1>Piloter les services locaux</h1>
+          <p class="lead muted">
+            Lancez, arrêtez et ouvrez chaque application (Reporting, Convertisseur BDC, Rapprochement) depuis un unique panneau.
+          </p>
+          <div class="dashboard-steps">
+            <span>1 • Lancer le service voulu</span>
+            <span>2 • Attendre le statut « En cours »</span>
+            <span>3 • Ouvrir l’interface dédiée</span>
+          </div>
+        </div>
+      </section>
+      <section class="dashboard-grid">
+        {% for service in services %}
+        <article class="service-card" data-service="{{ service.key }}">
+          <div>
+            <p class="eyebrow">Service {{ service.label|lower }}</p>
+            <h2>{{ service.label }}</h2>
+            <p class="muted">{{ service.description }}</p>
+          </div>
+          <div class="flex-row">
+            <button class="primary" type="button" data-action="start">Lancer</button>
+            <button class="btn btn-secondary dashboard-stop" type="button" data-action="stop">Arrêter</button>
+            <a class="btn btn-secondary" href="{{ service.url }}" target="_blank" rel="noopener noreferrer">Ouvrir</a>
+          </div>
+          <div class="service-card__status">
+            <span class="status-pill stopped" data-role="status">Arrêté</span>
+            <small class="muted" data-role="uptime">—</small>
+          </div>
+        </article>
+        {% endfor %}
+      </section>
+    </main>
+    <script src="{{ static_url('js/global.js') }}"></script>
+    <script src="{{ static_url('js/dashboard.js') }}"></script>
+  </body>
+</html>

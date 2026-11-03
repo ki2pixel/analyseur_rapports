@@ -1,0 +1,37 @@
+{
+  "numero_bdc": "BDC-26-1689",
+  "date_commande": "01/10/2026",
+  "date_livraison": "01/10/2026",
+  "reference": "LOTS 2/7/10/12/15/17",
+  "references": [
+    "LOTS 2",
+    "7",
+    "10",
+    "12",
+    "15",
+    "17"
+  ],
+  "articles": [
+    {
+      "description": "Recadrage - vidéo courte (moins de 2 min)",
+      "quantite": "5,00",
+      "unite": "Unité",
+      "taux": "4,00",
+      "montant": "20,00"
+    },
+    {
+      "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+      "quantite": "12,00",
+      "unite": "Unité",
+      "taux": "8,00",
+      "montant": "96,00"
+    }
+  ],
+  "totals": {
+    "subtotal": "116,00",
+    "total": "116,00"
+  },
+  "expected_layout_fingerprint": "index | description | quantite | taux | montant",
+  "expected_status": "ok",
+  "expected_warnings": []
+}

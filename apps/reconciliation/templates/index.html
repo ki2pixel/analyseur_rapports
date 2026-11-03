@@ -1,0 +1,643 @@
+{% extends "base.html" %}
+{% block title %}Rapprochement Reporting ↔ BDC{% endblock %}
+{% set active_page = 'reconciliation' %}
+
+{% macro inspector_body(cluster, meta) %}
+  {% set billed_map = cluster.billed|default({}) %}
+  {% set actual_map = cluster.actual|default({}) %}
+  {% set delta_map = cluster.delta|default({}) %}
+  {% set categories = [
+    ("short", "Courte (<2 min)"),
+    ("standard", "Standard (2-5 min)"),
+    ("medium", "Moyenne (5-7 min)"),
+    ("long", "Longue (≥7 min)")
+  ] %}
+  <div class="inspector__grid">
+    <section class="inspector__column">
+      <h4>Attendu côté BDC</h4>
+      <table class="inspector__table">
+        <caption class="sr-only">Attendu facturé pour {{ cluster.label }}</caption>
+        <thead>
+          <tr>
+            <th scope="col">Catégorie</th>
+            <th scope="col" class="num">Facturé</th>
+            <th scope="col" class="num">Réalisé</th>
+            <th scope="col" class="num">Écart</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cat, label in categories %}
+            {% set billed = billed_map[cat]|default(0) %}
+            {% set actual = actual_map[cat]|default(0) %}
+            {% set delta = delta_map[cat]|default(0) %}
+            {% set delta_class = 'text-positive' if delta == 0 else ('text-warn' if delta > 0 else 'text-negative') %}
+            <tr>
+              <td>{{ label }}</td>
+              <td class="num">{{ billed }}</td>
+              <td class="num">{{ actual }}</td>
+              <td class="num"><span class="{{ delta_class }}">{{ "%+d"|format(delta) }}</span></td>
+            </tr>
+          {% endfor %}
+          <tr>
+            <td><strong>Total</strong></td>
+            <td class="num">{{ cluster.billed_total|default(0) }}</td>
+            <td class="num">{{ cluster.actual_total|default(0) }}</td>
+            <td class="num"><strong>Écart (Réalisé − Facturé)</strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="muted muted--tight">
+        BDC : {{ cluster.bdc_numbers|default([])|join(', ') or '—' }}
+      </p>
+      {% if cluster.source_references|default([]) %}
+        <p class="muted muted--tight">Références : {{ cluster.source_references|join(' · ') }}</p>
+      {% endif %}
+      {% if cluster.billed_unknown|default(0) %}
+        <p class="muted muted--tight">
+          Dont {{ cluster.billed_unknown }} article{{ "s" if cluster.billed_unknown > 1 else "" }}
+          BDC non reconnu{{ "s" if cluster.billed_unknown > 1 else "" }}, non réparti{{ "s" if cluster.billed_unknown > 1 else "" }}
+          par durée.
+        </p>
+      {% endif %}
+    </section>
+
+    <section class="inspector__column">
+      <h4>Réalisé côté production</h4>
+      {% set production_lots = cluster.production_lots|default([]) %}
+      {% if production_lots %}
+        {% set total_surplus = [cluster.delta.short|default(0), 0]|max + [cluster.delta.standard|default(0), 0]|max + [cluster.delta.medium|default(0), 0]|max + [cluster.delta.long|default(0), 0]|max %}
+        <div class="inspector__production-summary">
+          <div class="inspector__production-summary-title">
+            <span><strong>{{ cluster.actual_total|default(0) }}</strong> vidéo(s) réalisée(s) sur {{ production_lots|length }} lot(s)</span>
+            {% if total_surplus > 0 %}
+              <span class="badge badge--warn badge--xs">⚠ +{{ total_surplus }} non facturée(s)</span>
+            {% elif cluster.actual_total == cluster.billed_total %}
+              <span class="badge badge--ok badge--xs">✓ Volume total en accord</span>
+            {% endif %}
+          </div>
+          <div class="inspector__production-summary-pills">
+            {% for cat, label in categories %}
+              {% set cat_act = cluster.actual[cat]|default(0) %}
+              {% set cat_bil = cluster.billed[cat]|default(0) %}
+              {% set cat_del = cluster.delta[cat]|default(0) %}
+              {% if cat_act > 0 or cat_bil > 0 %}
+                {% if cat_del > 0 %}
+                  <span class="badge badge--warn badge--xs" title="{{ cat_act }} réalisée(s) vs {{ cat_bil }} facturée(s)">
+                    {{ label }} : {{ cat_act }} / {{ cat_bil }} (⚠ +{{ cat_del }} non facturée{{ 's' if cat_del > 1 else '' }})
+                  </span>
+                {% elif cat_del < 0 %}
+                  <span class="badge badge--danger badge--xs" title="{{ cat_act }} réalisée(s) vs {{ cat_bil }} facturée(s)">
+                    {{ label }} : {{ cat_act }} / {{ cat_bil }} (🚨 −{{ cat_del|abs }} manquante{{ 's' if cat_del|abs > 1 else '' }})
+                  </span>
+                {% else %}
+                  <span class="badge badge--ok badge--xs" title="{{ cat_act }} réalisée(s) = {{ cat_bil }} facturée(s)">
+                    {{ label }} : {{ cat_act }} (✓ En accord)
+                  </span>
+                {% endif %}
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        {% for lot in production_lots %}
+          <div class="inspector__lot">
+            <div class="inspector__lot-title">
+              <span>
+                Lot {{ lot.id_camille }}
+                {% if lot.has_suspects %}
+                  <span class="badge badge--warn badge--xs" title="Ce lot contient des fichiers suspects (doublon ou effet de seuil expliquant le surplus)">⚠ À vérifier</span>
+                {% endif %}
+              </span>
+              <span>{{ lot.total|default(0) }} vidéo(s)</span>
+            </div>
+            {% for cat, label in categories %}
+              {% set cat_data = lot.categories[cat] if lot.categories and cat in lot.categories else {} %}
+              {% set count = cat_data.count|default(0) %}
+              {% set cat_delta = cluster.delta[cat]|default(0) %}
+              {% if count %}
+                <div class="file-line file-line--cat-header">
+                  <span class="file-line__name">
+                    <strong>{{ label }}</strong>
+                  </span>
+                  <span class="file-line__duration"><strong>{{ count }}</strong></span>
+                </div>
+              {% endif %}
+              {% for detail in cat_data.file_details|default([]) %}
+                {% set is_suspect = detail.is_duplicate or detail.is_jingle or detail.is_near_boundary %}
+                <div class="file-line {% if is_suspect %}file-line--surplus{% endif %}">
+                  <span class="file-line__name">
+                    {{ detail.name }}
+                    <span class="file-line__badges">
+                      {% if cat_delta == 0 and not is_suspect %}
+                        <span class="badge badge--ok badge--xs" title="Catégorie en accord">{{ label }}</span>
+                      {% elif cat_delta > 0 and not is_suspect %}
+                        <span class="badge badge--neutral badge--xs" title="Catégorie '{{ label }}' (surplus global de +{{ cat_delta }} non facturée(s) sur ce BDC)">{{ label }}</span>
+                      {% else %}
+                        <span class="badge badge--warn badge--xs" title="Vidéo à vérifier">{{ label }}</span>
+                      {% endif %}
+                      {% if detail.is_duplicate %}
+                        <span class="badge badge--warn badge--xs" title="Titre dupliqué dans la production de ce BDC (1 vidéo en trop non facturée)">🔍 Doublon (surplus)</span>
+                      {% endif %}
+                      {% if detail.is_jingle %}
+                        <span class="badge badge--danger badge--xs" title="Jingle exclu">🚫 Jingle</span>
+                      {% endif %}
+                      {% if detail.is_near_boundary and detail.near_threshold %}
+                        <span class="badge badge--warn badge--xs" title="Durée {{ '%.1f'|format(detail.duration_sec) }}s à moins de 3s du seuil {{ '%.0f'|format(detail.near_threshold) }}s (explication du surplus)">⏱ Seuil {{ '%.0f'|format(detail.near_threshold) }}s</span>
+                      {% endif %}
+                    </span>
+                  </span>
+                  <span class="file-line__duration">
+                    {% if detail.duration_sec is not none %}{{ "%.1f"|format(detail.duration_sec) }} s{% else %}durée ?{% endif %}
+                  </span>
+                </div>
+              {% endfor %}
+            {% endfor %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p class="muted">Aucun lot produit rattaché à ce bon de commande.</p>
+      {% endif %}
+    </section>
+  </div>
+
+  {% if cluster.missing_reporting_ids|default([]) %}
+    <p class="inline-warn">
+      Lots facturés sans dossier vidéo ce mois-ci :
+      {{ cluster.missing_reporting_ids|join(', ') }}
+    </p>
+  {% endif %}
+
+  {% set diag_list = cluster.diagnostics if (cluster.diagnostics is defined and cluster.diagnostics) else ([cluster.diagnostic] if cluster.diagnostic else []) %}
+  {% if diag_list %}
+    {% for diag in diag_list %}
+      <div class="diagnostic diagnostic--{{ diag.severity|default('info') }}">
+        <div class="diagnostic__title">💡 {{ diag.title }}</div>
+        <p class="diagnostic__message">{{ diag.message }}</p>
+        {% if meta and meta.token %}
+          <div class="diagnostic__actions">
+            {% if diag.suspect_files|default([]) %}
+              {% for suspect in diag.suspect_files %}
+                <form method="post" action="/inspector/exclude">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input type="hidden" name="token" value="{{ meta.token }}"/>
+                  <input type="hidden" name="month" value="{{ meta.month|default('') }}"/>
+                  <input type="hidden" name="reporting_name" value="{{ meta.reporting_name|default('') }}"/>
+                  <input type="hidden" name="bdc_name" value="{{ meta.bdc_name|default('') }}"/>
+                  <input type="hidden" name="filename" value="{{ suspect.name }}"/>
+                  <input type="hidden" name="id_camille" value="{{ suspect.lot|default('') }}"/>
+                  <input type="hidden" name="cluster_key" value="{{ cluster.cluster_key|default('') }}"/>
+                  <input type="hidden" name="scope" value="{{ 'month' if suspect.suspect_kind|default('') == 'jingle' else 'occurrence' }}"/>
+                  <button class="btn btn-secondary" type="submit" title="Exclure {{ suspect.name }} (lot {{ suspect.lot|default('?') }})">
+                    🧹 Exclure {{ suspect.name|truncate(48) }}{% if suspect.lot %} (lot {{ suspect.lot }}){% endif %}
+                  </button>
+                </form>
+              {% endfor %}
+            {% endif %}
+            {% if loop.first and cluster.cluster_key|default('') %}
+              {% if cluster.justified|default(false) %}
+                <form method="post" action="/inspector/justify">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input type="hidden" name="token" value="{{ meta.token }}"/>
+                  <input type="hidden" name="month" value="{{ meta.month|default('') }}"/>
+                  <input type="hidden" name="reporting_name" value="{{ meta.reporting_name|default('') }}"/>
+                  <input type="hidden" name="bdc_name" value="{{ meta.bdc_name|default('') }}"/>
+                  <input type="hidden" name="cluster_key" value="{{ cluster.cluster_key }}"/>
+                  <input type="hidden" name="undo" value="1"/>
+                  <button class="btn btn-secondary" type="submit">Annuler la justification</button>
+                </form>
+              {% elif cluster.justification_eligible|default(false) %}
+                <form method="post" action="/inspector/justify">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                  <input type="hidden" name="token" value="{{ meta.token }}"/>
+                  <input type="hidden" name="month" value="{{ meta.month|default('') }}"/>
+                  <input type="hidden" name="reporting_name" value="{{ meta.reporting_name|default('') }}"/>
+                  <input type="hidden" name="bdc_name" value="{{ meta.bdc_name|default('') }}"/>
+                  <input type="hidden" name="cluster_key" value="{{ cluster.cluster_key }}"/>
+                  <button class="btn btn-secondary" type="submit">📌 Justifier le doublon / jingle</button>
+                </form>
+              {% endif %}
+            {% endif %}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+    {% if cluster.justification_hint|default('') and not cluster.justified|default(false) %}
+      <p class="diagnostic__message justification-hint">{{ cluster.justification_hint }}</p>
+    {% endif %}
+  {% elif (not cluster.is_compliant or cluster.justified|default(false)) and meta and meta.token and cluster.cluster_key|default('') %}
+    <div class="diagnostic diagnostic--info">
+      <div class="diagnostic__title">💡 Écart de production</div>
+      <p class="diagnostic__message">Un écart a été constaté entre le bon de commande et les dossiers de production.</p>
+      {% if cluster.justified|default(false) %}
+        <div class="diagnostic__actions">
+          <form method="post" action="/inspector/justify">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="token" value="{{ meta.token }}"/>
+            <input type="hidden" name="month" value="{{ meta.month|default('') }}"/>
+            <input type="hidden" name="reporting_name" value="{{ meta.reporting_name|default('') }}"/>
+            <input type="hidden" name="bdc_name" value="{{ meta.bdc_name|default('') }}"/>
+            <input type="hidden" name="cluster_key" value="{{ cluster.cluster_key }}"/>
+            <input type="hidden" name="undo" value="1"/>
+            <button class="btn btn-secondary" type="submit">Annuler la justification</button>
+          </form>
+        </div>
+      {% elif cluster.justification_eligible|default(false) %}
+        <div class="diagnostic__actions">
+          <form method="post" action="/inspector/justify">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="token" value="{{ meta.token }}"/>
+            <input type="hidden" name="month" value="{{ meta.month|default('') }}"/>
+            <input type="hidden" name="reporting_name" value="{{ meta.reporting_name|default('') }}"/>
+            <input type="hidden" name="bdc_name" value="{{ meta.bdc_name|default('') }}"/>
+            <input type="hidden" name="cluster_key" value="{{ cluster.cluster_key }}"/>
+            <button class="btn btn-secondary" type="submit">📌 Justifier le doublon / jingle</button>
+          </form>
+        </div>
+      {% elif cluster.justification_hint|default('') %}
+        <p class="diagnostic__message justification-hint">{{ cluster.justification_hint }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+{% endmacro %}
+
+{% block content %}
+<main class="container animate-fade-in">
+  <section class="panel panel--hero">
+    <p class="eyebrow">Acte 3 · Équilibrage &amp; victoire</p>
+    <h1>Le rituel mensuel de réconciliation</h1>
+    <p class="muted lead">
+      Le mois sélectionné charge automatiquement le rapport de production et l’export BDC.
+      Inspectez les écarts, excluez les artefacts, justifiez les doublons et jingles identifiés, puis certifiez le mois.
+    </p>
+
+    {% if current_month %}
+      <div class="flex-row mb-md">
+        <span class="badge badge--neutral">📅 Mois : {{ current_month }}</span>
+        {% if meta %}
+          <span class="badge badge--ok">{{ meta.reporting_name }} ↔ {{ meta.bdc_name }}</span>
+        {% endif %}
+      </div>
+    {% endif %}
+
+    <details class="file-drawer" {% if not meta %}open{% endif %}>
+      <summary>Sélection manuelle des deux fichiers JSON</summary>
+      <form method="post" action="/" class="form-grid form-grid--wide mt-md">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="field-card">
+          <label for="reporting_filename">Rapport production (.json)</label>
+          {% if reporting_reports %}
+            <select id="reporting_filename" name="reporting_filename" required>
+              {% for report in reporting_reports %}
+                <option value="{{ report.filename }}" {% if report.filename == selected_reporting %}selected{% endif %}>{{ report.display }}</option>
+              {% endfor %}
+            </select>
+          {% else %}
+            <p class="text-negative muted--tight">Aucun rapport de production trouvé.</p>
+          {% endif %}
+          <p class="muted muted--tight">Généré automatiquement par le service reporting.</p>
+        </div>
+        <div class="field-card">
+          <label for="bdc_filename">Rapport BDC (.json)</label>
+          {% if bdc_reports %}
+            <select id="bdc_filename" name="bdc_filename" required>
+              {% for report in bdc_reports %}
+                <option value="{{ report.filename }}" {% if report.filename == selected_bdc %}selected{% endif %}>{{ report.display }}</option>
+              {% endfor %}
+            </select>
+          {% else %}
+            <p class="text-negative muted--tight">Aucun rapport BDC trouvé.</p>
+          {% endif %}
+          <p class="muted muted--tight">Généré automatiquement par le service BDC.</p>
+        </div>
+        <div class="form-actions">
+          <button class="primary" type="submit" {% if not reporting_reports or not bdc_reports %}disabled{% endif %}>Lancer l’analyse</button>
+        </div>
+      </form>
+    </details>
+  </section>
+
+  {% if error %}
+    <div class="alert alert--error">{{ error }}</div>
+  {% endif %}
+  {% if notice %}
+    <div class="alert alert--info">{{ notice }}</div>
+  {% endif %}
+
+  {% if analysis %}
+    {% set conformity = view_model.conformity %}
+    {% set certification = view_model.certification %}
+    {% set cluster_results = view_model.cluster_results %}
+    {% set justified_orders = conformity.justified_orders|default(0) %}
+    <section class="stack--lg mt-lg">
+      <article class="panel score-panel {% if certification.is_certified %}panel--perfect{% endif %}">
+        <div class="score-panel__head">
+          <div>
+            <p class="eyebrow">Score de conformité</p>
+            <div class="score-panel__value {% if conformity.score == 100 %}is-perfect{% endif %}">
+              {{ "%.1f"|format(conformity.score) }}%
+            </div>
+            <p class="muted muted--tight">
+              {{ conformity.compliant_orders }} / {{ conformity.total_orders }} bons de commande conformes.
+              {% if justified_orders %}
+                Dont {{ justified_orders }} écart{{ "s" if justified_orders > 1 else "" }} justifié{{ "s" if justified_orders > 1 else "" }} par doublon ou jingle.
+              {% endif %}
+            </p>
+          </div>
+          <div class="inspector__badges">
+            {% if certification.is_certified %}
+              <span class="badge badge--ok">🏆 Mois certifié</span>
+            {% elif conformity.total_orders and conformity.score == 100 %}
+              <span class="badge badge--warn">Score 100 % — certification bloquée par un signalement</span>
+            {% else %}
+              <span class="badge badge--warn">⚠ {{ view_model.review_count }} BDC à inspecter</span>
+            {% endif %}
+            {% if justified_orders %}
+              <span class="badge badge--neutral">📌 {{ justified_orders }} écart{{ "s" if justified_orders > 1 else "" }} justifié{{ "s" if justified_orders > 1 else "" }}</span>
+            {% endif %}
+            <span class="badge badge--neutral">{{ analysis.issues_count }} signalement(s)</span>
+          </div>
+        </div>
+        <div
+          class="score-gauge"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="{{ conformity.score }}"
+          aria-label="Score de conformité mensuel"
+        >
+          {% set gauge_style = ('style="width: ' ~ conformity.score ~ '%"')|safe %}
+          <div class="score-gauge__fill" {{ gauge_style }}></div>
+        </div>
+        <div class="score-meta">
+          <span>Dernière génération : {{ analysis.generated_at }}</span>
+          <span>{{ cluster_results|length }} bon(s) de commande analysé(s)</span>
+          <span>{{ view_model.overlapping_bdc_lots|length }} chevauchement(s) de lots</span>
+        </div>
+
+        {% if meta and meta.token %}
+          <div class="flex-row mt-md">
+            <a href="/export/html?token={{ meta.token }}{% if meta.month %}&amp;month={{ meta.month }}{% endif %}" class="btn {% if certification.is_certified %}btn--certified{% else %}btn-secondary{% endif %}">
+              {% if certification.is_certified %}🏆 Générer le certificat HTML{% else %}Exporter HTML{% endif %}
+            </a>
+            <a href="/export/pdf?token={{ meta.token }}{% if meta.month %}&amp;month={{ meta.month }}{% endif %}" class="btn btn-secondary" title="La génération peut prendre quelques secondes pour les mois volumineux.">
+              {% if certification.is_certified %}Générer le certificat PDF{% else %}Exporter PDF{% endif %}
+            </a>
+            <a href="/export/json?token={{ meta.token }}{% if meta.month %}&amp;month={{ meta.month }}{% endif %}" class="btn btn-secondary">Exporter JSON</a>
+            {% if meta.adjustments.excluded_files or meta.adjustments.justified_clusters %}
+              <form method="post" action="/inspector/reset">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <input type="hidden" name="token" value="{{ meta.token }}"/>
+                <input type="hidden" name="month" value="{{ meta.month|default('') }}"/>
+                <input type="hidden" name="reporting_name" value="{{ meta.reporting_name|default('') }}"/>
+                <input type="hidden" name="bdc_name" value="{{ meta.bdc_name|default('') }}"/>
+                <button class="btn btn-secondary" type="submit">Réinitialiser les ajustements</button>
+              </form>
+              <span class="muted muted--tight">
+                Ajustements de session : {{ meta.adjustments.excluded_files }} fichier(s) exclu(s),
+                {{ meta.adjustments.justified_clusters }} écart(s) justifié(s).
+              </span>
+            {% endif %}
+          </div>
+        {% endif %}
+      </article>
+
+      <article class="panel">
+        <div class="flex-between">
+          <div>
+            <p class="eyebrow">Balance globale du mois</p>
+            <h2 class="mb-0">Équilibre facturé / réalisé</h2>
+          </div>
+          <span class="badge badge--neutral">{{ conformity.compliant_orders }} / {{ conformity.total_orders }} en accord</span>
+        </div>
+        <div class="balance-grid">
+          {% for cat, label in [
+            ("short", "Courtes (<2 min)"),
+            ("standard", "Standards (2-5 min)"),
+            ("medium", "Moyennes (5-7 min)"),
+            ("long", "Longues (≥7 min)")
+          ] %}
+            {% set item = view_model.balance[cat] if view_model.balance and cat in view_model.balance else {"billed": 0, "actual": 0, "delta": 0} %}
+            {% set max_value = [item.billed, item.actual, 1]|max %}
+            {% set delta_class = 'text-positive' if item.delta == 0 else ('text-warn' if item.delta > 0 else 'text-negative') %}
+            {% set badge_class = 'badge--ok' if item.delta == 0 else ('badge--warn' if item.delta > 0 else 'badge--danger') %}
+            <div class="balance-row">
+              <span class="balance-row__label">{{ label }}</span>
+              <div class="balance-row__numbers">
+                <span>Facturé : {{ item.billed }}</span>
+                <div class="balance-bar">
+                  {% set billed_style = ('style="width: ' ~ ((item.billed / max_value * 100)|round(0)|int) ~ '%"')|safe %}
+                  <div class="balance-bar__fill balance-bar__fill--billed" {{ billed_style }}></div>
+                </div>
+              </div>
+              <div class="balance-row__numbers">
+                <span>Réalisé : {{ item.actual }}</span>
+                <div class="balance-bar">
+                  {% set actual_style = ('style="width: ' ~ ((item.actual / max_value * 100)|round(0)|int) ~ '%"')|safe %}
+                  <div class="balance-bar__fill balance-bar__fill--actual" {{ actual_style }}></div>
+                </div>
+              </div>
+              <span class="badge {{ badge_class }} {{ delta_class }}">
+                {% if item.delta == 0 %}
+                  ✓ En règle (0)
+                {% elif item.delta > 0 %}
+                  ⚠ +{{ item.delta }} non facturée(s)
+                {% else %}
+                  🚨 −{{ item.delta|abs }} manquante(s)
+                {% endif %}
+              </span>
+            </div>
+          {% endfor %}
+        </div>
+      </article>
+
+      {% if view_model.overlapping_bdc_lots %}
+        <article class="panel panel--warn overlap-panel">
+          <h2>Chevauchements de BDC détectés</h2>
+          <p class="muted">
+            Ces lots sont revendiqués par plusieurs bons de commande. La certification reste bloquée
+            tant que l’ambiguïté n’est pas levée.
+          </p>
+          <ul class="list-plain">
+            {% for overlap in view_model.overlapping_bdc_lots %}
+              <li><strong>Lot {{ overlap.lot }}</strong> — {{ overlap.bdc_numbers|join(', ') }}</li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% endif %}
+
+      <article class="panel">
+        <div class="flex-between">
+          <div>
+            <p class="eyebrow">Bons de commande (Regroupements de lots)</p>
+            <h2 class="mb-0">Inspecteur d’écarts</h2>
+          </div>
+          <span class="muted">{{ cluster_results|length }} BDC</span>
+        </div>
+
+        <div class="tabs" role="tablist" aria-label="Filtrer les bons de commande" data-inspector-tabs>
+          <button type="button" class="tab is-active" data-filter="all" role="tab" aria-selected="true">
+            Tous les BDC ({{ cluster_results|length }})
+          </button>
+          <button type="button" class="tab" data-filter="issues" role="tab" aria-selected="false">
+            Écarts à inspecter ({{ view_model.review_count }})
+          </button>
+          <button type="button" class="tab" data-filter="ok" role="tab" aria-selected="false">
+            Conformes ✓ ({{ cluster_results|length - view_model.review_count }})
+          </button>
+        </div>
+
+        <div class="stack" data-inspector-list>
+          {% for cluster in cluster_results %}
+            {% set is_review = cluster.requires_review if cluster.requires_review is defined else (cluster.is_compliant is not defined or not cluster.is_compliant) %}
+            <article class="inspector {% if not is_review %}inspector--ok{% endif %}" data-compliance="{{ 'issues' if is_review else 'ok' }}">
+              <div class="inspector__header">
+                <div>
+                  <h3 class="inspector__title">{{ cluster.label }}</h3>
+                  <p class="inspector__subtitle">
+                    {% if cluster.bdc_numbers|default([]) %}{{ cluster.bdc_numbers|join(' · ') }}{% endif %}
+                    {% if cluster.source_references|default([]) %} — {{ cluster.source_references|join(' · ') }}{% endif %}
+                  </p>
+                </div>
+                <div class="inspector__badges">
+                  {% if cluster.justified|default(false) %}
+                    <span class="badge badge--ok">📌 Écart justifié (doublon / jingle)</span>
+                  {% endif %}
+                  {% if is_review %}
+                    <span class="badge badge--warn">⚠ À inspecter</span>
+                  {% elif not cluster.justified|default(false) %}
+                    <span class="badge badge--ok">✓ Conforme</span>
+                  {% endif %}
+                  {% if cluster.has_jingle_or_duplicate|default(false) %}
+                    <span class="badge badge--danger">Jingle / doublon</span>
+                  {% endif %}
+                  {% if cluster.has_unknown_articles|default(false) %}
+                    <span class="badge badge--danger">Articles BDC non reconnus</span>
+                  {% endif %}
+                  {% if cluster.overlaps_with_bdc|default(false) %}
+                    <span class="badge badge--warn">Chevauchement BDC</span>
+                  {% endif %}
+                  {% if cluster.found_in_adjacent_month|default(false) %}
+                    <span class="badge badge--neutral">Inter-mois</span>
+                  {% endif %}
+                </div>
+              </div>
+
+              {% if is_review %}
+                {{ inspector_body(cluster, meta) }}
+              {% else %}
+                <details class="inspector__details">
+                  <summary>
+                    Voir le détail — {{ cluster.actual_total|default(0) }} vidéos réalisées /
+                    {{ cluster.billed_total|default(0) }} facturées
+                  </summary>
+                  {{ inspector_body(cluster, meta) }}
+                </details>
+              {% endif %}
+            </article>
+          {% else %}
+            <p class="muted">Aucun bon de commande à inspecter pour ce mois.</p>
+          {% endfor %}
+        </div>
+      </article>
+
+      {% if view_model.unexpected_ids %}
+        <article class="panel panel--warn">
+          <h2>Lots facturés sans dossier vidéo ce mois-ci</h2>
+          <p class="muted">Ces lots apparaissent sur un BDC mais aucun dossier de production ne leur correspond.</p>
+          <ul class="list-plain">
+            {% for gid in view_model.unexpected_ids %}
+              <li><strong>Lot {{ gid }}</strong></li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% endif %}
+
+      {% if view_model.missing_invoices %}
+        <article class="panel panel--warn">
+          <h2>Lots produits en attente de BDC</h2>
+          <p class="muted">Ces lots existent dans la production mais ne sont rattachés à aucun BDC du mois.</p>
+          <ul class="list-plain">
+            {% for group in view_model.missing_invoices %}
+              <li class="flex-row">
+                <strong>Lot {{ group.id_camille }}</strong>
+                <span class="pill">{{ group.person }}</span>
+                <small class="muted ml-auto">
+                  Total : {{ group.categories.short.count + group.categories.standard.count + group.categories.medium.count + group.categories.long.count }}
+                </small>
+                {% if group.adjacent_month %}
+                  <span class="badge badge--neutral">
+                    {% if group.adjacent_month.in_report %}
+                      🔄 Présent en {{ group.adjacent_month.month }}
+                      {% if group.adjacent_month.bdc_numbers %} · facturé sur {{ group.adjacent_month.bdc_numbers|join(', ') }}{% endif %}
+                    {% elif group.adjacent_month.bdc_numbers %}
+                      🔄 Facturé sur {{ group.adjacent_month.month }} ({{ group.adjacent_month.bdc_numbers|join(', ') }})
+                    {% else %}
+                      🔄 Présent en {{ group.adjacent_month.month }}
+                    {% endif %}
+                  </span>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        </article>
+      {% endif %}
+
+      <article class="panel">
+        <h2>Détail des lots produits (Dossiers monteur)</h2>
+        <div class="card-grid mt-md">
+          {% for group in view_model.reporting_groups %}
+            <div class="lot-card--compact">
+              <h3 class="mt-0 flex-row">
+                Lot {{ group.id_camille }}
+                <span class="pill">{{ group.person }}</span>
+              </h3>
+              <table class="inspector__table">
+                <caption class="sr-only">Volumes du lot {{ group.id_camille }}</caption>
+                <tbody>
+                  {% for cat, label in [
+                    ("short", "Courte (<2m)"),
+                    ("standard", "Standard (2-5m)"),
+                    ("medium", "Moyenne (5-7m)"),
+                    ("long", "Longue (≥7m)")
+                  ] %}
+                    {% set cat_data = group.categories[cat] if group.categories and cat in group.categories else {} %}
+                    <tr>
+                      <td>{{ label }}</td>
+                      <td class="num">{{ cat_data.count|default(0) }}</td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+              {% if group.categories %}
+                <details class="inspector__details">
+                  <summary>Voir les fichiers</summary>
+                  {% for cat, label in [
+                    ("short", "Courte"),
+                    ("standard", "Standard"),
+                    ("medium", "Moyenne"),
+                    ("long", "Longue")
+                  ] %}
+                    {% set cat_data = group.categories[cat] if cat in group.categories else {} %}
+                    {% for detail in cat_data.file_details|default([]) %}
+                      <div class="file-line">
+                        <span class="file-line__name">{{ detail.name }}</span>
+                        <span class="file-line__duration">
+                          {% if detail.duration_sec is not none %}{{ "%.1f"|format(detail.duration_sec) }} s{% else %}durée ?{% endif %}
+                        </span>
+                      </div>
+                    {% endfor %}
+                  {% endfor %}
+                </details>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </article>
+    </section>
+  {% endif %}
+</main>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ static_url('js/reconciliation.js') }}"></script>
+{% endblock %}
