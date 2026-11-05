@@ -1,5 +1,5 @@
-{% set current_step = {'bdc': 1, 'reporting': 2, 'reconciliation': 3}.get(active_page|default(''), 0) %}
-<section class="ritual-shell" aria-label="Mission mensuelle en trois actes">
+{% set current_step = {'bdc': 1, 'reporting': 2, 'reconciliation': 3, 'billing': 4}.get(active_page|default(''), 0) %}
+<section class="ritual-shell" aria-label="Mission mensuelle en quatre actes">
   <div class="ritual-shell__context">
     <p class="eyebrow">Mission mensuelle</p>
     <strong>
@@ -37,18 +37,33 @@
         </span>
       </a>
     </li>
-    <li class="ritual-step {% if current_step == 3 %}is-active{% endif %}">
+    <li class="ritual-step {% if current_step == 3 %}is-active{% elif current_step > 3 %}is-done{% endif %}">
       <a
         href="{{ service_urls.reconciliation }}{{ month_qs }}"
         {% if current_step == 3 %}aria-current="step"{% endif %}
       >
-        <span class="ritual-step__index" aria-hidden="true">3</span>
+        <span class="ritual-step__index" aria-hidden="true">{% if current_step > 3 %}✓{% else %}3{% endif %}</span>
         <span class="ritual-step__body">
           <strong>Acte 3 · Équilibrage &amp; victoire</strong>
           <small>Réconcilier, inspecter les écarts et certifier le mois</small>
         </span>
         <span class="ritual-step__state">
           {% if current_step == 3 %}En cours{% elif current_step > 3 %}Terminé{% else %}À venir{% endif %}
+        </span>
+      </a>
+    </li>
+    <li class="ritual-step {% if current_step == 4 %}is-active{% endif %}">
+      <a
+        href="{{ service_urls.billing }}{{ month_qs }}"
+        {% if current_step == 4 %}aria-current="step"{% endif %}
+      >
+        <span class="ritual-step__index" aria-hidden="true">4</span>
+        <span class="ritual-step__body">
+          <strong>Acte 4 · Facturation &amp; envoi</strong>
+          <small>Versionner la base, contrôler et préparer l’envoi client</small>
+        </span>
+        <span class="ritual-step__state">
+          {% if current_step == 4 %}En cours{% else %}À venir{% endif %}
         </span>
       </a>
     </li>

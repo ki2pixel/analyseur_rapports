@@ -5,11 +5,12 @@ Monorepo Flask local pour :
 - **Reporting** — rapport mensuel des vidéos dans `archives/` (UI + exports HTML/JSON).
 - **Convertisseur BDC** — extraction PDF → JSON + batch mensuel partagé, avec cartes de contrôle et alertes de chevauchement.
 - **Rapprochement** — comparaison reporting ↔ BDC, score de conformité, inspecteur d’écarts et export certifié.
-- **Dashboard** — démarrage / arrêt des trois services (`./scripts/launch_services.sh`).
+- **Facturation** — base de facturation versionnée à partir des BDC et du rapprochement, contrôle des écarts, export HTML/PDF/CSV et suivi du numéro Indy.
+- **Dashboard** — démarrage / arrêt des quatre services (`./scripts/launch_services.sh`).
 
-Le parcours cible est un **rituel mensuel en 3 actes** : réception des commandes BDC, scan de
-production vidéo, puis équilibrage et certification du rapprochement. Un sélecteur de mois
-global (`?month=YYYY-MM`) synchronise les trois services.
+Le parcours cible est un **rituel mensuel en 4 actes** : réception des commandes BDC, scan de
+production vidéo, équilibrage et certification du rapprochement, puis préparation et envoi de
+la facture. Un sélecteur de mois global (`?month=YYYY-MM`) synchronise les quatre services.
 
 Les dossiers d'archives sont attendus au format `<id> Camille YYYY-MM-DD_HH-MM-SS/`
 (ex. `273 Camille 2025-10-28_10-24-42/`), avec `metadata.json` (`video_path`, …) et
@@ -54,7 +55,7 @@ le chargent automatiquement (`python-dotenv`).
 ```
 
 Dashboard : `http://127.0.0.1:5500/` — boutons pour Reporting (`5010`), BDC (`5000`),
-Rapprochement (`5030`).
+Rapprochement (`5030`), Facturation (`5040`).
 
 Overrides optionnels : `SERVICE_DASHBOARD_HOST`, `SERVICE_DASHBOARD_PORT`,
 `SERVICE_DASHBOARD_BROWSER=0/1`.
@@ -65,6 +66,7 @@ Overrides optionnels : `SERVICE_DASHBOARD_HOST`, `SERVICE_DASHBOARD_PORT`,
 make serve-reporting      # http://127.0.0.1:5010/
 make serve-bdc            # http://127.0.0.1:5000/
 make serve-reconciliation # http://127.0.0.1:5030/
+make serve-billing        # http://127.0.0.1:5040/
 ```
 
 Tous bindent `127.0.0.1` par défaut ; debug désactivé sauf `APP_DEBUG=1` / `FLASK_DEBUG=1`.
@@ -90,14 +92,15 @@ Protections en place :
 - Assets `/static` : `Cache-Control` + query `?v=` (mtime) via `static_url()` dans les templates.
 
 Variables utiles : `APP_HOST`, `APP_DEBUG`, `TRUST_LOOPBACK_AUTH`, `BDC_URL`, `REPORTING_URL`,
-`RECONCILIATION_URL`, `BDC_MAX_PDF_FILES`, `BDC_MAX_PDF_BYTES`, `REPORTING_MAX_WORKERS`.
+`RECONCILIATION_URL`, `BILLING_URL`, `BDC_MAX_PDF_FILES`, `BDC_MAX_PDF_BYTES`,
+`REPORTING_MAX_WORKERS`.
 
 Recharger les polices locales : `./scripts/fetch_fonts.sh`.
 
 ## Workflow métier — le rituel mensuel
 
 1. **Choisir le mois cible** dans le sélecteur global de la barre supérieure. Le paramètre
-   `?month=YYYY-MM` est propagé aux trois services et conservé dans les URLs.
+   `?month=YYYY-MM` est propagé aux quatre services et conservé dans les URLs.
 2. **Acte 1 — Réception commandes (BDC)** : déposer les PDF dans `apps/bdc_converter/pdfs/`,
    lancer la conversion. Chaque PDF produit une carte avec son numéro BDC, ses lots détectés
    et un badge « Plage détectée », « Chevauchement » ou « Structure modifiée » (dérive de
@@ -112,6 +115,14 @@ Recharger les polices locales : `./scripts/fetch_fonts.sh`.
 4. **Acte 3 — Équilibrage & victoire (Réconciliation)** : ouvrir `/?month=YYYY-MM` charge
    automatiquement `rapport-YYYY-MM.json` et `convert_bdc_MM-YYYY.json`. Le score, les onglets
    et l’inspecteur guident la résolution ; les exports HTML, PDF et JSON sont disponibles.
+   Le bouton **« Transmettre à la facturation »** fige l’analyse effective (ajustements inclus)
+   dans `data/reconciliation/YYYY-MM.json`.
+5. **Acte 4 — Facturation & envoi** : ouvrir `http://127.0.0.1:5040/?month=YYYY-MM`. Le service
+   calcule un brouillon à partir des BDC et du snapshot de réconciliation, propose une ligne par
+   BDC et une provision « Lots réalisés sans BDC », puis permet de geler des versions, de suivre
+   les statuts et d’enregistrer le numéro Indy. Il **ne produit pas la facture légale** : le
+   PDF officiel reste émis dans Indy. Les exports HTML/PDF sont des récapitulatifs de
+   préparation ; le CSV sert à la saisie ou à l’import.
 
 ### Lire le rapprochement
 
@@ -141,6 +152,30 @@ Recharger les polices locales : `./scripts/fetch_fonts.sh`.
 La sélection manuelle des deux JSON reste disponible dans le panneau « Sélection manuelle »
 pour les cas hors mois standard.
 
+### Lire la facturation
+
+- **Base de calcul** : par défaut, une ligne BDC vaut `min(réalisé, commandé) × taux` ; le
+  surplus de production part dans la ligne « Lots réalisés sans BDC ». Le mode « Au commandé »
+  facture le total du BDC même si la production est inférieure.
+- **Provision** : la ligne « Lots réalisés sans BDC » agrège les surplus sur BDC couverts et
+  les lots sans BDC, avec le détail par catégorie. Elle est éditable et disparaît après
+  régularisation client.
+- **Versions** : un brouillon est modifiable ; une version gelée est immuable. Une correction
+  après envoi crée une nouvelle version et le diff s’affiche automatiquement.
+- **Statuts** : `brouillon` → `envoyé_pour_vérification` → `validé_client` → `émis` →
+  `remplacé`. Le passage en `émis` exige la certification de réconciliation ou un override
+  justifié, ainsi que le numéro et la date Indy.
+- **Sources** : le snapshot de réconciliation est prioritaire ; sans lui, le calcul est refait
+  avec `compare_reports()` et un avertissement « snapshot absent » apparaît. Chaque version
+  archive ses sources et leurs empreintes SHA-256.
+- **Ce que le service ne fait pas** : il ne génère pas la facture légale, ne tient pas de
+  grand livre et ne gère pas les avoirs. Le PDF officiel reste produit par Indy ; le service
+  prépare, contrôle, versionne et archive le PDF Indy une fois émis.
+
+Guide pas à pas, scénarios de régularisation et check-list :
+[`apps/billing/README.md`](apps/billing/README.md). Il est aussi accessible via le bouton
+**« Guide »** de la page facturation.
+
 Détails convertisseur : [`apps/bdc_converter/README.md`](apps/bdc_converter/README.md).
 
 ## Générer un rapport HTML (CLI)
@@ -167,16 +202,22 @@ apps/
   bdc_converter/     # PDF → JSON + batch + cartes de contrôle
   reporting/         # archives / batches → rapports + tiroir des fichiers atypiques
   reconciliation/    # score, inspecteur d’écarts, exports certifiés
+  billing/           # base de facturation versionnée, contrôles et récapitulatifs
   static/            # CSS/JS partagés (global.js, bdc_convert.js, reconciliation.js)
   templates/         # base.html + _ritual_stepper.html
 libs/
   schemas/           # contrat dataclass partagé
   pipeline/          # BDC → MonthlyBatch + video_names.py (jingles/doublons)
   reconciliation/    # plages contextualisées, chevauchements, score, diagnostics
+  billing/           # calcul de la base, grille de taux, versions, diff
   web/               # auth, CSRF, headers, I/O, chemins sûrs
 scripts/
   launch_services.sh
   service_dashboard.py
+data/
+  batches/           # batches BDC mensuels
+  reconciliation/    # snapshots de certification transmis à la facturation
+  billing/           # projets, versions gelées, sources archivées
 audits/              # audits (ex. audit-backend-…)
 .env.example
 Makefile
@@ -210,4 +251,7 @@ compatibilité avec les rapports historiques.
   inconnues ; les diagnostics de seuil temporel s’appliquent aux rapports régénérés.
 - Les actions de l’inspecteur (exclure un fichier, justifier un doublon) sont conservées en mémoire
   pour la session uniquement ; elles ne modifient jamais les JSON sources.
+- La facturation ne produit pas de facture légale et ne gère pas les avoirs : le PDF officiel
+  reste émis dans Indy. Elle prépare, versionne et archive la base ; une correction après
+  émission suppose un avoir émis hors de l’outil.
 - Exposition hors machine locale : conserver CSRF + jeton ; ne pas désactiver `TRUST_LOOPBACK_AUTH` à la légère si le port n’est plus uniquement loopback.

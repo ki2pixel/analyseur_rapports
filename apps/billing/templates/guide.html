@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Guide de facturation{% endblock %}
+{% set active_page = 'billing' %}
+
+{% block content %}
+<main class="container animate-fade-in">
+  <section class="panel">
+    <p class="eyebrow">Acte 4 · Documentation</p>
+    <h1>Guide de facturation</h1>
+    <p class="muted lead">
+      Scénarios de régularisation, statuts et check-list. Cette page affiche le contenu
+      de <code>apps/billing/README.md</code>.
+    </p>
+    <pre class="guide-pre">{{ content }}</pre>
+  </section>
+</main>
+{% endblock %}

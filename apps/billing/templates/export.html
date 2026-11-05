@@ -1,0 +1,214 @@
+{% set totals = version.totals %}
+{% set summary = version.reconciliation_summary|default({}) %}
+{% set certification = version.certification|default({}) %}
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Facturation {{ month_label }} — version {{ version.version }}</title>
+    <style>{% include "export_styles.css" %}</style>
+  </head>
+  <body class="{% if pdf_mode %}pdf{% endif %}">
+    <header class="doc-head">
+      <div>
+        <p class="eyebrow">Récapitulatif de facturation</p>
+        <h1>{{ month_label|capitalize }}</h1>
+        <p class="muted">Version {{ version.version }} · {{ version.status|status_label }}</p>
+      </div>
+      <div class="doc-head__meta">
+        <p><strong>Document de préparation</strong></p>
+        <p>Ne constitue pas une facture.</p>
+        <p>Généré le {{ generated_at|fr_datetime }}</p>
+      </div>
+    </header>
+
+    <section class="doc-grid">
+      <article class="doc-card">
+        <h2>Facture Indy</h2>
+        {% if version.invoice.number %}
+          <p><strong>{{ version.invoice.number }}</strong></p>
+          <p>Émise le {{ version.invoice.issued_on|fr_date }}</p>
+          {% if version.invoice.note %}<p class="muted">{{ version.invoice.note }}</p>{% endif %}
+        {% else %}
+          <p class="muted">Numéro et date à renseigner après émission dans Indy.</p>
+        {% endif %}
+      </article>
+      <article class="doc-card">
+        <h2>Rapprochement</h2>
+        <p>
+          {% if certification.is_certified|default(false) %}
+            <span class="ok">Mois certifié</span>
+          {% else %}
+            <span class="warn">Non certifié</span>
+          {% endif %}
+          · score {{ summary.score|default(0)|score }} %
+        </p>
+        <p class="muted">
+          {{ summary.compliant_orders|default(0) }} / {{ summary.total_orders|default(0) }} BDC conformes
+          · {{ summary.missing_invoices|default(0) }} lot(s) sans BDC
+          · {{ summary.unexpected_ids|default(0) }} lot(s) sans production
+        </p>
+      </article>
+    </section>
+
+    <section class="doc-card doc-card--flow">
+      <h2>Lignes</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Libellé</th>
+            <th scope="col" class="num">Qté</th>
+            <th scope="col" class="num">PU HT</th>
+            <th scope="col" class="num">TVA</th>
+            <th scope="col" class="num">Total HT</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for line in version.lines %}
+            {% if line.included %}
+              <tr>
+                <td>
+                  <strong>{{ line.label }}</strong>
+                  {% if line.edited %}<div class="line-note">Ligne ajustée manuellement.</div>{% endif %}
+                  {% if line.note %}<div class="line-note">{{ line.note }}</div>{% endif %}
+                </td>
+                <td class="num">{{ line.quantity|qty }}</td>
+                <td class="num">{{ line.unit_price_cents|eur }}</td>
+                <td class="num">{{ line.vat_rate|rate }}</td>
+                <td class="num">{{ line.total_cents|eur }}</td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+        <tfoot>
+          <tr>
+            <th scope="row" colspan="4">Total HT</th>
+            <td class="num"><strong>{{ totals.ht_cents|eur }}</strong></td>
+          </tr>
+          <tr>
+            <th scope="row" colspan="4">TVA</th>
+            <td class="num">{{ totals.vat_cents|eur }}</td>
+          </tr>
+          <tr>
+            <th scope="row" colspan="4">Total TTC</th>
+            <td class="num"><strong>{{ totals.ttc_cents|eur }}</strong></td>
+          </tr>
+        </tfoot>
+      </table>
+    </section>
+
+    {% set uncovered = version.lines|selectattr('kind', 'equalto', 'uncovered')|list %}
+    {% if uncovered %}
+      <section class="doc-card doc-card--flow">
+        <h2>Détail de la production non couverte</h2>
+        {% for line in uncovered %}
+          {% if line.included %}
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Origine</th>
+                  <th scope="col">Catégorie</th>
+                  <th scope="col" class="num">Quantité</th>
+                  <th scope="col" class="num">Taux</th>
+                  <th scope="col" class="num">Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for entry in line.detail.entries|default([]) %}
+                  <tr>
+                    <td>{% if entry.kind == 'missing' %}Lot {{ entry.lot }}{% else %}{{ entry.bdc }}{% endif %}</td>
+                    <td>{{ category_labels[entry.category]|default(entry.category) }}</td>
+                    <td class="num">{{ entry.count }}</td>
+                    <td class="num">{{ entry.rate }} €</td>
+                    <td class="num">{{ entry.amount_cents|eur }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% endif %}
+        {% endfor %}
+      </section>
+    {% endif %}
+
+    {% if version.already_billed %}
+      <section class="doc-card">
+        <h2>Lots déjà facturés sur un mois voisin</h2>
+        <ul>
+          {% for item in version.already_billed %}
+            <li>Lot {{ item.lot }} — {{ item.adjacent_month.month|default('mois voisin') }}{% if item.adjacent_month.bdc_numbers %} · {{ item.adjacent_month.bdc_numbers|join(', ') }}{% endif %}</li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    {% if diff and diff.has_changes %}
+      <section class="doc-card doc-card--flow">
+        <h2>Évolution depuis la version {{ version.version - 1 }}</h2>
+        <p>
+          Total HT : {{ diff.totals.before|eur }} → {{ diff.totals.after|eur }}
+          ({% if diff.totals.delta > 0 %}+{% endif %}{{ diff.totals.delta|eur }}).
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Ligne</th>
+              <th scope="col">Changement</th>
+              <th scope="col" class="num">Avant</th>
+              <th scope="col" class="num">Après</th>
+              <th scope="col" class="num">Δ</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for change in diff.lines %}
+              <tr>
+                <td>{{ change.label }}</td>
+                <td>
+                  {% if change.change == 'added' %}Ajoutée
+                  {% elif change.change == 'removed' %}Retirée
+                  {% else %}Modifiée{% endif %}
+                </td>
+                <td class="num">{{ change.before.total_cents|eur if change.before else '—' }}</td>
+                <td class="num">{{ change.after.total_cents|eur if change.after else '—' }}</td>
+                <td class="num">{% if change.delta_cents > 0 %}+{% endif %}{{ change.delta_cents|eur }}</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+    {% endif %}
+
+    <section class="doc-card">
+      <h2>Sources de cette version</h2>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Source</th>
+            <th scope="col">Fichier</th>
+            <th scope="col">SHA-256</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for key, info in version.sources.items() %}
+            {% set source_labels = {
+              'reporting': 'Rapport de production',
+              'bdc': 'Rapport BDC',
+              'reconciliation': 'Snapshot de réconciliation'
+            } %}
+            <tr>
+              <td>{{ source_labels.get(key, key) }}</td>
+              <td>{{ info.name|default('—') }}</td>
+              <td class="mono">{{ (info.sha256|default(''))[:24] }}{% if (info.sha256|default(''))|length > 24 %}…{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      <p class="muted">Les versions gelées conservent leurs sources et ne sont jamais recalculées.</p>
+    </section>
+
+    <footer class="doc-foot">
+      <span>Facturation {{ month_label }} · version {{ version.version }} · {{ version.status|status_label }}</span>
+      <span>Document de préparation — ne constitue pas une facture</span>
+    </footer>
+  </body>
+</html>

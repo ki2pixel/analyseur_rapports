@@ -75,6 +75,7 @@ kill_port 5500  # Dashboard port
 kill_port 5010  # Reporting port
 kill_port 5000  # BDC converter port
 kill_port 5030  # Reconciliation port
+kill_port 5040  # Billing port
 
 if ! command -v python3 >/dev/null 2>&1; then
   echo "python3 est requis pour lancer le tableau de bord." >&2

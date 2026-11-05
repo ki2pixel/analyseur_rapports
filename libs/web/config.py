@@ -49,6 +49,7 @@ class ServiceUrls:
     bdc: str
     reporting: str
     reconciliation: str
+    billing: str
 
 
 def _truthy(value: str | None) -> bool:
@@ -126,6 +127,7 @@ def get_service_urls() -> ServiceUrls:
         reconciliation=_normalize_service_url(
             os.environ.get("RECONCILIATION_URL"), "http://127.0.0.1:5030/"
         ),
+        billing=_normalize_service_url(os.environ.get("BILLING_URL"), "http://127.0.0.1:5040/"),
     )
 
 

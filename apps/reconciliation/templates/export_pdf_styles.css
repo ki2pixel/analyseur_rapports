@@ -1,14 +1,26 @@
 /* ==========================================================================
-   Export PDF réconciliation — ajustements de pagination et de densité.
+   Export PDF réconciliation — page unique et ajustements de densité.
    Ce partial est inliné uniquement pour l'export PDF, après export_styles.css.
-   WeasyPrint reste beaucoup plus rapide avec ces blocs en flux simple.
    ========================================================================== */
+
+{% set page_height_px = pdf_page_height_px|default(60000, true) %}
+@page {
+  size: 210mm {{ "%.2f"|format(page_height_px) }}px;
+  margin: 12mm 12mm 14mm;
+}
 
 @media print {
   .file-grid,
-  .lot-files-grid,
   .production-lots {
     display: block !important;
+  }
+
+  /* L'annexe fichiers garde sa grille 2 colonnes : la page unique reste compacte. */
+  .lot-files-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    align-items: start;
   }
 
   .file-chip,

@@ -1,0 +1,689 @@
+{% extends "base.html" %}
+{% block title %}Facturation {{ month_label }}{% endblock %}
+{% set active_page = 'billing' %}
+
+{% macro source_card(key, label, info, helper) %}
+  {% set missing = info.missing|default(false) or not (info.sha256|default('')) %}
+  <article class="billing-source {% if missing %}billing-source--missing{% endif %}">
+    <div class="billing-source__head">
+      <span class="eyebrow">{{ label }}</span>
+      {% if missing %}
+        <span class="badge badge--danger badge--xs">Manquant</span>
+      {% else %}
+        <span class="badge badge--ok badge--xs">Présent</span>
+      {% endif %}
+    </div>
+    <strong class="billing-source__name">{{ info.name|default('—') }}</strong>
+    <p class="muted muted--tight">{{ helper }}</p>
+    {% if not missing %}
+      <p class="billing-source__hash" title="Empreinte SHA-256">{{ info.sha256[:16] }}…</p>
+      <p class="muted muted--tight">Modifié le {{ info.modified_at|fr_datetime }}</p>
+    {% endif %}
+  </article>
+{% endmacro %}
+
+{% macro issue_badge(severity) %}
+  {% if severity == 'error' %}
+    <span class="badge badge--danger badge--xs">Bloquant</span>
+  {% elif severity == 'warning' %}
+    <span class="badge badge--warn badge--xs">Avertissement</span>
+  {% else %}
+    <span class="badge badge--neutral badge--xs">Info</span>
+  {% endif %}
+{% endmacro %}
+
+{% block content %}
+<main class="container animate-fade-in">
+  <section class="panel panel--hero">
+    <p class="eyebrow">Acte 4 · Facturation &amp; envoi</p>
+    <h1>Préparer la base de facturation</h1>
+    <p class="muted lead">
+      Le service prépare la facture à partir des BDC et du rapprochement certifié.
+      Il ne remplace pas Indy : il versionne la base, contrôle les écarts et produit
+      un récapitulatif à envoyer au client.
+    </p>
+
+    <form method="get" action="/" class="form-grid form-grid--wide mt-md">
+      <div class="field-card">
+        <label for="billing-month">Mois de production</label>
+        <select id="billing-month" name="month">
+          {% for item in months %}
+            <option value="{{ item.value }}" {% if item.value == current_month %}selected{% endif %}>
+              {{ item.label }}{% if not item.reporting %} · rapport manquant{% endif %}{% if not item.bdc %} · BDC manquant{% endif %}
+            </option>
+          {% else %}
+            <option value="{{ current_month }}">{{ month_label }}</option>
+          {% endfor %}
+        </select>
+        <p class="muted muted--tight">La facture peut être émise le mois suivant : la clé reste le mois de production.</p>
+      </div>
+      <div class="form-actions">
+        <button class="primary" type="submit">Charger le mois</button>
+      </div>
+    </form>
+
+    <div class="flex-row mt-md">
+      <span class="badge badge--neutral">📅 {{ month_label }}</span>
+      {% if version %}
+        <span class="badge {{ version.status|status_badge }}">{{ version.status|status_label }}</span>
+        <span class="badge badge--neutral">Version {{ version.version }}</span>
+      {% else %}
+        <span class="badge badge--neutral">Aucun brouillon</span>
+      {% endif %}
+      <a class="btn btn-secondary btn--compact ml-auto" href="{{ service_urls.reconciliation }}{% if current_month %}?month={{ current_month }}{% endif %}">Ouvrir la réconciliation</a>
+      <a class="btn btn-secondary btn--compact" href="{{ url_for('guide') }}{% if current_month %}?month={{ current_month }}{% endif %}">Guide</a>
+    </div>
+  </section>
+
+  {% if error %}
+    <div class="alert alert--error">{{ error }}</div>
+  {% endif %}
+  {% if notice %}
+    <div class="alert alert--info">{{ notice }}</div>
+  {% endif %}
+
+  {% set source_map = version.sources if version and version.sources else sources %}
+  <section class="billing-grid mt-lg">
+    <article class="panel">
+      <div class="flex-between">
+        <div>
+          <p class="eyebrow">Sources</p>
+          <h2 class="mb-0">Entrées du mois</h2>
+        </div>
+        <span class="badge badge--neutral">{{ source_map|length }} source(s)</span>
+      </div>
+      <div class="billing-source-grid mt-md">
+        {{ source_card('reporting', 'Rapport de production', source_map.reporting|default({}), 'rapport-YYYY-MM.json — acte 2') }}
+        {{ source_card('bdc', 'Rapport BDC', source_map.bdc|default({}), 'convert_bdc_MM-YYYY.json — acte 1') }}
+        {{ source_card('reconciliation', 'Snapshot de réconciliation', source_map.reconciliation|default({}), 'Transmis depuis l’acte 3') }}
+      </div>
+      {% if staleness %}
+        <div class="alert alert--error mt-md">
+          <div>
+            <strong>Sources modifiées depuis le gel de cette version.</strong>
+            <ul class="list-plain mt-sm">
+              {% for change in staleness %}
+                <li>{{ change.name }} — empreinte changée</li>
+              {% endfor %}
+            </ul>
+            <p class="muted muted--tight">Une version gelée reste immuable : créez une nouvelle version pour intégrer les changements.</p>
+          </div>
+        </div>
+      {% endif %}
+      {% if not snapshot_exists %}
+        <p class="muted mt-md">
+          Aucun snapshot de réconciliation : le calcul sera refait sans les exclusions et justifications de session.
+          <a href="{{ service_urls.reconciliation }}{% if current_month %}?month={{ current_month }}{% endif %}">Transmettre l’analyse depuis l’acte 3</a>.
+        </p>
+      {% endif %}
+    </article>
+
+    <article class="panel">
+      <p class="eyebrow">Certification</p>
+      <h2 class="mb-0">Rapprochement du mois</h2>
+      {% set summary = version.reconciliation_summary if version else {} %}
+      {% set certification = version.certification if version else {} %}
+      {% set is_certified = certification.is_certified|default(false) %}
+      {% if summary %}
+        <div class="billing-cert">
+          <div>
+            <span class="billing-cert__score">{{ summary.score|default(0)|score }}%</span>
+            <p class="muted muted--tight">
+              {{ summary.compliant_orders|default(0) }} / {{ summary.total_orders|default(0) }} BDC conformes
+            </p>
+          </div>
+          <div class="billing-cert__badges">
+            {% if is_certified %}
+              <span class="badge badge--ok">🏆 Mois certifié</span>
+            {% elif summary.score == 100 %}
+              <span class="badge badge--warn">Score 100 % — signalement en cours</span>
+            {% else %}
+              <span class="badge badge--warn">⚠ {{ summary.issues_count|default(0) }} signalement(s)</span>
+            {% endif %}
+            {% if summary.missing_invoices %}
+              <span class="badge badge--warn">{{ summary.missing_invoices }} lot(s) sans BDC</span>
+            {% endif %}
+            {% if summary.unexpected_ids %}
+              <span class="badge badge--danger">{{ summary.unexpected_ids }} lot(s) sans production</span>
+            {% endif %}
+            {% if summary.overlaps %}
+              <span class="badge badge--warn">{{ summary.overlaps }} chevauchement(s)</span>
+            {% endif %}
+          </div>
+        </div>
+        <p class="muted muted--tight mt-md">
+          {% set snapshot_at = version.snapshot_generated_at|default('') %}
+          Dernier snapshot : {{ snapshot_at|fr_datetime if snapshot_at else 'analyse recalculée' }}.
+          {% if not is_certified %}
+            Une version peut être préparée et envoyée pour vérification, mais le passage en « Émise » exigera un override justifié.
+          {% endif %}
+        </p>
+      {% else %}
+        <p class="muted mt-md">Aucune analyse de réconciliation chargée pour ce mois.</p>
+      {% endif %}
+    </article>
+  </section>
+
+  {% if not version %}
+    <section class="panel mt-lg">
+      <p class="eyebrow">Démarrage</p>
+      <h2>Calculer le premier brouillon</h2>
+      {% set reporting_ready = reporting_exists or snapshot_exists %}
+      {% if not reporting_ready or not bdc_exists %}
+        <div class="alert alert--error">
+          <div>
+            <strong>Sources incomplètes.</strong>
+            <p class="muted muted--tight">
+              Il faut le rapport BDC du mois et, au choix, le rapport de production ou
+              le snapshot de réconciliation.
+              {% if not bdc_exists %} Le rapport BDC manque.{% endif %}
+              {% if not reporting_ready %} Ni rapport de production ni snapshot de réconciliation.{% endif %}
+            </p>
+          </div>
+        </div>
+      {% endif %}
+      <form method="post" action="{{ url_for('create_draft') }}" class="form-grid form-grid--wide mt-md">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <input type="hidden" name="month" value="{{ current_month }}"/>
+        <div class="field-card">
+          <label for="billing_basis">Base de calcul</label>
+          <select id="billing_basis" name="billing_basis">
+            {% for key, label in billing_bases.items() %}
+              <option value="{{ key }}" {% if key == 'actual_capped' %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+          <p class="muted muted--tight">Recommandé : facturer le réalisé, sans dépasser le commandé.</p>
+        </div>
+        <div class="field-card">
+          <label for="vat_rate">TVA (%)</label>
+          <input type="text" id="vat_rate" name="vat_rate" value="0.00" inputmode="decimal"/>
+          <p class="muted muted--tight">TVA non applicable, art. 293 B du CGI : laisser 0,00.</p>
+        </div>
+        <div class="form-actions">
+          <button class="primary" type="submit" {% if not reporting_ready or not bdc_exists %}disabled{% endif %}>
+            Calculer le brouillon
+          </button>
+        </div>
+      </form>
+    </section>
+  {% else %}
+    {% set totals = version.totals %}
+    <section class="billing-summary mt-lg">
+      <article class="stat">
+        <span class="stat__label">Total HT</span>
+        <strong class="stat__value">{{ totals.ht_cents|eur }}</strong>
+      </article>
+      <article class="stat">
+        <span class="stat__label">TVA</span>
+        <strong class="stat__value stat__value--sm">{{ totals.vat_cents|eur }}</strong>
+      </article>
+      <article class="stat">
+        <span class="stat__label">Total TTC</span>
+        <strong class="stat__value stat__value--sm">{{ totals.ttc_cents|eur }}</strong>
+      </article>
+      <article class="stat">
+        <span class="stat__label">Lignes</span>
+        <strong class="stat__value stat__value--sm">{{ version.lines|length }}</strong>
+      </article>
+      <article class="stat">
+        <span class="stat__label">Statut</span>
+        <strong class="stat__value stat__value--sm">{{ version.status|status_label }}</strong>
+      </article>
+    </section>
+
+    {% if version.issues %}
+      <section class="panel mt-lg">
+        <div class="flex-between">
+          <div>
+            <p class="eyebrow">Contrôles</p>
+            <h2 class="mb-0">Points d’attention</h2>
+          </div>
+          <span class="badge badge--neutral">{{ version.issues|length }}</span>
+        </div>
+        <div class="billing-issues mt-md">
+          {% for issue in version.issues %}
+            <div class="billing-issue billing-issue--{{ issue.severity|default('info') }}">
+              {{ issue_badge(issue.severity|default('info')) }}
+              <span>{{ issue.message }}</span>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+
+    <section class="panel mt-lg">
+      <div class="flex-between">
+        <div>
+          <p class="eyebrow">Base de facturation</p>
+          <h2 class="mb-0">Lignes de la version {{ version.version }}</h2>
+        </div>
+        <div class="flex-row">
+          <a class="btn btn-secondary" href="{{ url_for('export_html', month=current_month, version=version.version) }}">HTML</a>
+          <a class="btn btn-secondary" href="{{ url_for('export_pdf', month=current_month, version=version.version) }}">PDF</a>
+          <a class="btn btn-secondary" href="{{ url_for('export_csv', month=current_month, version=version.version) }}">CSV</a>
+        </div>
+      </div>
+
+      <div class="table-wrap mt-md">
+        <table class="table billing-table">
+          <caption class="sr-only">Lignes de facturation du mois {{ month_label }}</caption>
+          <thead>
+            <tr>
+              <th scope="col">Libellé</th>
+              <th scope="col">Détail</th>
+              <th scope="col" class="num">Qté</th>
+              <th scope="col" class="num">PU HT</th>
+              <th scope="col" class="num">Total HT</th>
+              <th scope="col">État</th>
+              {% if can_edit %}<th scope="col">Action</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for line in version.lines %}
+              <tr class="{% if not line.included %}billing-line--excluded{% endif %}">
+                <td>
+                  <strong>{{ line.label }}</strong>
+                  {% if line.edited %}<span class="badge badge--warn badge--xs">Ajustée</span>{% endif %}
+                  {% if line.bdc_number and line.bdc_number not in line.label %}
+                    <span class="pill">{{ line.bdc_number }}</span>
+                  {% endif %}
+                  {% if line.note %}<p class="muted muted--tight">{{ line.note }}</p>{% endif %}
+                </td>
+                <td>
+                  {% if line.kind == 'uncovered' %}
+                    {% for entry in line.detail.entries|default([]) %}
+                      <span class="badge badge--warn badge--xs">
+                        {% if entry.kind == 'missing' %}Lot {{ entry.lot }}{% else %}{{ entry.bdc }}{% endif %}
+                        · {{ entry.count }} {{ category_labels[entry.category]|default(entry.category) }}
+                        × {{ entry.rate }} €
+                      </span>
+                    {% endfor %}
+                    {% for item in line.detail.already_billed|default([]) %}
+                      <span class="badge badge--neutral badge--xs">
+                        Lot {{ item.lot }} · déjà facturé en {{ item.adjacent_month.month|default('mois voisin') }}
+                      </span>
+                    {% endfor %}
+                  {% else %}
+                    {% set categories = line.detail.categories|default({}) %}
+                    {% for cat in category_keys %}
+                      {% set item = categories[cat]|default({}) %}
+                      {% if item.ordered or item.actual %}
+                        <span class="badge badge--neutral badge--xs" title="Facturé / commandé / réalisé">
+                          {{ category_labels[cat] }} : {{ item.billable|default(0) }} / {{ item.ordered|default(0) }} / {{ item.actual|default(0) }}
+                          {% if item.surplus %}<span class="text-warn">· +{{ item.surplus }}</span>{% endif %}
+                        </span>
+                      {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </td>
+                <td class="num">{{ line.quantity|qty }}</td>
+                <td class="num">{{ line.unit_price_cents|eur }}</td>
+                <td class="num"><strong>{{ line.total_cents|eur }}</strong></td>
+                <td>
+                  {% if line.included %}
+                    <span class="badge badge--ok badge--xs">Incluse</span>
+                  {% else %}
+                    <span class="badge badge--danger badge--xs">Exclue</span>
+                  {% endif %}
+                </td>
+                {% if can_edit %}
+                  <td>
+                    <details class="billing-line-edit">
+                      <summary>Modifier</summary>
+                      <form method="post" action="{{ url_for('update_line', line_id=line.line_id) }}" class="billing-line-form">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="month" value="{{ current_month }}"/>
+                        <input type="hidden" name="version" value="{{ version.version }}"/>
+                        <label>Libellé<input type="text" name="label" value="{{ line.label }}" required/></label>
+                        <label>Quantité<input type="text" name="quantity" value="{{ line.quantity }}" inputmode="decimal"/></label>
+                        <label>PU HT (€)<input type="text" name="unit_price" value="{{ line.unit_price_cents|amount }}" inputmode="decimal"/></label>
+                        <label>Date de livraison<input type="text" name="delivery_date" value="{{ line.delivery_date|default('') }}" placeholder="JJ/MM/AAAA"/></label>
+                        <label>Note<input type="text" name="note" value="{{ line.note }}" placeholder="Commentaire interne"/></label>
+                        <label class="billing-check"><input type="checkbox" name="included" {% if line.included %}checked{% endif %}/> Inclure dans le total</label>
+                        <button class="primary" type="submit">Enregistrer</button>
+                      </form>
+                      <form method="post" action="{{ url_for('delete_line', line_id=line.line_id) }}" class="mt-sm">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                        <input type="hidden" name="month" value="{{ current_month }}"/>
+                        <input type="hidden" name="version" value="{{ version.version }}"/>
+                        <button class="btn btn-secondary" type="submit">
+                          {% if line.kind == 'manual' or line.source == 'manual' %}Supprimer{% else %}Exclure{% endif %}
+                        </button>
+                      </form>
+                    </details>
+                  </td>
+                {% endif %}
+              </tr>
+            {% endfor %}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row" colspan="4">Total HT</th>
+              <td class="num"><strong>{{ totals.ht_cents|eur }}</strong></td>
+              <td colspan="{% if can_edit %}2{% else %}1{% endif %}"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      {% if can_edit %}
+        <details class="billing-add-line mt-md">
+          <summary>Ajouter une ligne manuelle</summary>
+          <form method="post" action="{{ url_for('create_line') }}" class="form-grid form-grid--wide mt-md">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="month" value="{{ current_month }}"/>
+            <input type="hidden" name="version" value="{{ version.version }}"/>
+            <div class="field-card">
+              <label for="manual-label">Libellé</label>
+              <input id="manual-label" type="text" name="label" required placeholder="Ex. frais de mise en page"/>
+            </div>
+            <div class="field-card">
+              <label for="manual-quantity">Quantité</label>
+              <input id="manual-quantity" type="text" name="quantity" value="1" inputmode="decimal"/>
+            </div>
+            <div class="field-card">
+              <label for="manual-price">PU HT (€)</label>
+              <input id="manual-price" type="text" name="unit_price" value="0,00" inputmode="decimal"/>
+            </div>
+            <div class="field-card">
+              <label for="manual-note">Note</label>
+              <input id="manual-note" type="text" name="note" placeholder="Optionnel"/>
+            </div>
+            <div class="form-actions">
+              <button class="primary" type="submit">Ajouter</button>
+            </div>
+          </form>
+        </details>
+      {% endif %}
+    </section>
+
+    <section class="billing-workflow mt-lg">
+      <article class="panel">
+        <p class="eyebrow">Workflow</p>
+        <h2 class="mb-0">Version {{ version.version }}</h2>
+        <p class="muted">
+          {{ version.status|status_label }}
+          {% if version.frozen_at %}· gelée le {{ version.frozen_at|fr_datetime }}{% endif %}
+          {% if version.reason %}· {{ version.reason }}{% endif %}
+        </p>
+
+        {% if can_edit %}
+          <form method="post" action="{{ url_for('freeze_version') }}" class="billing-form mt-md">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="month" value="{{ current_month }}"/>
+            <input type="hidden" name="version" value="{{ version.version }}"/>
+            <div class="field-card">
+              <label for="freeze-target">Geler avec le statut</label>
+              <select id="freeze-target" name="target_status">
+                <option value="envoyé_pour_vérification">Envoyée pour vérification</option>
+                <option value="validé_client">Validée client</option>
+              </select>
+            </div>
+            <div class="field-card">
+              <label for="freeze-reason">Motif</label>
+              <input id="freeze-reason" type="text" name="reason" placeholder="Ex. envoi du projet au client"/>
+            </div>
+            <div class="field-card">
+              <label for="freeze-override">Override certification (optionnel)</label>
+              <input id="freeze-override" type="text" name="override_reason" value="{{ version.override_reason|default('') }}" placeholder="Justification si la réconciliation n’est pas certifiée"/>
+            </div>
+            {% set warnings = version.issues|selectattr('severity', 'equalto', 'warning')|list %}
+            {% if warnings %}
+              <fieldset class="billing-acks">
+                <legend>Acquitter les avertissements</legend>
+                {% for issue in warnings %}
+                  <label class="billing-check">
+                    <input type="checkbox" name="acknowledge" value="{{ issue.code }}"
+                      {% if issue.code in version.acknowledged_warnings %}checked{% endif %}/>
+                    {{ issue.message }}
+                  </label>
+                {% endfor %}
+              </fieldset>
+            {% endif %}
+            <div class="form-actions">
+              <button class="primary" type="submit">Geler la version</button>
+            </div>
+          </form>
+
+          <form method="post" action="{{ url_for('recompute_draft') }}" class="billing-form mt-md">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="month" value="{{ current_month }}"/>
+            <div class="field-card">
+              <label for="recompute-basis">Recalculer avec</label>
+              <select id="recompute-basis" name="billing_basis">
+                {% for key, label in billing_bases.items() %}
+                  <option value="{{ key }}" {% if key == version.settings.billing_basis %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field-card">
+              <label for="recompute-vat">TVA (%)</label>
+              <input id="recompute-vat" type="text" name="vat_rate" value="{{ version.settings.vat_rate }}" inputmode="decimal"/>
+            </div>
+            <fieldset class="billing-rates">
+              <legend>Taux unitaires (€ HT)</legend>
+              <p class="muted muted--tight">Laisser vide pour utiliser le taux déduit des BDC.</p>
+              <div class="billing-rates__grid">
+                {% for cat in category_keys %}
+                  <label for="rate-{{ cat }}">
+                    {{ category_labels[cat] }}
+                    <input
+                      id="rate-{{ cat }}"
+                      type="text"
+                      name="rate_{{ cat }}"
+                      value="{{ (version.settings.rate_overrides|default({})).get(cat, '') }}"
+                      placeholder="{{ (version.rate_grid|default({})).get(cat, '—') }}"
+                      inputmode="decimal"
+                    />
+                  </label>
+                {% endfor %}
+              </div>
+            </fieldset>
+            <div class="form-actions">
+              <button class="btn btn-secondary" type="submit">Recalculer depuis les sources</button>
+            </div>
+            <p class="muted muted--tight">
+              Les lignes manuelles sont conservées ; les lignes BDC et la provision sont recalculées.
+            </p>
+          </form>
+        {% else %}
+          <div class="flex-row mt-md">
+            <a class="btn btn-secondary" href="{{ url_for('export_html', month=current_month, version=version.version) }}">Récapitulatif HTML</a>
+            <a class="btn btn-secondary" href="{{ url_for('export_pdf', month=current_month, version=version.version) }}">Récapitulatif PDF</a>
+            <a class="btn btn-secondary" href="{{ url_for('export_csv', month=current_month, version=version.version) }}">CSV Indy</a>
+            {% if attachment and attachment.exists %}
+              <a class="btn btn-secondary" href="{{ url_for('download_invoice_pdf', month=current_month, version=version.version) }}">PDF Indy attaché</a>
+            {% endif %}
+          </div>
+
+          <form method="post" action="{{ url_for('new_version') }}" class="billing-form mt-md">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="month" value="{{ current_month }}"/>
+            <div class="field-card">
+              <label for="new-version-reason">Créer une nouvelle version depuis les sources</label>
+              <input id="new-version-reason" type="text" name="reason" placeholder="Ex. régularisation client"/>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-secondary" type="submit">Nouvelle version</button>
+            </div>
+          </form>
+        {% endif %}
+      </article>
+
+      <article class="panel">
+        <p class="eyebrow">Facture Indy</p>
+        <h2 class="mb-0">Émission</h2>
+        {% if version.status == 'brouillon' %}
+          <p class="muted">La version doit être gelée avant de saisir le numéro Indy.</p>
+        {% else %}
+          <form method="post" action="{{ url_for('update_invoice') }}" class="billing-form mt-md">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="month" value="{{ current_month }}"/>
+            <input type="hidden" name="version" value="{{ version.version }}"/>
+            <div class="field-card">
+              <label for="invoice-number">Numéro Indy</label>
+              <input id="invoice-number" type="text" name="invoice_number" value="{{ version.invoice.number }}" placeholder="KD202611-45" required/>
+            </div>
+            <div class="field-card">
+              <label for="issued-on">Date d’émission</label>
+              <input id="issued-on" type="date" name="issued_on" value="{{ version.invoice.issued_on }}" required/>
+            </div>
+            <div class="field-card">
+              <label for="invoice-total">Total HT Indy (€)</label>
+              <input id="invoice-total" type="text" name="invoice_total" value="{{ (version.invoice.total_cents or version.totals.ht_cents)|amount }}" inputmode="decimal"/>
+              <p class="muted muted--tight">Doit correspondre au total HT, sauf écart documenté.</p>
+            </div>
+            <div class="field-card">
+              <label for="invoice-note">Note d’écart</label>
+              <input id="invoice-note" type="text" name="invoice_note" value="{{ version.invoice.note }}" placeholder="Si le total Indy diffère"/>
+            </div>
+            <div class="form-actions">
+              <button class="primary" type="submit">Enregistrer</button>
+            </div>
+          </form>
+
+          <form method="post" action="{{ url_for('upload_attachment') }}" enctype="multipart/form-data" class="billing-form mt-md">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+            <input type="hidden" name="month" value="{{ current_month }}"/>
+            <input type="hidden" name="version" value="{{ version.version }}"/>
+            <div class="field-card">
+              <label for="invoice-pdf">Attacher le PDF Indy</label>
+              <input id="invoice-pdf" type="file" name="invoice_pdf" accept="application/pdf"/>
+              <p class="muted muted--tight">Archivé avec la version, sans remplacer le calcul.</p>
+            </div>
+            <div class="form-actions">
+              <button class="btn btn-secondary" type="submit">Attacher</button>
+            </div>
+          </form>
+        {% endif %}
+      </article>
+    </section>
+
+    {% if next_statuses %}
+    <section class="panel mt-lg">
+      <p class="eyebrow">Statuts</p>
+      <h2 class="mb-0">Faire avancer la version</h2>
+      <div class="billing-status-grid mt-md">
+        {% for target in next_statuses %}
+          {% if target != version.status %}
+            {% set blockers = validation.get(target, []) %}
+            <form method="post" action="{{ url_for('update_status') }}" class="billing-status-card">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <input type="hidden" name="month" value="{{ current_month }}"/>
+              <input type="hidden" name="version" value="{{ version.version }}"/>
+              <input type="hidden" name="target_status" value="{{ target }}"/>
+              <strong>{{ target|status_label }}</strong>
+              {% if blockers %}
+                <p class="muted muted--tight">{{ blockers[0] }}</p>
+              {% else %}
+                <p class="muted muted--tight">Transition disponible.</p>
+              {% endif %}
+              <input type="text" name="reason" placeholder="Motif (optionnel)" aria-label="Motif de la transition"/>
+              {% set warnings = version.issues|selectattr('severity', 'equalto', 'warning')|list %}
+              {% if warnings and target in ['validé_client', 'émis'] %}
+                <details>
+                  <summary>Acquitter les avertissements</summary>
+                  {% for issue in warnings %}
+                    <label class="billing-check">
+                      <input type="checkbox" name="acknowledge" value="{{ issue.code }}"
+                        {% if issue.code in version.acknowledged_warnings %}checked{% endif %}/>
+                      {{ issue.message }}
+                    </label>
+                  {% endfor %}
+                </details>
+              {% endif %}
+              <input type="text" name="override_reason" value="{{ version.override_reason|default('') }}" placeholder="Override certification (si besoin)" aria-label="Override certification"/>
+              <button class="btn btn-secondary" type="submit">Passer à « {{ target|status_label }} »</button>
+            </form>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+    {% endif %}
+
+    {% if diff and diff.has_changes %}
+      <section class="panel mt-lg">
+        <p class="eyebrow">Comparaison</p>
+        <h2 class="mb-0">Évolution depuis la version {{ version.version - 1 }}</h2>
+        <p class="muted">
+          Total HT : {{ diff.totals.before|eur }} → {{ diff.totals.after|eur }}
+          ({% if diff.totals.delta > 0 %}+{% endif %}{{ diff.totals.delta|eur }}).
+        </p>
+        <div class="table-wrap mt-md">
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Ligne</th>
+                <th scope="col">Changement</th>
+                <th scope="col" class="num">Avant</th>
+                <th scope="col" class="num">Après</th>
+                <th scope="col" class="num">Δ</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for change in diff.lines %}
+                <tr>
+                  <td>{{ change.label }}</td>
+                  <td>
+                    {% if change.change == 'added' %}
+                      <span class="badge badge--ok badge--xs">Ajoutée</span>
+                    {% elif change.change == 'removed' %}
+                      <span class="badge badge--danger badge--xs">Retirée</span>
+                    {% else %}
+                      <span class="badge badge--warn badge--xs">Modifiée</span>
+                    {% endif %}
+                  </td>
+                  <td class="num">{{ change.before.total_cents|eur if change.before else '—' }}</td>
+                  <td class="num">{{ change.after.total_cents|eur if change.after else '—' }}</td>
+                  <td class="num">
+                    {% if change.delta_cents > 0 %}+{% endif %}{{ change.delta_cents|eur }}
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% if diff.source_changes %}
+          <p class="muted mt-md">
+            Sources modifiées :
+            {% for change in diff.source_changes %}{{ change.name }}{% if not loop.last %}, {% endif %}{% endfor %}.
+          </p>
+        {% endif %}
+      </section>
+    {% endif %}
+
+    <section class="panel mt-lg">
+      <p class="eyebrow">Historique</p>
+      <h2 class="mb-0">Versions du mois</h2>
+      <div class="table-wrap mt-md">
+        <table class="table">
+          <thead>
+            <tr>
+              <th scope="col">Version</th>
+              <th scope="col">Statut</th>
+              <th scope="col">Créée</th>
+              <th scope="col" class="num">Total HT</th>
+              <th scope="col">Facture Indy</th>
+              <th scope="col"></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in versions %}
+              <tr>
+                <td><strong>v{{ item.version }}</strong></td>
+                <td><span class="badge {{ item.status|status_badge }}">{{ item.status|status_label }}</span></td>
+                <td>{{ item.created_at|fr_datetime }}</td>
+                <td class="num">{{ item.total_ht_cents|eur }}</td>
+                <td>{{ item.invoice_number or '—' }}{% if item.invoice_issued_on %} · {{ item.invoice_issued_on|fr_date }}{% endif %}</td>
+                <td><a class="btn btn-secondary btn--compact" href="{{ url_for('index', month=current_month, version=item.version) }}">Ouvrir</a></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="6" class="muted">Aucune version enregistrée.</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  {% endif %}
+</main>
+{% endblock %}

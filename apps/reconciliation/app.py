@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import copy
+import hashlib
 import json
 import logging
 import re
@@ -27,9 +28,11 @@ from werkzeug.datastructures import FileStorage
 from libs.reconciliation import compare_reports, serialize_comparison
 from libs.web import (
     PathValidationError,
+    atomic_write_text,
     get_run_settings,
     init_app_security,
     log_exception,
+    resource_lock,
     safe_join_filename,
 )
 from libs.web.headers import DEFAULT_CSP
@@ -39,6 +42,7 @@ TEMPLATES_DIR = BASE_DIR / "templates"
 ROOT_DIR = BASE_DIR.parents[1]
 REPORTING_DIR = ROOT_DIR / "apps" / "reporting"
 BDC_DIR = ROOT_DIR / "apps" / "bdc_converter"
+HANDOFF_DIR = ROOT_DIR / "data" / "reconciliation"
 
 SHARED_STATIC_DIR = BASE_DIR.parent / "static"
 SHARED_TEMPLATES_DIR = BASE_DIR.parent / "templates"
@@ -64,6 +68,15 @@ FRENCH_MONTHS = (
     "décembre",
 )
 EXPORT_CSP = DEFAULT_CSP.replace("font-src 'self'", "font-src 'self' data:")
+
+# Export PDF : une page continue dont la hauteur est calée sur le contenu.
+PDF_PAGE_BOTTOM_MARGIN_MM = 14  # aligné sur la marge basse de @page dans export_pdf_styles.css
+PDF_PAGE_BOTTOM_MARGIN_PX = PDF_PAGE_BOTTOM_MARGIN_MM / 25.4 * 96
+PDF_MIN_PAGE_HEIGHT_PX = 297 / 25.4 * 96  # plancher A4 pour les rapports courts
+PDF_PROBE_PAGE_HEIGHT_PX = 60_000.0
+PDF_PROBE_MAX_ATTEMPTS = 3
+PDF_PAGE_HEIGHT_SAFETY_PX = 2.0
+PDF_MAX_PAGE_HEIGHT_PT = 14_400.0  # limite PDF 1.7 : 200 pouces
 
 logger = logging.getLogger("analyseur.reconciliation")
 
@@ -214,6 +227,17 @@ def _file_fingerprint(path: Path) -> str:
     except OSError:
         return "missing"
     return f"{stat.st_size}:{stat.st_mtime_ns}"
+
+
+def _sha256_file(path: Path) -> str:
+    try:
+        digest = hashlib.sha256()
+        with path.open("rb") as handle:
+            for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+                digest.update(chunk)
+        return digest.hexdigest()
+    except OSError:
+        return ""
 
 
 def _source_fingerprint(reporting_name: str, bdc_name: str) -> str:
@@ -823,6 +847,15 @@ def index():
             "Session expirée : l'analyse a été rechargée depuis les fichiers sources "
             "et les ajustements précédents ont été réinitialisés."
         )
+    elif request.args.get("notice") == "handoff":
+        context["notice"] = (
+            "Analyse transmise à la facturation. Ouvrez l’acte 4 pour préparer la base "
+            "de facturation du mois."
+        )
+    elif request.args.get("notice") == "handoff_failed":
+        context["error"] = "La transmission à la facturation a échoué" + (
+            f" (réf. {request.args.get('error_id')})." if request.args.get("error_id") else "."
+        )
 
     token = request.args.get("token")
     requested_month = request.args.get("month")
@@ -1058,6 +1091,102 @@ def inspector_reset():
     return _redirect_to_record(record, recovered=bool(token and record.token != token))
 
 
+@app.post("/handoff/billing")
+def handoff_billing():
+    """Persist the effective reconciliation analysis for the billing service."""
+    token = request.form.get("token") or ""
+    month = request.form.get("month") or ""
+    reporting_name = request.form.get("reporting_name") or ""
+    bdc_name = request.form.get("bdc_name") or ""
+
+    record = _resolve_record(
+        token,
+        month=month,
+        reporting_name=reporting_name,
+        bdc_name=bdc_name,
+    )
+    if record is None:
+        return redirect(url_for("index", month=month, notice="handoff_failed"))
+
+    if token and record.token != token:
+        # The token expired or the source files changed: never silently hand off
+        # an analysis rebuilt without the session adjustments.
+        return redirect(
+            url_for(
+                "index",
+                token=record.token,
+                month=record.month or month,
+                notice="expired",
+            )
+        )
+
+    target_month = record.month or _month_from_reporting_name(record.reporting_name)
+    if not target_month or not MONTH_PATTERN.match(target_month):
+        return redirect(
+            url_for(
+                "index",
+                token=record.token,
+                month=month,
+                notice="handoff_failed",
+            )
+        )
+
+    payload = {
+        "month": target_month,
+        "generated_at": datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        "reporting_name": record.reporting_name,
+        "bdc_name": record.bdc_name,
+        "source_fingerprint": record.source_fingerprint,
+        "sources": {
+            "reporting": {
+                "name": record.reporting_name,
+                "sha256": _sha256_file(REPORTING_DIR / record.reporting_name),
+            },
+            "bdc": {
+                "name": record.bdc_name,
+                "sha256": _sha256_file(BDC_DIR / record.bdc_name),
+            },
+        },
+        "adjustments": {
+            "excluded_files": [
+                {"lot": lot, "filename": filename, "count": count}
+                for (lot, filename), count in sorted(record.excluded_files.items())
+            ],
+            "justified_clusters": sorted(record.justified_clusters),
+        },
+        "certification": record.analysis.get("certification") or {},
+        "analysis": record.analysis,
+    }
+
+    try:
+        HANDOFF_DIR.mkdir(parents=True, exist_ok=True)
+        with resource_lock(f"reconciliation-handoff:{target_month}"):
+            atomic_write_text(
+                HANDOFF_DIR / f"{target_month}.json",
+                json.dumps(payload, ensure_ascii=False, indent=2),
+            )
+    except Exception as exc:
+        error_id = log_exception(exc, message="Reconciliation billing handoff failed")
+        return redirect(
+            url_for(
+                "index",
+                token=record.token,
+                month=target_month,
+                notice="handoff_failed",
+                error_id=error_id,
+            )
+        )
+
+    return redirect(
+        url_for(
+            "index",
+            token=record.token,
+            month=target_month,
+            notice="handoff",
+        )
+    )
+
+
 @app.route("/export/json", methods=["GET"])
 def export_json():
     token = request.args.get("token") or ""
@@ -1108,7 +1237,11 @@ def _export_filename(record: StoredAnalysis, extension: str) -> str:
 
 
 def _render_export_document(
-    record: StoredAnalysis, *, pdf_mode: bool = False, recovered: bool = False
+    record: StoredAnalysis,
+    *,
+    pdf_mode: bool = False,
+    recovered: bool = False,
+    pdf_page_height_px: Optional[float] = None,
 ) -> str:
     return render_template(
         "export.html",
@@ -1127,7 +1260,86 @@ def _render_export_document(
             ),
         },
         pdf_mode=pdf_mode,
+        pdf_page_height_px=pdf_page_height_px,
     )
+
+
+def _pdf_content_bottom_px(document: Any) -> float:
+    """Hauteur du contenu rendu (px CSS), mesurée sur la page sonde WeasyPrint."""
+    page = document.pages[0]
+    page_box = getattr(page, "_page_box", None)
+    if page_box is None:
+        raise RuntimeError("WeasyPrint page box unavailable")
+
+    root = next(
+        (child for child in page_box.children if getattr(child, "element_tag", None) == "html"),
+        None,
+    )
+    if root is None:
+        root = page_box.children[0] if page_box.children else None
+    if root is None:
+        raise RuntimeError("WeasyPrint page has no content box")
+    return float(root.position_y + root.margin_height())
+
+
+def _pdf_zoom_for_page_height(page_height_pt: float) -> float:
+    """Ramène une page trop haute sous la limite de 14 400 pt (200 pouces)."""
+    if page_height_pt <= 0:
+        return 1.0
+    return min(1.0, PDF_MAX_PAGE_HEIGHT_PT / page_height_pt)
+
+
+def _render_single_page_pdf(
+    record: StoredAnalysis,
+    *,
+    weasyprint_html: Any,
+    recovered: bool = False,
+) -> bytes:
+    """Rend l'export sur une page unique, dimensionnée pour contenir tout le contenu."""
+    probe_height = PDF_PROBE_PAGE_HEIGHT_PX
+    probe_document = None
+    for _ in range(PDF_PROBE_MAX_ATTEMPTS):
+        probe_html = _render_export_document(
+            record,
+            pdf_mode=True,
+            recovered=recovered,
+            pdf_page_height_px=probe_height,
+        )
+        probe_document = weasyprint_html(string=probe_html).render()
+        if len(probe_document.pages) == 1:
+            break
+        probe_height *= 2
+    else:
+        raise RuntimeError("Unable to fit the export on a single page")
+
+    content_bottom_px = _pdf_content_bottom_px(probe_document)
+    del probe_document
+
+    page_height_px = max(
+        PDF_MIN_PAGE_HEIGHT_PX,
+        content_bottom_px + PDF_PAGE_BOTTOM_MARGIN_PX + PDF_PAGE_HEIGHT_SAFETY_PX,
+    )
+    document = None
+    for _ in range(2):
+        html = _render_export_document(
+            record,
+            pdf_mode=True,
+            recovered=recovered,
+            pdf_page_height_px=page_height_px,
+        )
+        document = weasyprint_html(string=html).render()
+        if len(document.pages) == 1:
+            break
+        # Marge de sécurité si l'arrondi de mise en page a débordé.
+        page_height_px = page_height_px * 1.01 + 24
+    else:
+        raise RuntimeError("Unable to fit the export on a single page")
+
+    zoom = _pdf_zoom_for_page_height(document.pages[0].height * 0.75)
+    pdf_bytes = document.write_pdf(zoom=zoom)
+    if not pdf_bytes:
+        raise RuntimeError("WeasyPrint returned an empty PDF")
+    return pdf_bytes
 
 
 @app.route("/export/html", methods=["GET"])
@@ -1181,13 +1393,12 @@ def export_pdf():
         error_id = log_exception(exc, message="Reconciliation PDF export unavailable")
         return f"Export PDF indisponible (réf. {error_id}).", 503
 
-    html = _render_export_document(
-        record, pdf_mode=True, recovered=bool(token and record.token != token)
-    )
     try:
-        pdf_bytes = WeasyPrintHTML(string=html).write_pdf()
-        if not pdf_bytes:
-            raise RuntimeError("WeasyPrint returned an empty PDF")
+        pdf_bytes = _render_single_page_pdf(
+            record,
+            weasyprint_html=WeasyPrintHTML,
+            recovered=bool(token and record.token != token),
+        )
     except Exception as exc:
         error_id = log_exception(exc, message="Reconciliation PDF export failed")
         return f"Erreur lors de l'export PDF (réf. {error_id}).", 500

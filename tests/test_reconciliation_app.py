@@ -1,5 +1,6 @@
 import pytest
 from datetime import datetime, timedelta, timezone
+import io
 import json
 import re
 import uuid
@@ -9,6 +10,8 @@ from apps.reconciliation.app import (
     StoredAnalysis,
     _cleanup_store,
     _effective_reporting_payload,
+    _pdf_content_bottom_px,
+    _pdf_zoom_for_page_height,
     _recompute_record,
     _store,
     _store_analysis,
@@ -827,6 +830,7 @@ def test_export_total_uses_net_balance_and_explains_it(tmp_path, monkeypatch):
 
 def test_export_pdf_downloads_valid_document(tmp_path, monkeypatch):
     pytest.importorskip("weasyprint")
+    pdfium = pytest.importorskip("pypdfium2")
     _store.clear()
     reporting_dir = tmp_path / "reporting"
     bdc_dir = tmp_path / "bdc"
@@ -900,4 +904,30 @@ def test_export_pdf_downloads_valid_document(tmp_path, monkeypatch):
         assert pdf.data.startswith(b"%PDF-")
         assert len(pdf.data) > 1000
 
+        pdf_document = pdfium.PdfDocument(io.BytesIO(pdf.data))
+        try:
+            assert len(pdf_document) == 1
+            page_width, page_height = pdf_document[0].get_size()
+            assert page_width == pytest.approx(595.276, abs=1.0)
+            assert 841.89 <= page_height <= 14_400
+        finally:
+            pdf_document.close()
+
         assert client.get("/export/pdf").status_code == 400
+
+
+def test_pdf_content_bottom_measurement():
+    pytest.importorskip("weasyprint")
+    from weasyprint import HTML
+
+    document = HTML(
+        string="<style>@page{size:210mm 3000px;margin:10mm}</style><p>Hello</p>"
+    ).render()
+    bottom = _pdf_content_bottom_px(document)
+    assert 37 < bottom < 3000
+
+
+def test_pdf_zoom_caps_page_height():
+    assert _pdf_zoom_for_page_height(10_000) == 1.0
+    assert _pdf_zoom_for_page_height(28_800) == pytest.approx(0.5)
+    assert _pdf_zoom_for_page_height(0) == 1.0

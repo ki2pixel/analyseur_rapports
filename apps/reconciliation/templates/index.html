@@ -320,7 +320,14 @@
     <div class="alert alert--error">{{ error }}</div>
   {% endif %}
   {% if notice %}
-    <div class="alert alert--info">{{ notice }}</div>
+    <div class="alert alert--info">
+      {{ notice }}
+      {% if request.args.get('notice') == 'handoff' %}
+        <a class="alert__link" href="{{ service_urls.billing }}{% if current_month %}?month={{ current_month }}{% endif %}">
+          Ouvrir l’acte 4 · Facturation →
+        </a>
+      {% endif %}
+    </div>
   {% endif %}
 
   {% if analysis %}
@@ -379,10 +386,18 @@
             <a href="/export/html?token={{ meta.token }}{% if meta.month %}&amp;month={{ meta.month }}{% endif %}" class="btn {% if certification.is_certified %}btn--certified{% else %}btn-secondary{% endif %}">
               {% if certification.is_certified %}🏆 Générer le certificat HTML{% else %}Exporter HTML{% endif %}
             </a>
-            <a href="/export/pdf?token={{ meta.token }}{% if meta.month %}&amp;month={{ meta.month }}{% endif %}" class="btn btn-secondary" title="La génération peut prendre quelques secondes pour les mois volumineux.">
+            <a href="/export/pdf?token={{ meta.token }}{% if meta.month %}&amp;month={{ meta.month }}{% endif %}" class="btn btn-secondary" title="La génération peut prendre une dizaine de secondes pour les mois volumineux.">
               {% if certification.is_certified %}Générer le certificat PDF{% else %}Exporter PDF{% endif %}
             </a>
             <a href="/export/json?token={{ meta.token }}{% if meta.month %}&amp;month={{ meta.month }}{% endif %}" class="btn btn-secondary">Exporter JSON</a>
+            <form method="post" action="/handoff/billing">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <input type="hidden" name="token" value="{{ meta.token }}"/>
+              <input type="hidden" name="month" value="{{ meta.month|default('') }}"/>
+              <input type="hidden" name="reporting_name" value="{{ meta.reporting_name|default('') }}"/>
+              <input type="hidden" name="bdc_name" value="{{ meta.bdc_name|default('') }}"/>
+              <button class="btn btn-secondary" type="submit" title="Figer l’analyse effective pour l’acte 4">📤 Transmettre à la facturation</button>
+            </form>
             {% if meta.adjustments.excluded_files or meta.adjustments.justified_clusters %}
               <form method="post" action="/inspector/reset">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>

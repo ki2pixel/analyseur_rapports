@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple web dashboard that exposes buttons to start/stop the three Flask services.
+Simple web dashboard that exposes buttons to start/stop the four Flask services.
 
 Usage:
     python scripts/service_dashboard.py
@@ -9,7 +9,7 @@ Environment variables:
     SERVICE_DASHBOARD_HOST   Hostname for the dashboard (default: 127.0.0.1)
     SERVICE_DASHBOARD_PORT   Port for the dashboard (default: 5500)
     SERVICE_DASHBOARD_BROWSER  Auto-open browser when set to "1" (default: 1)
-    BDC_URL / REPORTING_URL / RECONCILIATION_URL  Service open links
+    BDC_URL / REPORTING_URL / RECONCILIATION_URL / BILLING_URL  Service open links
 """
 
 from __future__ import annotations
@@ -83,6 +83,13 @@ def _build_services() -> Dict[str, ServiceDefinition]:
             command=["make", "serve-reconciliation"],
             url=urls.reconciliation,
             description="Compare les exports reporting ↔ BDC.",
+        ),
+        "billing": ServiceDefinition(
+            key="billing",
+            label="Facturation",
+            command=["make", "serve-billing"],
+            url=urls.billing,
+            description="Prépare et versionne la base de facturation à partir des BDC.",
         ),
     }
 
