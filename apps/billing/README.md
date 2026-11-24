@@ -41,11 +41,13 @@ justifications) sont alors perdus : il vaut mieux refaire le handoff depuis l’
 
 ## 3. Créer la première version
 
-1. Choisir le mois puis **« Calculer le brouillon »**.
+1. Choisir le mois puis **« Calculer le brouillon »** (la TVA par défaut est `0,00 %` —
+   art. 293 B du CGI).
 2. Contrôler les lignes et les éventuels points d’attention.
 3. **« Geler la version »** avec le statut adapté :
    - **« Envoyée pour vérification »** : proposition à faire valider par le client ;
-   - **« Validée client »** : uniquement si le client a déjà validé le contenu.
+   - **« Validée client »** : uniquement si le client a déjà validé le contenu (exige
+     d’acquitter les éventuels avertissements).
 4. Exporter si besoin :
    - **HTML** : récapitulatif lisible ;
    - **PDF** : document de préparation, mention explicite « ne constitue pas une facture » ;
@@ -61,7 +63,10 @@ elle devient **immuable**.
 Une ligne par bon de commande, avec :
 
 - le numéro BDC et la date de livraison ;
-- le détail **facturé / commandé / réalisé** par catégorie ;
+- le détail **facturé / commandé / réalisé** par catégorie (`Courte < 2 min`,
+  `Standard 2 – 5 min`, `Moyenne 5 – 8 min`, `Longue ≥ 8 min`) ;
+- un badge indiquant le format du BDC (**« Simplifié »** ou **« Détaillé (N vidéos) »**) et,
+  pour un BDC détaillé, le taux de correspondance **« Annexe : XX % »** ;
 - le montant calculé par défaut avec :
 
 ```text
@@ -71,18 +76,27 @@ min(réalisé, commandé) × taux
 Le mode **« Au commandé »** (dans « Recalculer avec ») facture le total du BDC même si
 la production est inférieure.
 
+Si un BDC détaillé présente des écarts internes qui se compensent entre lots (delta global
+nul par catégorie), le calcul reste effectué au niveau du BDC : aucun volume n’est basculé
+en provision et un point d’attention informatif (`Écarts internes compensés entre lots…`)
+est simplement signalé.
+
 ### Ligne « Lots réalisés sans BDC »
 
 Elle est **automatique**. Elle regroupe :
 
 - les surplus de production sur des BDC couverts ;
-- les lots produits sans BDC ;
+- les lots produits sans BDC (hors lots déjà facturés sur un mois voisin) ;
 - le détail par catégorie et par taux.
 
 Elle peut être éditée ou exclue dans un brouillon. Si la version est déjà gelée,
 créez une nouvelle version.
 
-### Lignes manuelles
+### Lignes manuelles et édition en brouillon
+
+Dans un **brouillon**, toute ligne (BDC, provision « Lots réalisés sans BDC » ou ligne
+manuelle) peut être modifiée (libellé, quantité, PU HT, date de livraison, note, inclusion
+dans le total) ou exclue/supprimée via son panneau **« Modifier »**.
 
 Le bouton **« Ajouter une ligne manuelle »** sert aux frais ou prestations qui ne
 ressortent pas des BDC. Une ligne existante modifiée via le formulaire porte le badge
@@ -108,11 +122,16 @@ Transitions possibles :
 
 ```text
 brouillon → envoyé_pour_vérification → validé_client → émis → remplacé
-                     ↘ annulé                 ↘ annulé
+    │                  ↘ annulé             ↗ ↘ annulé
+    └──────────────────────────────────────┘
 ```
+
+Le passage à **`validé_client`** exige que tous les avertissements éventuels soient
+**acquittés** (« Acquitter les avertissements »).
 
 Le passage à **`émis`** exige :
 
+- le statut préalable **`validé_client`** ;
 - la certification de réconciliation, ou un **override justifié** ;
 - le **numéro Indy** et la **date d’émission** ;
 - un total Indy identique au total de la version, ou une **note d’écart**.
@@ -131,7 +150,14 @@ Le service n’attribue pas les numéros de facture : vous saisissez le numéro 
 4. Si vous utilisez le suivi Indy : renseigner numéro/date, attacher le PDF, puis
    **« Émise »**.
 
-C’est le cas d’octobre 2026 : 7 lignes BDC, 1 676,00 €, certification 100 %.
+Exemples :
+
+- **Octobre 2026** : 7 lignes BDC, 1 676,00 €, certification 100 %.
+- **Novembre 2026 (mois mixte)** : 1 BDC simplifié (`BDC-26-1882`, 48,00 €), 1 BDC détaillé
+  (`BDC-M6-0001`, 73 lots, 134 vidéos, 712,00 €) et le lot `40` réalisé sans BDC en provision
+  (28,00 €), soit 788,00 € HT et un score BDC de 100 %. Tant que le lot `40` reste sans BDC,
+  le mois n’est pas certifié : passer en « Émise » demande soit la régularisation client,
+  soit un override justifié.
 
 ### B. Mois avec écarts, le client accepte la provision
 
@@ -139,7 +165,8 @@ C’est le cas d’octobre 2026 : 7 lignes BDC, 1 676,00 €, certification 100 
    « Lots réalisés sans BDC ».
 2. Geler en **« Envoyée pour vérification »**.
 3. Le client accepte la provision.
-4. Passer en **« Validée client »**, puis éventuellement en **« Émise »**.
+4. Acquitter les avertissements, passer en **« Validée client »**, puis éventuellement en
+   **« Émise »** (avec override justifié si le mois n’est pas certifié).
 
 Aucune nouvelle version n’est nécessaire.
 
@@ -215,7 +242,7 @@ Le service **ne gère pas les avoirs**. La correction comptable se fait dans Ind
 
 - [ ] Le brouillon est calculé dans l’acte 4.
 - [ ] Les lignes BDC et la provision sont cohérentes.
-- [ ] Les avertissements sont lus.
+- [ ] Les avertissements sont lus et acquittés si validation client.
 - [ ] La version est gelée avec le bon statut.
 - [ ] Les exports HTML/PDF/CSV sont générés si nécessaire.
 
@@ -234,8 +261,11 @@ Le service **ne gère pas les avoirs**. La correction comptable se fait dans Ind
 |---------|-----------|
 | « Aucun snapshot de réconciliation » | Faire le handoff depuis l’acte 3. Le calcul reste possible mais sans les ajustements de session. |
 | « Sources modifiées depuis le gel de cette version » | C’est normal : la version gelée reste immuable. Refaire les actes concernés, puis créer une nouvelle version. |
-| « Le snapshot de réconciliation ne correspond plus au rapport… » | Les sources ont changé depuis le handoff. Refaire l’acte 3 et transmettre à nouveau. |
+| « Le snapshot de réconciliation ne correspond plus au … » | Les sources ont changé depuis le handoff. Refaire l’acte 3 et transmettre à nouveau. |
+| « Écarts internes compensés entre lots sur … » | Message informatif (Option A) : des vidéos diffèrent entre lots d’un même BDC détaillé mais le total reste conforme. Aucun impact sur le montant. |
+| « Plusieurs taux détectés pour … » | Deux BDC du mois portent des taux unitaires différents pour une même catégorie : vérifier le taux retenu et le surcharger dans « Recalculer avec » si besoin. |
 | « Aucun taux connu pour la catégorie… » | Ajouter un BDC avec cette catégorie ou renseigner le taux dans « Recalculer avec ». |
+| « … avertissement(s) non acquitté(s) avant validation client » | Cocher les avertissements dans « Acquitter les avertissements » avant de passer en « Validée client ». |
 | « Transition impossible depuis… » | Le statut cible n’est pas accessible depuis le statut actuel. Utiliser le bouton prévu pour le prochain statut. |
 | « La version doit être validée client avant… » | Passer d’abord par « Validée client ». |
 | « Le numéro de facture Indy est obligatoire… » | Renseigner le numéro et la date dans le bloc « Facture Indy ». |
@@ -248,7 +278,7 @@ data/
   billing/YYYY-MM/
     project.json                # index des versions
     versions/vN.json            # version gelée ou brouillon
-    versions/vN-facture.pdf     # PDF Indy attaché
+    versions/vN-facture.pdf     # PDF Indy attaché (PDF %PDF uniquement, 6 Mo max)
     sources/vN/                 # copies des sources au moment du calcul
 ```
 

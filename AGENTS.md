@@ -4,14 +4,14 @@
 
 Python monorepo with four Flask apps and shared libraries.
 
-- **`apps/`**: Independent Flask applications:
+- **`apps/`**: Independent Flask applications (each documented in its local `README.md`):
   - **`bdc_converter/`**: PDF purchase orders → monthly JSON + `MonthlyBatch`; per-PDF control cards and BDC overlap alerts.
   - **`reporting/`**: Video archives / batches → monthly HTML/JSON reports; M6+ jingle filtering, deduplication, empty-lot suppression, duration details and warnings.
   - **`reconciliation/`**: Compare reporting vs BDC exports; `?month=YYYY-MM` auto-load, conformity score, split-view inspector, in-memory adjustments, and a **billing handoff** snapshot.
   - **`billing/`**: Versioned billing base from BDC JSON + reconciliation snapshot; one line per BDC, provision for uncovered production, statuses, diff, HTML/PDF/CSV exports and Indy invoice metadata.
   - **`static/`**, **`templates/`**: Shared UI assets (incl. self-hosted fonts), base layout and the 4-act `_ritual_stepper.html`.
 - **`libs/`**: Shared logic:
-  - **`schemas/`**: Shared dataclasses (`MonthlyBatch`, `PurchaseOrder`, `VideoEntry`, `VideoGroupCategory`, …).
+  - **`schemas/`**: Shared dataclasses (`MonthlyBatch`, `PurchaseOrder`, `AnnexeVideoItem`, `VideoEntry`, `VideoCategory`, `VideoGroupCategory`, …).
   - **`pipeline/`**: BDC JSON → `MonthlyBatch` + `video_names.py` (M6+ regex and name normalization).
   - **`reconciliation/`**: Contextual range expansion, BDC overlap detection, conformity score, balance and diagnostics.
   - **`billing/`**: Pure billing compute (rate grid, draft lines, provision, version diff, transition guards) + filesystem store + Decimal money helpers.
@@ -61,7 +61,7 @@ Defaults: bind **loopback**, **debug off**. Override with `APP_HOST` / `APP_DEBU
 - **Disambiguated lots**: keep `309 (date)` IDs distinct. A single BDC referencing base lot `309` receives all its folders; when several BDCs reference the same base lot, allocate each folder to the BDC whose billed category mix it best completes (and keep genuine overlaps detectable).
 - **Month context**: use `?month=YYYY-MM`; reconciliation GET auto-loads the matching pair, reporting GET only preselects the month, billing GET auto-loads BDC + reporting + the optional reconciliation snapshot.
 - **UI semantics**: `.text-positive` is reserved for `delta == 0`; use `.text-warn` for `delta > 0` and `.text-negative` for `delta < 0`.
-- **Billing statuses**: `brouillon` → `envoyé_pour_vérification` → `validé_client` → `émis` → `remplacé`; keep `brouillon` editable and every other version immutable.
+- **Billing statuses**: `brouillon` → (`envoyé_pour_vérification` →) `validé_client` → `émis` → `remplacé`, with `annulé` reachable from `envoyé_pour_vérification` or `validé_client`; keep `brouillon` editable and every other version immutable.
 
 ## Testing Guidelines
 
@@ -74,7 +74,7 @@ Defaults: bind **loopback**, **debug off**. Override with `APP_HOST` / `APP_DEBU
 - Regression coverage expected: **120/300/480 s boundaries**, M6+ variants (`m6+…`, `m6_plus…`, `m6+max anime…`), duplicate names, empty lots, BDC range normalization (`38-92` → `LOTS 38 à 92`), French quantity parsing (`"9,00"`, `"27,00"`), contextual range expansion, BDC overlap detection, conformity score and inspector diagnostics.
 - September regeneration check: `total_mp4 == 254`, no `m6+max anime.mp4` / `m6+.mp4` in report entries, lot 63 at **1 short + 2 standard**, `BDC-26-1528` compliant, and overlap `BDC-26-1479` / `BDC-26-1482` on lots **21, 23, 26, 27, 31, 33, 36, 39**.
 - July regression expectations: `missing=[181,189,193,195]`, `unexpected=[215,233,239]`, no phantom lots in the `38 à 92` range.
-- November 2026 mixed-format check (`tests/test_november_mixed_formats.py`): `BDC-26-1882` simplified = `48,00 €`, `BDC-M6-0001` detailed = `712,00 €` (73 lots, 134 videos), lot `40` without BDC = `28,00 €`, Total HT `788,00 €`, conformity `100 %`, no `missing_rate` error, no BDC overlap, no duplicate diagnostic on lots 209/219, lot `166` billed `medium` (`460,52 s`). `is_certified` stays `False` while lot `40` has no BDC: emission in Act 4 needs a documented override.
+- November 2026 mixed-format check (`tests/test_november_mixed_formats.py`): runs when local `apps/bdc_converter/pdfs/` (`BDC-26-1882.pdf`, `BDC-M6-0001.pdf`) and `archives/` `2026-11` folders are present (otherwise skipped, complementing the versioned golden corpus in `tests/fixtures/bdc/`). Checks `BDC-26-1882` simplified = `48,00 €`, `BDC-M6-0001` detailed = `712,00 €` (73 lots, 134 videos), lot `40` without BDC = `28,00 €`, Total HT `788,00 €`, conformity `100 %`, no `missing_rate` error, no BDC overlap, no duplicate diagnostic on lots 209/219, lot `166` billed `medium` (`460,52 s`). `is_certified` stays `False` while lot `40` has no BDC: emission in Act 4 needs a documented override.
 - Inspector route tests use the Flask test client with CSRF disabled; keep adjustments session-scoped.
 - **Billing tests**: `tests/test_billing_logic.py` covers the rate grid, `actual_capped`/`ordered`, provision, adjacent-month exclusion, diffs and transition guards; `tests/test_billing_app.py` covers draft/freeze/status/export and the reconciliation handoff. Use temporary `data/billing` and `data/reconciliation` directories; never write to the real `data/` from tests.
 
@@ -98,7 +98,7 @@ Defaults: bind **loopback**, **debug off**. Override with `APP_HOST` / `APP_DEBU
 - Set `active_page` in each page template so the shared nav and `_ritual_stepper.html` highlight the right act.
 - Keep the global month selector (`data-month-form`) and propagate `?month=YYYY-MM` in inter-app links.
 - No inline scripts (CSP `script-src 'self'`); inline styles are only for dynamic widths (score gauge, balance and stacked bars).
-- L’export HTML de réconciliation est volontairement autonome : `apps/reconciliation/templates/export_styles.css` est un partial Jinja inliné dans `<style>` et les polices sont embarquées via `font_uri()` ; ne pas le remplacer par un `<link>` vers `/static`.
+- L’export HTML de réconciliation est volontairement autonome : `apps/reconciliation/templates/export_styles.css` est un partial Jinja inliné dans `<style>` et les polices sont embarquées via `font_uri()` ; ne pas le remplacer par un `<link>` vers `/static`. Lorsque le mois inclut au moins un BDC détaillé, l’export affiche également l’encart **Rapprochement vidéo — BDC détaillé** (`video-strip`).
 - L’export PDF réutilise ce document HTML via WeasyPrint (`pdf_mode=True`) et ajoute `export_pdf_styles.css` : une page unique dont la hauteur est calculée à partir du contenu (deux passes de mise en page), avec un plancher A4 et une mise à l’échelle uniforme si la hauteur dépasse la limite PDF de 14 400 pt. L’annexe fichiers reste en deux colonnes ; en mode PDF, les cartes d’écart renvoient le détail fichier à l’annexe 1 pour rester légères.
 - L’export de facturation (`apps/billing/templates/export.html`) est **autonome** : `export_styles.css` est inliné dans `<style>`, les polices passent par `font_uri()`, aucun script et aucun `/static/`. Il porte la mention « Document de préparation — ne constitue pas une facture » et reste en A4 multi-pages.
 - Le stepper est en **4 actes** ; l’acte 4 (`billing`) est actif sur la page de facturation et les statuts utilisent les badges existants (`badge--ok`, `badge--warn`, `badge--danger`, `badge--neutral`).

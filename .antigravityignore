@@ -1,0 +1,112 @@
+# Antigravity Context & Indexing Ignore File
+# Définit les fichiers et répertoires ignorés par les agents Antigravity
+# Objectifs :
+#  1. Préservation du contexte : éviter de saturer la fenêtre de contexte avec des binaires, vidéos et dumps
+#  2. Sécurité & Confidentialité : empêcher l'ingestion accidentelle de secrets, tokens et clés
+#  3. Qualité des recherches : éliminer le bruit (faux-positifs) lors des explorations de code
+
+# ==============================================================================
+# 1. Gestion de versions & Métadonnées internes
+# ==============================================================================
+.git/
+.svn/
+.hg/
+
+# ==============================================================================
+# 2. Sécurité & Variables d'environnement
+# ==============================================================================
+.env
+.env.*
+.env.local
+!.env.example
+*.pem
+*.key
+*.secret
+
+# ==============================================================================
+# 3. Médias lourds & Archives vidéo (archives monteur)
+# ==============================================================================
+# Dossier source des archives vidéo volumineuses
+archives/
+
+# Fichiers vidéo et audio bruts
+*.mp4
+*.mov
+*.m4v
+*.avi
+*.mkv
+*.webm
+*.mp3
+*.wav
+*.aac
+*.flac
+
+# ==============================================================================
+# 4. Données locales générées & Artefacts de runtime
+# ==============================================================================
+# Lots générés, instantanés de réconciliation et projets de facturation
+data/
+
+# Dossier d'import des PDF de bons de commande
+apps/bdc_converter/pdfs/
+
+# ==============================================================================
+# 5. Environnements virtuels & Dépendances
+# ==============================================================================
+venv/
+.venv/
+env/
+ENV/
+node_modules/
+
+# ==============================================================================
+# 6. Caches Python, Typage, Tests & Compilation
+# ==============================================================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+build/
+dist/
+*.egg-info/
+camille_reporting.egg-info/
+
+# ==============================================================================
+# 7. Polices et ressources binaires statiques
+# ==============================================================================
+*.woff
+*.woff2
+*.ttf
+*.eot
+*.otf
+
+# ==============================================================================
+# 8. Journaux d'exécution & Fichiers temporaires
+# ==============================================================================
+*.log
+logs/
+debug/
+*.pid
+*.tmp
+*.temp
+*.bak
+*.swp
+*.swo
+*~
+
+# ==============================================================================
+# 9. Outils d'agents AI & Métadonnées IDE / Système
+# ==============================================================================
+.commandcode/
+.zenflow/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
