@@ -621,3 +621,99 @@ def test_invoice_43_to_45_diff_is_reproduced():
     assert changes["bdc:BDC-26-1867"]["delta_cents"] == 400
     assert changes["bdc:BDC-26-1879"]["delta_cents"] == 2000
     assert changes["uncovered:production"]["delta_cents"] == -8400
+
+
+class TestDetailedFormatBilling:
+    def test_category_labels_reflect_8_minutes(self):
+        from libs.billing.model import CATEGORY_LABELS
+
+        assert CATEGORY_LABELS["medium"] == "Moyenne (5 – 8 min)"
+        assert CATEGORY_LABELS["long"] == "Longue (≥ 8 min)"
+
+    def test_new_bdc_medium_label_maps_to_medium_category(self):
+        from libs.pipeline.bdc_to_batch import infer_category_from_description
+
+        assert (
+            infer_category_from_description("Recadrage - vidéo moyenne (de 5 à 8 min)").value
+            == "medium"
+        )
+        assert (
+            infer_category_from_description("Recadrage - vidéo standard (de 2 à 5 min)").value
+            == "standard"
+        )
+
+    def test_line_detail_exposes_bdc_format_and_annex_summary(self):
+        article = [("Recadrage - vidéo courte (moins de 2 min)", 2, 4)]
+        bdc = _bdc("BDC-M6-0001", "24/11/2026", article, lots=("42",))
+        bdc["bdc_format"] = "detailed"
+        bdc["concerned_lots"] = ["42"]
+        bdc["annex_videos"] = [
+            {"lot": "42", "video_name": "a.mp4", "duration_sec": 30, "category_label": "courte"},
+            {"lot": "42", "video_name": "b.mp4", "duration_sec": 40, "category_label": "courte"},
+        ]
+        reporting = _reporting(("42", {"short": 2}))
+
+        version = build_draft(
+            month="2026-11",
+            reporting_payload=reporting,
+            bdc_payload=[bdc],
+            snapshot=None,
+        )
+
+        line = next(item for item in version["lines"] if item["line_id"] == "bdc:BDC-M6-0001")
+        assert line["detail"]["bdc_format"] == "detailed"
+        assert line["detail"]["annex_videos"] == 2
+        assert line["detail"]["video_match_summary"]["annex_total"] == 2
+
+    def test_simplified_line_detail_stays_simplified(self):
+        article = [("Recadrage - vidéo courte (moins de 2 min)", 1, 4)]
+        bdc = _bdc("BDC-26-1882", "03/11/2026", article, lots=("2",))
+        reporting = _reporting(("2", {"short": 1}))
+
+        version = build_draft(
+            month="2026-11",
+            reporting_payload=reporting,
+            bdc_payload=[bdc],
+            snapshot=None,
+        )
+
+        line = next(item for item in version["lines"] if item["line_id"] == "bdc:BDC-26-1882")
+        assert line["detail"]["bdc_format"] == "simplified"
+        assert line["detail"]["video_match_summary"] == {}
+
+    def test_compensated_lot_mismatch_becomes_info_issue(self):
+        analysis = {
+            "cluster_results": [
+                {
+                    "cluster_key": "42",
+                    "cluster_ids": ["42"],
+                    "bdc_numbers": ["BDC-M6-0001"],
+                    "billed": {"short": 2, "standard": 0, "medium": 0, "long": 0},
+                    "actual": {"short": 2, "standard": 0, "medium": 0, "long": 0},
+                    "billed_unknown": 0,
+                    "diagnostics": [
+                        {"code": "compensated_lot_mismatch", "severity": "warn", "message": "x"}
+                    ],
+                    "components": [],
+                }
+            ],
+            "missing_invoices": [],
+            "unexpected_ids": [],
+            "overlapping_bdc_lots": [],
+            "certification": {"is_certified": True},
+            "conformity": {"score": 100.0},
+        }
+        article = [("Recadrage - vidéo courte (moins de 2 min)", 2, 4)]
+        bdc = _bdc("BDC-M6-0001", "24/11/2026", article, lots=("42",))
+
+        version = build_draft(
+            month="2026-11",
+            reporting_payload=None,
+            bdc_payload=[bdc],
+            snapshot={"analysis": analysis},
+        )
+
+        codes = {issue["code"]: issue["severity"] for issue in version["issues"]}
+        assert codes["compensated_lot_mismatch"] == "info"
+        errors = [item for item in version["issues"] if item["severity"] == "error"]
+        assert errors == []

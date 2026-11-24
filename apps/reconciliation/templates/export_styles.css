@@ -529,6 +529,68 @@ code {
   font-size: 1rem;
 }
 
+.video-strip {
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-soft);
+}
+
+.video-strip__head {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.video-strip__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.video-strip strong {
+  display: block;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.94rem;
+}
+
+.video-strip p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.video-strip__list {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+.video-strip__meta {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.video-strip__warn {
+  margin: 10px 0 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 0.8rem;
+}
+
 .certificate-strip {
   display: flex;
   gap: 14px;

@@ -39,7 +39,8 @@ LOT_SEQUENCE_CAPTURE_PATTERN = re.compile(r"(?:LOTS?\s*)[\d\s/,-]+", re.IGNORECA
 HEADER_KEYWORDS = ("description", "quant", "taux", "montant")
 MIN_COLUMNS_FOR_ARTICLE = 3
 
-BDC_NUMBER_PATTERN = re.compile(r"^BDC-\d{2,4}-\d{2,7}$")
+BDC_NUMBER_PATTERN = re.compile(r"^BDC-(?:[A-Z0-9]{1,12}-)+\d{1,8}$")
+BDC_NUMBER_SEARCH_PATTERN = re.compile(r"\bBDC-(?:[A-Z0-9]{1,12}-)+\d{1,8}\b", re.IGNORECASE)
 SUBTOTAL_PATTERN = re.compile(r"sous[- ]?total\s*(?:€\s*)?([\d\s\u00a0\u202f.,]+)", re.IGNORECASE)
 TOTAL_PATTERN = re.compile(r"\btotal\b\s*(?:€\s*)?([\d\s\u00a0\u202f.,]+)", re.IGNORECASE)
 MONEY_TOLERANCE = Decimal("0.01")
@@ -60,6 +61,40 @@ FOOTER_PATTERN = re.compile(
     re.IGNORECASE,
 )
 EXPECTED_LAYOUT_FINGERPRINT = "index | description | quantite | taux | montant"
+
+ANNEX_HEADER_SYNONYMS = {
+    "lot": {"lot", "n°", "no", "num"},
+    "video": {"video", "titre", "fichier", "nom"},
+    "duree": {"duree"},
+    "categorie": {"categorie"},
+    "montant": {"montant", "total"},
+}
+ANNEX_REQUIRED_COLUMNS = {"lot", "video", "duree", "categorie", "montant"}
+ANNEX_TITLE = re.compile(r"^annexe\b", re.IGNORECASE)
+ANNEX_DURATION_MIN_SEC_PATTERN = re.compile(r"^(\d{1,3})\s*min\s*(\d{1,2})$", re.IGNORECASE)
+ANNEX_DURATION_SEC_PATTERN = re.compile(r"^(\d{1,4})\s*s$", re.IGNORECASE)
+ANNEX_MONEY_PATTERN = re.compile(r"^\d{1,3}(?:[ \u00a0\u202f]\d{3})*,\d{2}$")
+ANNEX_CATEGORY_WORDS = {
+    "courte": "short",
+    "court": "short",
+    "standard": "standard",
+    "moyenne": "medium",
+    "moyen": "medium",
+    "longue": "long",
+    "long": "long",
+}
+ANNEX_SUMMARY_TOTAL = re.compile(
+    r"Total\s+des\s+vid[ée]os?\s*:\s*(\d+)\s+vid[ée]os?\s+([\d\s\u00a0\u202f.,]+)",
+    re.IGNORECASE,
+)
+ANNEX_SUMMARY_ROW = re.compile(r"^\d+\s*×")
+PERIOD_PATTERN = re.compile(r"P[ée]riode\s*:\s*(.+)", re.IGNORECASE)
+SIRET_PATTERN = re.compile(r"\bSIRET\b.*$", re.IGNORECASE)
+CONCERNED_LOTS_HEADER = re.compile(r"Lots?\s+concern[ée]s?\s*\(\s*(\d+)\s*\)", re.IGNORECASE)
+ANNEX_DECLARED_PATTERN = re.compile(
+    r"D[ée]tail\s+des?\s+(\d+)\s+vid[ée]os?\s+en\s+annexe", re.IGNORECASE
+)
+VIDEO_EXTENSION_PATTERN = re.compile(r"\s*(\.(?:mp4|mov|mxf|avi|mkv))$", re.IGNORECASE)
 
 DEFAULT_MAX_PDF_FILES = 200
 DEFAULT_MAX_PDF_BYTES = 20 * 1024 * 1024
@@ -588,6 +623,256 @@ def _extract_first_amount(value):
     return candidate
 
 
+def _parse_annex_duration(text: str) -> int | None:
+    """Convertit ``0 min 18`` / ``71 s`` en secondes."""
+    normalized = _normalize_cell(text)
+    if not normalized:
+        return None
+    match = ANNEX_DURATION_MIN_SEC_PATTERN.match(normalized)
+    if match:
+        return int(match.group(1)) * 60 + int(match.group(2))
+    match = ANNEX_DURATION_SEC_PATTERN.match(normalized)
+    if match:
+        return int(match.group(1))
+    return None
+
+
+def _is_annex_header_line(line) -> bool:
+    """Détecte ``Lot | Vidéo | Durée | Catégorie | Montant`` par coordonnées."""
+    names = set()
+    for word in line["words"]:
+        token = _normalize_header_text(word["text"]).strip(":.")
+        for name, synonyms in ANNEX_HEADER_SYNONYMS.items():
+            if token in synonyms:
+                names.add(name)
+                break
+    return ANNEX_REQUIRED_COLUMNS <= names
+
+
+def _looks_like_page_number(line, page_height: float) -> bool:
+    """Ignore le folio isolé en pied de page (``2``, ``3``…)."""
+    words = line["words"]
+    if len(words) != 1:
+        return False
+    if not re.fullmatch(r"\d{1,3}", words[0]["text"].strip()):
+        return False
+    return line["top"] > page_height - 80
+
+
+def _is_annex_page_text(text: str) -> bool:
+    first_line = next((line.strip() for line in text.splitlines() if line.strip()), "")
+    return bool(ANNEX_TITLE.match(first_line))
+
+
+def _annex_row_from_line(line, page_height: float, lot_top: float | None):
+    """Extrait une ligne d'annexe, pilotée par les types (montant → catégorie → durée).
+
+    Le titre occupe le reste des jetons : il peut contenir des nombres, ce qui
+    rend l'affectation par recouvrement horizontal fragile.  On repère donc les
+    colonnes de droite par leur type et tout ce qui précède est le titre.
+    """
+    if _looks_like_page_number(line, page_height):
+        return None
+
+    words = line["words"]
+    texts = [word["text"] for word in words]
+    if not texts:
+        return None
+
+    first = words[0]
+    lot_text = first["text"].strip()
+    if not re.fullmatch(r"\d{1,4}", lot_text):
+        return None
+    if lot_top is not None and first["x0"] > lot_top:
+        return None
+    if _normalize_header_text(first["text"]) in {"lot", "n°", "no", "num"}:
+        return None
+
+    body = texts[1:]
+    if not body:
+        return None
+
+    montant = ""
+    if ANNEX_MONEY_PATTERN.match(body[-1].strip()):
+        montant = body.pop()
+
+    category_label = None
+    if body:
+        candidate = _normalize_header_text(body[-1])
+        if candidate in ANNEX_CATEGORY_WORDS:
+            category_label = body.pop()
+
+    duration_text = None
+    duration_sec = None
+    # La durée s'écrit sur trois jetons (« 0 min 18 ») ou deux (« 71 s »).
+    if len(body) >= 3:
+        candidate = _normalize_cell(" ".join(body[-3:]))
+        if ANNEX_DURATION_MIN_SEC_PATTERN.match(candidate):
+            duration_text = candidate
+            duration_sec = _parse_annex_duration(candidate)
+            body = body[:-3]
+    if duration_sec is None and len(body) >= 2:
+        candidate = _normalize_cell(" ".join(body[-2:]))
+        if ANNEX_DURATION_SEC_PATTERN.match(candidate):
+            duration_text = candidate
+            duration_sec = _parse_annex_duration(candidate)
+            body = body[:-2]
+    if duration_sec is None and body:
+        candidate = body[-1].strip()
+        if ANNEX_DURATION_SEC_PATTERN.match(candidate):
+            duration_text = candidate
+            duration_sec = _parse_annex_duration(candidate)
+            body = body[:-1]
+
+    video_name = _normalize_cell(" ".join(body))
+    if not video_name:
+        return None
+    # Sans durée, la ligne est une continuation de titre et non une vidéo.
+    if duration_sec is None:
+        return None
+
+    return {
+        "lot": lot_text,
+        "video_name": video_name,
+        "duration_text": duration_text,
+        "duration_sec": duration_sec,
+        "category_label": category_label,
+        "montant": montant or None,
+    }
+
+
+def _extract_annex_items(pages) -> dict:
+    """Extrait l'annexe vidéo multi-pages d'un BDC détaillé.
+
+    Une vidéo peut occuper plusieurs lignes PDF : seule la première porte le lot,
+    la durée, la catégorie et le montant.  Les lignes suivantes n'ont pas
+    d'identifiant de lot et sont donc recollées au titre précédent.
+    """
+    items: list[dict] = []
+    summary: dict = {
+        "total_videos": None,
+        "total_ht": None,
+        "category_rows": [],
+        "pages": [],
+    }
+    lot_header_top: float | None = None
+
+    for page in pages:
+        text = page.extract_text() or ""
+        if not _is_annex_page_text(text):
+            continue
+        summary["pages"].append(page.page_number)
+        lines = _group_words_into_lines(page.extract_words())
+        header_seen = False
+        for line in lines:
+            if _is_annex_header_line(line):
+                header_seen = True
+                lot_words = [
+                    word
+                    for word in line["words"]
+                    if _normalize_header_text(word["text"]).strip(":.") in {"lot", "n°", "no"}
+                ]
+                if lot_words:
+                    lot_header_top = max(word["x1"] for word in lot_words)
+                continue
+            if not header_seen:
+                continue
+            if _looks_like_page_number(line, page.height):
+                continue
+
+            joined = _normalize_cell(" ".join(word["text"] for word in line["words"]))
+            if not joined:
+                continue
+            if ANNEX_SUMMARY_ROW.match(joined):
+                summary["category_rows"].append(joined)
+                continue
+            total_match = ANNEX_SUMMARY_TOTAL.search(joined)
+            if total_match:
+                summary["total_videos"] = total_match.group(1)
+                summary["total_ht"] = _to_decimal(total_match.group(2))
+                continue
+            if ANNEX_TITLE.match(joined) or joined.lower().startswith("bon de commande"):
+                continue
+
+            if not _annex_line_starts_lot(line, lot_header_top):
+                # Continuation d'un titre coupé sur plusieurs lignes.
+                if items:
+                    items[-1]["video_name"] = _normalize_cell(f"{items[-1]['video_name']} {joined}")
+                continue
+
+            row = _annex_row_from_line(line, page.height, lot_header_top)
+            if row:
+                items.append(row)
+
+    cleaned: list[dict] = []
+    for item in items:
+        if not item.get("video_name"):
+            continue
+        item["video_name"] = VIDEO_EXTENSION_PATTERN.sub(r"\1", _normalize_cell(item["video_name"]))
+        cleaned.append(item)
+    cleaned = [item for item in cleaned if item.get("duration_sec") is not None]
+    summary["total_ht"] = str(summary["total_ht"]) if summary["total_ht"] is not None else None
+    return {"items": cleaned, "summary": summary}
+
+
+def _annex_line_starts_lot(line, lot_header_top: float | None) -> bool:
+    """Une nouvelle vidéo commence par un identifiant numérique dans la colonne Lot."""
+    words = line["words"]
+    if not words:
+        return False
+    first = words[0]
+    if not re.fullmatch(r"\d{1,4}", first["text"].strip()):
+        return False
+    return lot_header_top is None or first["x0"] <= lot_header_top
+
+
+def _extract_period(text: str) -> str | None:
+    match = PERIOD_PATTERN.search(text)
+    if not match:
+        return None
+    value = SIRET_PATTERN.sub("", match.group(1))
+    value = _normalize_cell(value)
+    return value or None
+
+
+def _extract_concerned_lots(text: str) -> tuple[list[str], int | None]:
+    """Lit le bloc ``Lots concernés (N)`` et retourne les identifiants explicités."""
+    match = CONCERNED_LOTS_HEADER.search(text)
+    if not match:
+        return [], None
+    try:
+        declared = int(match.group(1))
+    except (TypeError, ValueError):
+        declared = None
+
+    block = text[match.end() :]
+    stop = re.search(r"#\s*Description", block, re.IGNORECASE)
+    if stop:
+        block = block[: stop.start()]
+    else:
+        stop = re.search(r"\n\s*(?:Sous-total|Total)\b", block, re.IGNORECASE)
+        if stop:
+            block = block[: stop.start()]
+
+    lots: list[str] = []
+    seen: set[str] = set()
+    for number in re.findall(r"\d{1,6}", block):
+        if number not in seen:
+            seen.add(number)
+            lots.append(number)
+    return lots, declared
+
+
+def _extract_annex_declared_count(text: str) -> int | None:
+    match = ANNEX_DECLARED_PATTERN.search(text)
+    if not match:
+        return None
+    try:
+        return int(match.group(1))
+    except (TypeError, ValueError):
+        return None
+
+
 def _extract_totals_from_words(words):
     subtotal = None
     total = None
@@ -607,6 +892,9 @@ def _extract_totals_from_words(words):
                     raw = _normalize_cell(" ".join(texts[index + 1 :]))
                     if raw.startswith("+"):
                         break
+                    # « Total des vidéos : 134 vidéos » n'est pas un total monétaire.
+                    if re.match(r"^(?:des|de)\b", raw, re.IGNORECASE):
+                        break
                     total = _extract_first_amount(raw)
                     break
 
@@ -621,7 +909,7 @@ def _extract_metadata_from_words(words):
         normalized = _normalize_header_text(joined)
 
         if metadata["numero_bdc"] is None:
-            match = re.search(r"\bBDC-\d{2,4}-\d{2,7}\b", joined, re.IGNORECASE)
+            match = BDC_NUMBER_SEARCH_PATTERN.search(joined)
             if match:
                 metadata["numero_bdc"] = match.group(0).upper()
 
@@ -778,7 +1066,130 @@ def validate_bdc_data(data) -> list[dict]:
             )
         )
 
+    issues.extend(_validate_detailed_format(data, articles, reference_total))
     return issues
+
+
+def _validate_detailed_format(data, articles, reference_total) -> list[dict]:
+    """Contrôles croisés non bloquants propres au format détaillé."""
+    issues: list[dict] = []
+    if str(data.get("bdc_format") or "simplified") != "detailed":
+        return issues
+
+    concerned_lots = list(data.get("concerned_lots") or [])
+    declared_count = data.get("concerned_lots_declared_count")
+    if declared_count is not None and len(concerned_lots) != declared_count:
+        issues.append(
+            _issue(
+                "lots_concernes_incoherents",
+                "warning",
+                f"Lots concernés : {len(concerned_lots)} identifiés "
+                f"pour {declared_count} annoncés.",
+            )
+        )
+
+    annex_videos = list(data.get("annex_videos") or [])
+    annex_lots = {str(item.get("lot")) for item in annex_videos if item.get("lot")}
+    if concerned_lots and annex_videos:
+        unknown_lots = sorted(annex_lots - set(concerned_lots))
+        if unknown_lots:
+            issues.append(
+                _issue(
+                    "annexe_lots_hors_perimetre",
+                    "warning",
+                    "Lots présents dans l'annexe mais absents de « Lots concernés » : "
+                    + ", ".join(unknown_lots[:10])
+                    + ("…" if len(unknown_lots) > 10 else "")
+                    + ".",
+                )
+            )
+
+    declared_videos = data.get("annex_declared_count")
+    if declared_videos is not None and annex_videos and len(annex_videos) != declared_videos:
+        issues.append(
+            _issue(
+                "annexe_volume_incoherent",
+                "warning",
+                f"Annexe : {len(annex_videos)} vidéos extraites "
+                f"pour {declared_videos} annoncées.",
+            )
+        )
+
+    article_quantity = 0
+    for article in articles:
+        quantity = _to_decimal(article.get("quantite"))
+        if quantity is not None:
+            article_quantity += int(quantity)
+    if annex_videos and article_quantity and len(annex_videos) != article_quantity:
+        issues.append(
+            _issue(
+                "annexe_quantite_incoherente",
+                "warning",
+                f"Annexe : {len(annex_videos)} vidéos extraites pour "
+                f"{article_quantity} quantité(s) facturée(s) sur la page 1.",
+            )
+        )
+
+    if annex_videos:
+        annex_amount = sum(
+            (_to_decimal(item.get("montant")) or Decimal("0")) for item in annex_videos
+        )
+        if reference_total is not None and abs(annex_amount - reference_total) > MONEY_TOLERANCE:
+            issues.append(
+                _issue(
+                    "annexe_montant_incoherent",
+                    "warning",
+                    f"Somme de l'annexe ({annex_amount}) ≠ total du BDC ({reference_total}).",
+                )
+            )
+
+        category_counts: dict[str, int] = {}
+        for item in annex_videos:
+            category = str(item.get("category") or "").strip().lower()
+            if not category:
+                category = _category_key_from_annex_label(item.get("category_label"))
+            if category:
+                category_counts[category] = category_counts.get(category, 0) + 1
+        article_counts: dict[str, int] = {}
+        for article in articles:
+            category = _category_key_from_annex_label(article.get("description"))
+            quantity = _to_decimal(article.get("quantite"))
+            if category and quantity is not None:
+                article_counts[category] = article_counts.get(category, 0) + int(quantity)
+        for category in sorted(set(category_counts) | set(article_counts)):
+            if category_counts.get(category, 0) != article_counts.get(category, 0):
+                issues.append(
+                    _issue(
+                        "annexe_categorie_incoherente",
+                        "warning",
+                        f"Catégorie « {category} » : {category_counts.get(category, 0)} vidéo(s) "
+                        f"en annexe pour {article_counts.get(category, 0)} facturée(s).",
+                    )
+                )
+
+    summary = data.get("annex_summary") or {}
+    summary_total = _to_decimal(summary.get("total_ht"))
+    if summary_total is not None and reference_total is not None:
+        if abs(summary_total - reference_total) > MONEY_TOLERANCE:
+            issues.append(
+                _issue(
+                    "annexe_total_incoherent",
+                    "warning",
+                    f"Total de l'annexe ({summary_total}) ≠ total du BDC ({reference_total}).",
+                )
+            )
+
+    return issues
+
+
+def _category_key_from_annex_label(value) -> str:
+    normalized = _normalize_header_text(str(value or ""))
+    if not normalized:
+        return ""
+    for word, key in ANNEX_CATEGORY_WORDS.items():
+        if re.search(rf"\b{re.escape(word)}\b", normalized):
+            return key
+    return ""
 
 
 def extract_bdc_data(pdf_path):
@@ -790,6 +1201,13 @@ def extract_bdc_data(pdf_path):
         "references": [],
         "articles": [],
         "totals": {"subtotal": None, "total": None},
+        "bdc_format": "simplified",
+        "period": None,
+        "concerned_lots": [],
+        "concerned_lots_declared_count": None,
+        "annex_videos": [],
+        "annex_declared_count": None,
+        "annex_summary": None,
     }
 
     with pdfplumber.open(pdf_path) as pdf:
@@ -798,11 +1216,13 @@ def extract_bdc_data(pdf_path):
         text = first_page.extract_text() or ""
 
         # 1. Extraction des métadonnées : regex d'abord, repli par coordonnées
-        bdc_match = re.search(r"Bon de commande\s+(BDC-[\d-]+)", text, re.IGNORECASE)
+        bdc_match = re.search(
+            r"Bon de commande\s+(BDC-(?:[A-Z0-9]{1,12}-)+\d{1,8})", text, re.IGNORECASE
+        )
         if bdc_match:
             data["numero_bdc"] = bdc_match.group(1).upper()
         else:
-            bdc_match = re.search(r"\bBDC-\d{2,4}-\d{2,7}\b", text, re.IGNORECASE)
+            bdc_match = BDC_NUMBER_SEARCH_PATTERN.search(text)
             if bdc_match:
                 data["numero_bdc"] = bdc_match.group(0).upper()
 
@@ -822,6 +1242,12 @@ def extract_bdc_data(pdf_path):
         if livraison_match:
             data["date_livraison"] = livraison_match.group(1)
 
+        data["period"] = _extract_period(text)
+        concerned_lots, declared_count = _extract_concerned_lots(text)
+        data["concerned_lots"] = concerned_lots
+        data["concerned_lots_declared_count"] = declared_count
+        data["annex_declared_count"] = _extract_annex_declared_count(text)
+
         first_page_words = first_page.extract_words()
         layout = _extract_layout(first_page_words, first_page.width)
         fallback = _extract_metadata_from_words(first_page_words)
@@ -833,8 +1259,20 @@ def extract_bdc_data(pdf_path):
         data["reference"] = reference_value
         data["references"] = reference_parts
 
-        # 2. Articles et totaux : lecture par coordonnées, repli sur les tables
+        # 2. Annexe vidéo éventuelle (pages 2+), avant les articles de la page 1
+        annex_payload = _extract_annex_items(pdf.pages[1:])
+        data["annex_videos"] = annex_payload["items"]
+        if annex_payload["summary"]["pages"]:
+            data["annex_summary"] = annex_payload["summary"]
+        if data["annex_videos"] or data["concerned_lots"]:
+            data["bdc_format"] = "detailed"
+
+        # 3. Articles et totaux : lecture par coordonnées, repli sur les tables.
+        # Les pages d'annexe sont exclues pour ne jamais polluer ``articles``.
+        annex_pages = set(annex_payload["summary"]["pages"])
         for page in pdf.pages:
+            if page.page_number in annex_pages:
+                continue
             words = first_page_words if page.page_number == 1 else page.extract_words()
             page_articles = _extract_articles_from_words(words, page.width)
             tables = []

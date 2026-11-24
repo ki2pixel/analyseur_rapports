@@ -86,9 +86,9 @@ def _cache_key(path: Path, subfolder: Path) -> str:
 @dataclass
 class CategoryThresholds:
     short_lt: int = 120  # < 2 min
-    standard_lt: int = 300  # < 5 min
-    medium_lt: int = 420  # < 7 min
-    long_ge: int = 420  # >= 7 min
+    standard_lt: int = 300  # 2 à 5 min
+    medium_lt: int = 480  # 5 à 8 min (aligné sur les BDC média)
+    long_ge: int = 480  # >= 8 min
 
 
 DEFAULT_THRESHOLDS = CategoryThresholds()
@@ -358,9 +358,9 @@ def categorize(duration: Optional[float], th: CategoryThresholds) -> Optional[st
         return "short"
     if duration < th.standard_lt:  # [120, 300[ -> 2 à 5 min
         return "standard"
-    if duration < th.medium_lt:  # [300, 420[ -> 5 à 7 min
+    if duration < th.medium_lt:  # [300, 480[ -> 5 à 8 min
         return "medium"
-    # [420, +inf[ -> >= 7 min (corrige l'angle mort à 420.0s)
+    # [480, +inf[ -> >= 8 min (corrige l'angle mort à 480.0s)
     return "long"
 
 
@@ -442,8 +442,8 @@ def analyze_month(
         cats: Dict[str, CategoryResult] = {
             "standard": CategoryResult("vidéo standard (entre 2 et 5 minutes)", 0, []),
             "short": CategoryResult("vidéo courte (moins de 2 min)", 0, []),
-            "medium": CategoryResult("vidéo moyenne (entre 5 et 7 minutes)", 0, []),
-            "long": CategoryResult("vidéo longue (7 min et plus)", 0, []),
+            "medium": CategoryResult("vidéo moyenne (entre 5 et 8 minutes)", 0, []),
+            "long": CategoryResult("vidéo longue (8 min et plus)", 0, []),
         }
         seen_names: set[str] = set()
         for video in vids:
@@ -515,10 +515,10 @@ def analyze_batch(batch: MonthlyBatch, thresholds: CategoryThresholds) -> List[V
                 label="vidéo standard (entre 2 et 5 minutes)", count=0, files=[]
             ),
             VideoCategory.MEDIUM: VideoGroupCategory(
-                label="vidéo moyenne (entre 5 et 7 minutes)", count=0, files=[]
+                label="vidéo moyenne (entre 5 et 8 minutes)", count=0, files=[]
             ),
             VideoCategory.LONG: VideoGroupCategory(
-                label="vidéo longue (7 min et plus)", count=0, files=[]
+                label="vidéo longue (8 min et plus)", count=0, files=[]
             ),
         }
 

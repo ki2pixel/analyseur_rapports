@@ -128,12 +128,30 @@
       articles.className = "badge badge--neutral";
       articles.textContent = `${doc.articles_count || 0} article(s)`;
       head.appendChild(articles);
+      if (doc.bdc_format === "detailed") {
+        const annexCount = doc.annex_videos_count || 0;
+        head.appendChild(
+          badge(`Détaillé${annexCount ? ` (${annexCount} vidéos)` : ""}`, "badge--ok")
+        );
+      } else {
+        head.appendChild(badge("Simplifié", "badge--neutral"));
+      }
       card.appendChild(head);
 
       const reference = document.createElement("p");
       reference.className = "doc-card__ref";
       reference.textContent = doc.reference || "Référence de lots non détectée";
       card.appendChild(reference);
+
+      if (doc.bdc_format === "detailed") {
+        const detail = document.createElement("p");
+        detail.className = "muted muted--tight";
+        const parts = [];
+        if (doc.period) parts.push(`Période : ${doc.period}`);
+        if (doc.concerned_lots_count) parts.push(`${doc.concerned_lots_count} lots concernés`);
+        detail.textContent = parts.join(" · ");
+        if (detail.textContent) card.appendChild(detail);
+      }
 
       const filename = document.createElement("p");
       filename.className = "muted muted--tight";

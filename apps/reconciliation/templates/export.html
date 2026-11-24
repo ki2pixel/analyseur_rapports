@@ -17,8 +17,8 @@
 {% set categories = [
   ("short", "Courte", "< 2 min", "Courtes"),
   ("standard", "Standard", "2 – 5 min", "Standards"),
-  ("medium", "Moyenne", "5 – 7 min", "Moyennes"),
-  ("long", "Longue", "≥ 7 min", "Longues")
+  ("medium", "Moyenne", "5 – 8 min", "Moyennes"),
+  ("long", "Longue", "≥ 8 min", "Longues")
 ] %}
 {% set differences = vm.cluster_differences|default([], true) %}
 {% set all_clusters = vm.cluster_results_sorted|default(vm.cluster_results|default(differences, true), true) %}
@@ -371,6 +371,68 @@
           <span><strong>{{ order_count }}</strong> commandes</span>
           <span><strong>{{ overlaps|length }}</strong> chevauchement{{ "s" if overlaps|length > 1 else "" }}</span>
         </div>
+
+        {% set video_detail = vm.video_detail|default(None, true) %}
+        {% if video_detail %}
+          <div class="video-strip">
+            <div class="video-strip__head">
+              <span class="video-strip__icon">{{ svg_icon("check", 18) }}</span>
+              <div>
+                <strong>Rapprochement vidéo — BDC détaillé{{ "s" if video_detail.bdc_numbers|length > 1 else "" }} ({{ video_detail.bdc_numbers|join(" · ") }})</strong>
+                <p>
+                  {{ video_detail.matched }} / {{ video_detail.annex_total }} vidéos de l’annexe
+                  rapprochées d’un fichier de production
+                  ({{ "%.1f"|format(video_detail.match_rate)|replace(".", ",") }} %).
+                  {% set drift_count = video_detail.duration_drifts|length %}
+                  {% if drift_count %}
+                    {{ drift_count }} dérive{{ "s" if drift_count > 1 else "" }} de durée non
+                    bloquante{{ "s" if drift_count > 1 else "" }} : la catégorie facturée reste
+                    identique, le montant n’est donc pas affecté.
+                  {% else %}
+                    Aucune dérive de durée.
+                  {% endif %}
+                </p>
+              </div>
+            </div>
+            {% if video_detail.duration_drifts %}
+              <ul class="video-strip__list">
+                {% for drift in video_detail.duration_drifts %}
+                  {% set drift_cat = drift.bdc_category or drift.production_category %}
+                  {% set drift_label = namespace(value=drift_cat) %}
+                  {% for key, label, _threshold, _plural in categories %}
+                    {% if key == drift_cat %}
+                      {% set drift_label.value = label %}
+                    {% endif %}
+                  {% endfor %}
+                  <li>
+                    Lot {{ drift.lot }} — {{ drift.name }}
+                    <span class="video-strip__meta">
+                      BDC {{ "%.0f"|format(drift.bdc_duration_sec) }} s
+                      · archive {{ "%.1f"|format(drift.production_duration_sec)|replace(".", ",") }} s
+                      · {{ drift_label.value }}
+                    </span>
+                  </li>
+                {% endfor %}
+              </ul>
+            {% endif %}
+            {% if video_detail.missing_in_production %}
+              <p class="video-strip__warn">
+                {{ video_detail.missing_in_production|length }} vidéo{{ "s" if video_detail.missing_in_production|length > 1 else "" }}
+                facturée{{ "s" if video_detail.missing_in_production|length > 1 else "" }}
+                sur l’annexe {{ "sont" if video_detail.missing_in_production|length > 1 else "est" }}
+                introuvable{{ "s" if video_detail.missing_in_production|length > 1 else "" }}
+                dans la production.
+              </p>
+            {% endif %}
+            {% if video_detail.missing_lots %}
+              <p class="video-strip__meta">
+                Lots produits sans BDC ce mois-ci :
+                {{ video_detail.missing_lots|join(", ") }} — ils constituent l’écart du mois
+                et ne relèvent pas de l’annexe.
+              </p>
+            {% endif %}
+          </div>
+        {% endif %}
 
         {% if is_certified %}
           <div class="certificate-strip">

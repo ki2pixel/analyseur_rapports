@@ -522,6 +522,60 @@ def _build_annex_summary(
     }
 
 
+def _clusters_with_video_detail(cluster_results: List[dict]) -> List[dict]:
+    return [cluster for cluster in cluster_results if cluster.get("has_video_detail")]
+
+
+def _build_video_detail_summary(
+    cluster_results: List[dict],
+    missing_invoices: List[dict],
+) -> Optional[dict]:
+    """Agrège le rapprochement vidéo des BDC détaillés pour l'export.
+
+    Retourne ``None`` quand le mois ne contient aucun BDC détaillé : les mois
+    entièrement simplifiés gardent un export inchangé.
+    """
+    clusters = _clusters_with_video_detail(cluster_results)
+    if not clusters:
+        return None
+
+    annex_total = 0
+    counts: Dict[str, int] = {}
+    drifts: List[dict] = []
+    missing: List[dict] = []
+    bdc_numbers: List[str] = []
+    for cluster in clusters:
+        reconciliation = cluster.get("video_reconciliation") or {}
+        annex_total += int(reconciliation.get("annex_total") or 0)
+        for key, value in (reconciliation.get("counts") or {}).items():
+            counts[key] = counts.get(key, 0) + int(value or 0)
+        drifts.extend(reconciliation.get("duration_drifts") or [])
+        missing.extend(
+            item
+            for item in (reconciliation.get("items") or [])
+            if item.get("status") == "missing_in_production"
+        )
+        for number in reconciliation.get("bdc_numbers") or []:
+            if number not in bdc_numbers:
+                bdc_numbers.append(str(number))
+
+    matched = counts.get("matched", 0) + counts.get("duration_drift", 0)
+    missing_lots = [
+        str(item.get("id_camille") or "") for item in missing_invoices if item.get("id_camille")
+    ]
+
+    return {
+        "bdc_numbers": bdc_numbers,
+        "annex_total": annex_total,
+        "matched": matched,
+        "match_rate": round(100 * matched / annex_total, 1) if annex_total else 0.0,
+        "counts": counts,
+        "duration_drifts": drifts,
+        "missing_in_production": missing,
+        "missing_lots": missing_lots,
+    }
+
+
 def _build_view_model(analysis: dict, *, strip_justified_duplicates: bool = False) -> dict:
     analysis = analysis or {}
     cluster_results = analysis.get("cluster_results") or analysis.get("cluster_differences") or []
@@ -568,6 +622,7 @@ def _build_view_model(analysis: dict, *, strip_justified_duplicates: bool = Fals
         "certification": certification,
         "balance": balance,
         "annex": annex,
+        "video_detail": _build_video_detail_summary(cluster_results, missing_invoices),
         "review_count": len(review_clusters),
         "review_clusters": review_clusters,
         "cluster_results_sorted": sorted(cluster_results, key=_cluster_sort_key),

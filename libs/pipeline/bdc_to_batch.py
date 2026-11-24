@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 from libs.schemas import (
+    AnnexeVideoItem,
     MonthlyBatch,
     OrderArticle,
     PurchaseOrder,
@@ -28,7 +29,7 @@ _CATEGORY_DURATION_MAP = {
     VideoCategory.SHORT: 90,
     VideoCategory.STANDARD: 240,
     VideoCategory.MEDIUM: 360,
-    VideoCategory.LONG: 480,
+    VideoCategory.LONG: 540,
 }
 
 
@@ -44,19 +45,47 @@ def infer_category_from_description(description: str) -> VideoCategory:
 
     if any(
         keyword in desc_lower
-        for keyword in ("long", "longue", "plus de 7", "plus de 8", "> 7", "> 8", ">7", ">8")
+        for keyword in (
+            "long",
+            "longue",
+            "plus de 7",
+            "plus de 8",
+            "8 min et plus",
+            "> 7",
+            "> 8",
+            ">7",
+            ">8",
+        )
     ):
         return VideoCategory.LONG
 
     if any(
         keyword in desc_lower
-        for keyword in ("moyen", "moyenne", "medium", "entre 5 et 7", "5 à 7", "5-7")
+        for keyword in (
+            "moyen",
+            "moyenne",
+            "medium",
+            "de 5 à 8",
+            "5 à 8",
+            "entre 5 et 8",
+            "5-8",
+            "entre 5 et 7",
+            "5 à 7",
+            "5-7",
+        )
     ):
         return VideoCategory.MEDIUM
 
     if any(
         keyword in desc_lower
-        for keyword in ("standard", "entre 2 et 5", "entre 3 et 5", "2-5", "3-5")
+        for keyword in (
+            "standard",
+            "de 2 à 5",
+            "entre 2 et 5",
+            "entre 3 et 5",
+            "2-5",
+            "3-5",
+        )
     ):
         return VideoCategory.STANDARD
 
@@ -66,6 +95,41 @@ def infer_category_from_description(description: str) -> VideoCategory:
         return VideoCategory.SHORT
 
     return VideoCategory.UNKNOWN
+
+
+def _parse_annex_video_item(raw: Dict) -> Optional[AnnexeVideoItem]:
+    """Convertit une entrée d'annexe JSON en ``AnnexeVideoItem`` validé."""
+    if not isinstance(raw, dict):
+        return None
+    video_name = str(raw.get("video_name") or "").strip()
+    lot = str(raw.get("lot") or "").strip()
+    if not video_name or not lot:
+        return None
+
+    duration_sec: Optional[int] = None
+    raw_duration = raw.get("duration_sec")
+    if raw_duration is not None:
+        try:
+            parsed_duration = int(round(float(raw_duration)))
+        except (TypeError, ValueError):
+            parsed_duration = None
+        if parsed_duration is not None and parsed_duration >= 0:
+            duration_sec = parsed_duration
+
+    category_label = raw.get("category_label")
+    inferred = VideoCategory.UNKNOWN
+    if category_label:
+        inferred = infer_category_from_description(str(category_label))
+
+    return AnnexeVideoItem(
+        lot=lot,
+        video_name=video_name,
+        duration_text=raw.get("duration_text"),
+        duration_sec=duration_sec,
+        category_label=str(category_label) if category_label else None,
+        inferred_category=inferred,
+        montant=raw.get("montant"),
+    )
 
 
 def parse_bdc_json_to_orders(bdc_data: List[Dict]) -> List[PurchaseOrder]:
@@ -111,6 +175,17 @@ def parse_bdc_json_to_orders(bdc_data: List[Dict]) -> List[PurchaseOrder]:
             except (ValueError, TypeError, KeyError) as exc:
                 skipped_articles.append(f"article ignoré: {exc}")
 
+        annex_videos = [
+            item
+            for item in (_parse_annex_video_item(raw) for raw in bdc_item.get("annex_videos") or [])
+            if item is not None
+        ]
+        bdc_format = str(bdc_item.get("bdc_format") or "").strip().lower()
+        if bdc_format not in {"simplified", "detailed"}:
+            bdc_format = (
+                "detailed" if (annex_videos or bdc_item.get("concerned_lots")) else "simplified"
+            )
+
         try:
             order = PurchaseOrder(
                 numero_bdc=bdc_item.get("numero_bdc") or "",
@@ -119,6 +194,10 @@ def parse_bdc_json_to_orders(bdc_data: List[Dict]) -> List[PurchaseOrder]:
                 reference=bdc_item.get("reference"),
                 references=bdc_item.get("references", []),
                 articles=articles,
+                bdc_format=bdc_format,
+                period=bdc_item.get("period"),
+                concerned_lots=[str(lot) for lot in (bdc_item.get("concerned_lots") or [])],
+                annex_videos=annex_videos,
             )
             orders.append(order)
         except (ValueError, KeyError) as exc:
@@ -242,6 +321,48 @@ def _parse_quantity(value: Optional[str]) -> int:
     return parse_quantity(value)
 
 
+def _annex_entries_for_order(
+    order: PurchaseOrder, batch_id: str
+) -> tuple[List[VideoEntry], int, int]:
+    """Construit les ``VideoEntry`` d'une annexe détaillée.
+
+    Retourne les entrées, le nombre d'items ignorés (lot/nom manquant) et le
+    nombre de durées absentes (durée déduite de la catégorie).
+    """
+    entries: List[VideoEntry] = []
+    skipped = 0
+    missing_duration = 0
+    for index, item in enumerate(order.annex_videos):
+        if not item.lot or not item.video_name:
+            skipped += 1
+            continue
+        duration = item.duration_sec
+        source = "bdc_annex"
+        if duration is None:
+            duration = _CATEGORY_DURATION_MAP.get(item.inferred_category)
+            source = "bdc_annex_category"
+            missing_duration += 1
+        if duration is None:
+            skipped += 1
+            continue
+        entries.append(
+            VideoEntry(
+                video_id=f"{order.numero_bdc}-annex-{index}",
+                id_camille=item.lot,
+                person="",
+                month=batch_id,
+                video_name=item.video_name,
+                video_path=f"bdc://{order.numero_bdc}/annex/{index}",
+                duration_sec=float(duration),
+                duration_source=source,
+                archive_folder=f"bdc:{order.numero_bdc}",
+                source_bdc=order.numero_bdc,
+                source_article_index=index,
+            )
+        )
+    return entries, skipped, missing_duration
+
+
 def _orders_to_video_entries(
     batch_id: str, orders: List[PurchaseOrder]
 ) -> tuple[List[VideoEntry], List[str]]:
@@ -250,7 +371,17 @@ def _orders_to_video_entries(
     zero_quantity_lines = 0
     unknown_articles = 0
     empty_orders = 0
+    annex_skipped = 0
+    annex_missing_duration = 0
+    annex_orders = 0
     for order in orders:
+        if order.bdc_format == "detailed" and order.annex_videos:
+            annex_orders += 1
+            order_entries, skipped, missing_duration = _annex_entries_for_order(order, batch_id)
+            annex_skipped += skipped
+            annex_missing_duration += missing_duration
+            entries.extend(order_entries)
+            continue
         if not order.articles:
             empty_orders += 1
             continue
@@ -298,6 +429,19 @@ def _orders_to_video_entries(
         warnings.append(f"{zero_quantity_lines} ligne(s) BDC à quantité nulle ignorée(s).")
     if empty_orders:
         warnings.append(f"{empty_orders} bon(s) de commande sans article ignoré(s).")
+    if annex_skipped:
+        warnings.append(
+            f"{annex_skipped} vidéo(s) d'annexe ignorée(s) (lot, nom ou durée indisponible)."
+        )
+    if annex_missing_duration:
+        warnings.append(
+            f"{annex_missing_duration} vidéo(s) d'annexe sans durée explicite : "
+            "durée estimée depuis la catégorie BDC."
+        )
+    if annex_orders:
+        warnings.append(
+            f"{annex_orders} bon(s) de commande détaillé(s) : vidéos issues de l'annexe."
+        )
     return entries, warnings
 
 

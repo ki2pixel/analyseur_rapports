@@ -80,6 +80,144 @@ def test_golden_corpus(document):
 
 
 @pytest.mark.parametrize("document", DOCUMENTS, ids=lambda doc: doc["filename"])
+def test_golden_corpus_format_detail(document):
+    """Le format simplifié reste inchangé ; le détaillé expose son annexe."""
+    expected = _load_expected(document)
+    actual = extract_bdc_data(str(FIXTURES / "pdfs" / document["filename"]))
+
+    assert actual["bdc_format"] == expected.get("expected_bdc_format", "simplified")
+    if actual["bdc_format"] == "detailed":
+        assert actual["period"] == expected["expected_period"]
+        assert actual["concerned_lots"] == expected["expected_concerned_lots"]
+        assert len(actual["annex_videos"]) == expected["expected_annex_count"]
+        assert actual["annex_summary"]["total_ht"] == expected["expected_annex_total_ht"]
+    else:
+        assert actual["period"] is None
+        assert actual["concerned_lots"] == []
+        assert actual["annex_videos"] == []
+
+
+def test_detailed_bdc_annex_is_not_mixed_into_articles():
+    """Les lignes de l'annexe ne doivent jamais polluer le tableau d'articles."""
+    actual = extract_bdc_data(str(FIXTURES / "pdfs" / "BDC-M6-0001.pdf"))
+
+    assert [article["description"] for article in actual["articles"]] == [
+        "Recadrage - vidéo courte (moins de 2 min)",
+        "Recadrage - vidéo standard (de 2 à 5 min)",
+        "Recadrage - vidéo moyenne (de 5 à 8 min)",
+    ]
+    assert len(actual["annex_videos"]) == 134
+    assert all(item["video_name"] for item in actual["annex_videos"])
+
+
+def test_detailed_bdc_annex_reconstructs_wrapped_titles():
+    actual = extract_bdc_data(str(FIXTURES / "pdfs" / "BDC-M6-0001.pdf"))
+
+    names = {item["video_name"] for item in actual["annex_videos"]}
+    assert "Cathy s'est fait courtiser par un agriculteur d'une autre saison !.mp4" in names
+    assert "Gulli - MSL1 - Kondogbia co-animateur de « Ma Super Ligue 1 ».mp4" in names
+
+
+def test_detailed_bdc_extracts_mov_and_duration_variants():
+    actual = extract_bdc_data(str(FIXTURES / "pdfs" / "BDC-M6-0001.pdf"))
+    by_lot = {}
+    for item in actual["annex_videos"]:
+        by_lot.setdefault(item["lot"], []).append(item)
+
+    mov_names = sorted(
+        item["video_name"] for item in actual["annex_videos"] if item["video_name"].endswith(".mov")
+    )
+    assert mov_names == [
+        "LMCR2_RS BFC EXTRAIT 2.Copy.01.mov",
+        "LMCR3 - EP26 CVDL 1 RS EXTRAIT 1.mov",
+        "LMCR3 - EP26 CVDL 1 RS EXTRAIT 2.mov",
+    ]
+    lot_166 = by_lot["166"][0]
+    assert lot_166["duration_sec"] == 7 * 60 + 41
+    assert lot_166["category_label"] == "moyenne"
+
+
+def test_detailed_bdc_ignores_page_numbers_and_summary_rows():
+    actual = extract_bdc_data(str(FIXTURES / "pdfs" / "BDC-M6-0001.pdf"))
+
+    lots = {item["lot"] for item in actual["annex_videos"]}
+    assert "2" not in lots and "6" not in lots
+    assert lots == set(actual["concerned_lots"])
+    assert actual["annex_summary"]["total_videos"] == "134"
+    assert actual["annex_declared_count"] == 134
+
+
+def test_detailed_bdc_cross_checks_are_silent_when_coherent():
+    actual = extract_bdc_data(str(FIXTURES / "pdfs" / "BDC-M6-0001.pdf"))
+
+    codes = [issue["code"] for issue in actual["warnings"]]
+    assert "annexe_volume_incoherent" not in codes
+    assert "annexe_montant_incoherent" not in codes
+    assert "annexe_categorie_incoherente" not in codes
+    assert "lots_concernes_incoherents" not in codes
+
+
+def test_validate_detailed_format_reports_volume_mismatch():
+    data = {
+        "numero_bdc": "BDC-M6-0001",
+        "date_commande": "24/11/2026",
+        "date_livraison": "24/11/2026",
+        "reference": "LOTS 42 À 311",
+        "references": ["LOTS 42 à 311"],
+        "bdc_format": "detailed",
+        "concerned_lots": ["42", "45"],
+        "concerned_lots_declared_count": 3,
+        "annex_declared_count": 4,
+        "annex_videos": [
+            {
+                "lot": "42",
+                "video_name": "a.mp4",
+                "duration_sec": 30,
+                "category_label": "courte",
+                "montant": "4,00",
+            }
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "2,00",
+                "taux": "4,00",
+                "montant": "8,00",
+            }
+        ],
+        "totals": {"subtotal": "8,00", "total": "8,00"},
+    }
+
+    codes = {issue["code"] for issue in validate_bdc_data(data)}
+    assert "lots_concernes_incoherents" in codes
+    assert "annexe_volume_incoherent" in codes
+    assert "annexe_quantite_incoherente" in codes
+
+
+@pytest.mark.parametrize(
+    "numero",
+    [
+        "BDC-26-1882",
+        "BDC-M6-0001",
+        "BDC-W9-0001",
+        "BDC-6TER-0001",
+        "BDC-2026-M6-0001",
+    ],
+)
+def test_bdc_number_pattern_accepts_variants(numero):
+    from apps.bdc_converter.convert_bdc import BDC_NUMBER_PATTERN
+
+    assert BDC_NUMBER_PATTERN.match(numero)
+
+
+@pytest.mark.parametrize("numero", ["BDC-", "BDC-M6", "26-1882", "BDC-M6-"])
+def test_bdc_number_pattern_rejects_invalid(numero):
+    from apps.bdc_converter.convert_bdc import BDC_NUMBER_PATTERN
+
+    assert not BDC_NUMBER_PATTERN.match(numero)
+
+
+@pytest.mark.parametrize("document", DOCUMENTS, ids=lambda doc: doc["filename"])
 def test_corpus_invariants(document):
     expected = _load_expected(document)
     amounts = []

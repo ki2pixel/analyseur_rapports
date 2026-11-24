@@ -1,0 +1,1307 @@
+[
+    {
+        "numero_bdc": "BDC-26-1882",
+        "date_commande": "03/11/2026",
+        "date_livraison": "03/11/2026",
+        "reference": "LOTS 2/8/20/35/37",
+        "references": [
+            "LOTS 2",
+            "8",
+            "20",
+            "35",
+            "37"
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "10,00",
+                "unite": "Unité",
+                "taux": "4,00",
+                "montant": "40,00"
+            },
+            {
+                "description": "Recadrage - vidéo standard (entre 3 et 5 minutes)",
+                "quantite": "1,00",
+                "unite": "Unité",
+                "taux": "8,00",
+                "montant": "8,00"
+            }
+        ],
+        "totals": {
+            "subtotal": "48,00",
+            "total": "48,00"
+        },
+        "bdc_format": "simplified",
+        "period": null,
+        "concerned_lots": [],
+        "concerned_lots_declared_count": null,
+        "annex_videos": [],
+        "annex_declared_count": null,
+        "annex_summary": null,
+        "layout": {
+            "fingerprint": "index | description | quantite | taux | montant",
+            "expected": "index | description | quantite | taux | montant",
+            "changed": false,
+            "columns": [
+                {
+                    "name": "index",
+                    "label": "#"
+                },
+                {
+                    "name": "description",
+                    "label": "Description"
+                },
+                {
+                    "name": "quantite",
+                    "label": "Quantité"
+                },
+                {
+                    "name": "taux",
+                    "label": "Taux"
+                },
+                {
+                    "name": "montant",
+                    "label": "Montant"
+                }
+            ]
+        },
+        "warnings": [],
+        "status": "ok",
+        "source_filename": "BDC-26-1882.pdf"
+    },
+    {
+        "numero_bdc": "BDC-M6-0001",
+        "date_commande": "24/11/2026",
+        "date_livraison": "24/11/2026",
+        "reference": "LOTS 42 à 311",
+        "references": [
+            "LOTS 42 à 311"
+        ],
+        "articles": [
+            {
+                "description": "Recadrage - vidéo courte (moins de 2 min)",
+                "quantite": "91,00",
+                "unite": "Unité",
+                "taux": "4,00",
+                "montant": "364,00"
+            },
+            {
+                "description": "Recadrage - vidéo standard (de 2 à 5 min)",
+                "quantite": "42,00",
+                "unite": "Unité",
+                "taux": "8,00",
+                "montant": "336,00"
+            },
+            {
+                "description": "Recadrage - vidéo moyenne (de 5 à 8 min)",
+                "quantite": "1,00",
+                "unite": "Unité",
+                "taux": "12,00",
+                "montant": "12,00"
+            }
+        ],
+        "totals": {
+            "subtotal": "712,00",
+            "total": "712,00"
+        },
+        "bdc_format": "detailed",
+        "period": "Lots 42 et + · 11/2026",
+        "concerned_lots": [
+            "42",
+            "45",
+            "50",
+            "54",
+            "58",
+            "62",
+            "68",
+            "77",
+            "78",
+            "79",
+            "80",
+            "81",
+            "82",
+            "86",
+            "89",
+            "104",
+            "105",
+            "106",
+            "112",
+            "113",
+            "114",
+            "115",
+            "116",
+            "117",
+            "131",
+            "136",
+            "158",
+            "166",
+            "173",
+            "179",
+            "181",
+            "183",
+            "185",
+            "186",
+            "194",
+            "195",
+            "196",
+            "200",
+            "201",
+            "209",
+            "213",
+            "215",
+            "216",
+            "219",
+            "223",
+            "226",
+            "229",
+            "230",
+            "231",
+            "233",
+            "235",
+            "236",
+            "238",
+            "239",
+            "240",
+            "242",
+            "245",
+            "251",
+            "256",
+            "259",
+            "263",
+            "265",
+            "267",
+            "268",
+            "270",
+            "271",
+            "272",
+            "277",
+            "280",
+            "291",
+            "296",
+            "306",
+            "311"
+        ],
+        "concerned_lots_declared_count": 73,
+        "annex_videos": [
+            {
+                "lot": "42",
+                "video_name": "Le lapsus d’Olivier Minne déclenche un fou rire sur le plateau.mp4",
+                "duration_text": "0 min 18",
+                "duration_sec": 18,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "45",
+                "video_name": "M6+ - Younger – Extrait 1 - Liza et Josh au bar.mp4",
+                "duration_text": "1 min 20",
+                "duration_sec": 80,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "50",
+                "video_name": "Cathy s'est fait courtiser par un agriculteur d'une autre saison !.mp4",
+                "duration_text": "1 min 24",
+                "duration_sec": 84,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "54",
+                "video_name": "UJUD - CLIENT HOTEL.mp4",
+                "duration_text": "3 min 36",
+                "duration_sec": 216,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "58",
+                "video_name": "UJUD - CROUSTY.mp4",
+                "duration_text": "1 min 36",
+                "duration_sec": 96,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "62",
+                "video_name": "SHORT_E=M6 - EP NINO - V3.mp4",
+                "duration_text": "1 min 31",
+                "duration_sec": 91,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "62",
+                "video_name": "SHORT_oléagineux.mp4",
+                "duration_text": "1 min 10",
+                "duration_sec": 70,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "68",
+                "video_name": "6ter - De l'autre côté du périph.mp4",
+                "duration_text": "0 min 39",
+                "duration_sec": 39,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "77",
+                "video_name": "UJUD - CHAT HYPOALLERGENIQUE.mp4",
+                "duration_text": "2 min 15",
+                "duration_sec": 135,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "77",
+                "video_name": "UJUD - HOTEL POUR CHATS.mp4",
+                "duration_text": "1 min 55",
+                "duration_sec": 115,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "78",
+                "video_name": "Gulli - MSL1 - Kondogbia co-animateur de « Ma Super Ligue 1 ».mp4",
+                "duration_text": "0 min 41",
+                "duration_sec": 41,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "79",
+                "video_name": "Gulli - MSL1 - Léo, 7 ans, interviewe Matthis Abline.mp4",
+                "duration_text": "1 min 59",
+                "duration_sec": 119,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "79",
+                "video_name": "Gulli - MSL1 - Ripart fait une surprise à ces deux supporters.mp4",
+                "duration_text": "1 min 56",
+                "duration_sec": 116,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "80",
+                "video_name": "Gulli - MSL1 - L’interview « Quand j’étais petit » d’Igor Paixão.mp4",
+                "duration_text": "1 min 19",
+                "duration_sec": 79,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "80",
+                "video_name": "Leur belle-mère leur pourrit la vie !.mp4",
+                "duration_text": "1 min 28",
+                "duration_sec": 88,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "81",
+                "video_name": "Elles refusent 500 000 euros d'héritage !.mp4",
+                "duration_text": "1 min 09",
+                "duration_sec": 69,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "81",
+                "video_name": "Ils pensent que leur belle-mère n'est là que pour l'argent !.mp4",
+                "duration_text": "1 min 40",
+                "duration_sec": 100,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "81",
+                "video_name": "Sa fille l’accuse d’avoir un cancer à cause de lui !.mp4",
+                "duration_text": "1 min 21",
+                "duration_sec": 81,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "82",
+                "video_name": "Il tue cette femme car elle s’est mal garée !.mp4",
+                "duration_text": "2 min 53",
+                "duration_sec": 173,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "86",
+                "video_name": "Extrait 3 - EM6 (Duo Hair Suspension) Elle soulève sa partenaire à plusieurs mètres du sol par les cheveux.mp4",
+                "duration_text": "0 min 59",
+                "duration_sec": 59,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "86",
+                "video_name": "Extrait 4 - (Roman Rozier) Il joue du piano comme un véritable virtuose.mp4",
+                "duration_text": "1 min 25",
+                "duration_sec": 85,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "89",
+                "video_name": "M6 - Le seigneur des anneaux les anneaux de pouvoir - Troll des neiges.mp4",
+                "duration_text": "1 min 26",
+                "duration_sec": 86,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "104",
+                "video_name": "Extrait 5 - EM6 (Morph) Une chorégraphie inspirée de la maladie de Parkinson de son grand-père _TAT_M6.mp4",
+                "duration_text": "1 min 00",
+                "duration_sec": 60,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "104",
+                "video_name": "Extrait 6 - EM6 (Gildo Gomes) Il fond en larmes en répondant à la question d'Éric Antoine _TAT_M6.mp4",
+                "duration_text": "0 min 34",
+                "duration_sec": 34,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "104",
+                "video_name": "Extrait 7 - EM6 (Afonso the echo man) Sa voix est capable de créer un effet d’écho_TAT_M6.mp4",
+                "duration_text": "1 min 28",
+                "duration_sec": 88,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "104",
+                "video_name": "Il déteste la communauté LGBTQIA+.mp4",
+                "duration_text": "1 min 49",
+                "duration_sec": 109,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "104",
+                "video_name": "Manifestations antifascistes VS ultradroite !.mp4",
+                "duration_text": "2 min 58",
+                "duration_sec": 178,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "105",
+                "video_name": "Ces militants nationalistes apprennent à se battre.mp4",
+                "duration_text": "1 min 17",
+                "duration_sec": 77,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "105",
+                "video_name": "Extrait 8 - EM6 (Diane) Elle décroche le Golden Buzzer de Karine Le Marchand_TAT_M6.mp4",
+                "duration_text": "1 min 06",
+                "duration_sec": 66,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "105",
+                "video_name": "M6_EM6_ampoules short.mp4",
+                "duration_text": "1 min 06",
+                "duration_sec": 66,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "106",
+                "video_name": "Extrait 2 - Le remarquable jeu d’actrice de Nellie.mp4",
+                "duration_text": "0 min 49",
+                "duration_sec": 49,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "106",
+                "video_name": "Gulli - Totally Spies - Clover ne comprend pas le langage des jeunes.mp4",
+                "duration_text": "0 min 38",
+                "duration_sec": 38,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "106",
+                "video_name": "Gulli - Totally Spies - Le cauchemar de Clover.mp4",
+                "duration_text": "1 min 11",
+                "duration_sec": 71,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "106",
+                "video_name": "LMCR - Extrait 1.mp4",
+                "duration_text": "1 min 50",
+                "duration_sec": 110,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "106",
+                "video_name": "LMCR - Extrait 2.mp4",
+                "duration_text": "0 min 32",
+                "duration_sec": 32,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "112",
+                "video_name": "LMCR3 - EP26 CVDL 1 RS EXTRAIT 1.mov",
+                "duration_text": "0 min 30",
+                "duration_sec": 30,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "113",
+                "video_name": "LMCR3 - EP26 CVDL 1 RS EXTRAIT 2.mov",
+                "duration_text": "2 min 03",
+                "duration_sec": 123,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "114",
+                "video_name": "LMF - Qui trouvera le meilleur jeu de mot avec « Rhino ».mp4",
+                "duration_text": "0 min 28",
+                "duration_sec": 28,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "115",
+                "video_name": "LMF - Tout se joue sur la dernière question !.mp4",
+                "duration_text": "1 min 57",
+                "duration_sec": 117,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "116",
+                "video_name": "SDM - Liliane et josé.mp4",
+                "duration_text": "0 min 52",
+                "duration_sec": 52,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "117",
+                "video_name": "BUDGET.mp4",
+                "duration_text": "3 min 42",
+                "duration_sec": 222,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "131",
+                "video_name": "Raymond.mp4",
+                "duration_text": "0 min 28",
+                "duration_sec": 28,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "131",
+                "video_name": "SDM - Leslie et Léo.mp4",
+                "duration_text": "0 min 47",
+                "duration_sec": 47,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "136",
+                "video_name": "M6+ - THE 100 – Extrait 7 – Lexa Promesse.mp4",
+                "duration_text": "0 min 44",
+                "duration_sec": 44,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "136",
+                "video_name": "M6+ - THE 100 – Extrait 8 – Bellamy croit que Clarke est morte.mp4",
+                "duration_text": "0 min 46",
+                "duration_sec": 46,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "158",
+                "video_name": "CABINE TELEPHONE_TAT_Téva.mp4",
+                "duration_text": "1 min 08",
+                "duration_sec": 68,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "158",
+                "video_name": "CAMERAS_TAT_Téva.mp4",
+                "duration_text": "2 min 49",
+                "duration_sec": 169,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "158",
+                "video_name": "JEREMSTAR_TAT_Téva.mp4",
+                "duration_text": "1 min 08",
+                "duration_sec": 68,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "166",
+                "video_name": "PP - LRDP - Karine Dubernet en pilleur.mp4",
+                "duration_text": "7 min 41",
+                "duration_sec": 461,
+                "category_label": "moyenne",
+                "montant": "12,00"
+            },
+            {
+                "lot": "173",
+                "video_name": "W9 - LPHDF - ISOLATION DANGEREUSE.mp4",
+                "duration_text": "3 min 32",
+                "duration_sec": 212,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "179",
+                "video_name": "Chirurgie esthétique, elle n’aime pas ses fesses.mp4",
+                "duration_text": "2 min 12",
+                "duration_sec": 132,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "179",
+                "video_name": "Complexée, elle refuse de montrer son visage en public.mp4",
+                "duration_text": "2 min 22",
+                "duration_sec": 142,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "179",
+                "video_name": "Elle paye 7500 euros pour changer la couleur de ses yeux !.mp4",
+                "duration_text": "3 min 28",
+                "duration_sec": 208,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "181",
+                "video_name": "Vrai ou faux quand la date est dépassée, il faut jeter.mp4",
+                "duration_text": "1 min 01",
+                "duration_sec": 61,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "183",
+                "video_name": "Extrait 1 - EM7 (Sandra Miso) Elle fait rire le jury avec son sketch sur les applis de rencontre_TAT_M6.mp4",
+                "duration_text": "2 min 12",
+                "duration_sec": 132,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "185",
+                "video_name": "Booder n'a pas oublié ses profs… et leurs petites piques _TAT_M6.mp4",
+                "duration_text": "0 min 03",
+                "duration_sec": 3,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "185",
+                "video_name": "Elodie se clash avec une québécoise sur le français_TAT_M6.mp4",
+                "duration_text": "1 min 26",
+                "duration_sec": 86,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "185",
+                "video_name": "Jarry et Élodie révisent leurs langues…à leur manière _TAT_M6.mp4",
+                "duration_text": "1 min 02",
+                "duration_sec": 62,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "185",
+                "video_name": "Quand tu te retrouve dans un train low cost_TAT_M6.mp4",
+                "duration_text": "2 min 13",
+                "duration_sec": 133,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "186",
+                "video_name": "Extrait 3 - EM7 (Vello Vaher) À 62 ans, il laisse le jury sans voix_TAT_M6.mp4",
+                "duration_text": "1 min 06",
+                "duration_sec": 66,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "186",
+                "video_name": "Extrait 4 - EM7 (Enzo) Sa voix est presque identique à celle de Céline Dion_TAT_M6.mp4",
+                "duration_text": "2 min 03",
+                "duration_sec": 123,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "186",
+                "video_name": "Extrait 6 - EM7 (Franck) Sa prestation vocale déclenche un fou rire chez le jury _TAT_M6.mp4",
+                "duration_text": "1 min 15",
+                "duration_sec": 75,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "194",
+                "video_name": "E3325811Short dates de péremptionl_TAT_M6.mp4",
+                "duration_text": "1 min 01",
+                "duration_sec": 61,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "195",
+                "video_name": "Gulli - Totally Spies - Clover et Blaine surfent.mp4",
+                "duration_text": "1 min 01",
+                "duration_sec": 61,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "195",
+                "video_name": "Gulli - Totally Spies - Les retrouvailles entre Blaine et Clover.mp4",
+                "duration_text": "1 min 10",
+                "duration_sec": 70,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "196",
+                "video_name": "PP - Inspecteur Lavardin - Il attend la nuit pour aller enquêter.mp4",
+                "duration_text": "1 min 37",
+                "duration_sec": 97,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "200",
+                "video_name": "Des culottes usagées distribuées dans la rue !.mp4",
+                "duration_text": "0 min 57",
+                "duration_sec": 57,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "200",
+                "video_name": "Elle est accro aux enchères !.mp4",
+                "duration_text": "2 min 58",
+                "duration_sec": 178,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "200",
+                "video_name": "Elle se fait incarcérer volontairement !.mp4",
+                "duration_text": "2 min 41",
+                "duration_sec": 161,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "200",
+                "video_name": "Il traque les agresseurs dans le métro !.mp4",
+                "duration_text": "2 min 40",
+                "duration_sec": 160,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "201",
+                "video_name": "Elle loue son aspirateur !.mp4",
+                "duration_text": "1 min 48",
+                "duration_sec": 108,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "201",
+                "video_name": "Elles vont chez Maxi Bazar toutes les semaines !.mp4",
+                "duration_text": "1 min 44",
+                "duration_sec": 104,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "201",
+                "video_name": "Il achète 2 télés à 40€ !.mp4",
+                "duration_text": "1 min 04",
+                "duration_sec": 64,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "201",
+                "video_name": "Il achète un robot de cuisine à 1000€ !.mp4",
+                "duration_text": "2 min 01",
+                "duration_sec": 121,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "201",
+                "video_name": "LMCR2_RS BFC EXTRAIT 2.Copy.01.mov",
+                "duration_text": "1 min 26",
+                "duration_sec": 86,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "209",
+                "video_name": "COUPLE LIBRE_TAT_Téva.mp4",
+                "duration_text": "1 min 29",
+                "duration_sec": 89,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "209",
+                "video_name": "Gulli - Mortelle Adèle - Adèle piège son gâteau d'anniversaire.mp4",
+                "duration_text": "1 min 13",
+                "duration_sec": 73,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "209",
+                "video_name": "TEMOIGNAGE VICTIME_TAT_Téva.mp4",
+                "duration_text": "2 min 00",
+                "duration_sec": 120,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "209",
+                "video_name": "VICTIMES QUI RESTENT_TAT_Téva.mp4",
+                "duration_text": "1 min 00",
+                "duration_sec": 60,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "213",
+                "video_name": "Hillary se motive et veut s’essayer au gogo dancing.mp4",
+                "duration_text": "3 min 05",
+                "duration_sec": 185,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "213",
+                "video_name": "Jérémy est toujours très énervé contre Sophie parce qu’il pense qu’elle lui a menti.mp4",
+                "duration_text": "3 min 25",
+                "duration_sec": 205,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "213",
+                "video_name": "Les Ch’tis ont réussis leur soirée puis Marion et Jordan s’embrassent.mp4",
+                "duration_text": "3 min 25",
+                "duration_sec": 205,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "215",
+                "video_name": "66M - SPEED DATING.mp4",
+                "duration_text": "2 min 43",
+                "duration_sec": 163,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "215",
+                "video_name": "66M - TABLES.mp4",
+                "duration_text": "2 min 32",
+                "duration_sec": 152,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "215",
+                "video_name": "66M - VOITURE ADO.mp4",
+                "duration_text": "2 min 24",
+                "duration_sec": 144,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "216",
+                "video_name": "Alice et Sofiane.mp4",
+                "duration_text": "0 min 44",
+                "duration_sec": 44,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "216",
+                "video_name": "Liliane et José.mp4",
+                "duration_text": "0 min 49",
+                "duration_sec": 49,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "219",
+                "video_name": "Gulli - Mortelle Adèle - Adèle piège son gâteau d'anniversaire.mp4",
+                "duration_text": "1 min 13",
+                "duration_sec": 73,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "223",
+                "video_name": "LRDLR - Maïlys doit refaire toute la route en marche arrière.mp4",
+                "duration_text": "1 min 41",
+                "duration_sec": 101,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "226",
+                "video_name": "LRDLR - Marie roule dans des conditions très difficiles.mp4",
+                "duration_text": "0 min 44",
+                "duration_sec": 44,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "229",
+                "video_name": "LRDLR - Marie gère un chargement délicat.mp4",
+                "duration_text": "1 min 10",
+                "duration_sec": 70,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "230",
+                "video_name": "LRDLR - Adeline face à une situation à haut risque.mp4",
+                "duration_text": "0 min 45",
+                "duration_sec": 45,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "231",
+                "video_name": "6ter - Kong Skull Island - Ils foncent droit dans ce nuage.mp4",
+                "duration_text": "1 min 27",
+                "duration_sec": 87,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "233",
+                "video_name": "AVDP Les anciens agriculteurs s’intéressent à l’intimité de Jean-Marie et Corinne.mp4",
+                "duration_text": "0 min 59",
+                "duration_sec": 59,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "235",
+                "video_name": "extrait ps2 - Ce candidat fait craquer notre jury.mp4",
+                "duration_text": "0 min 32",
+                "duration_sec": 32,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "236",
+                "video_name": "Il brûle son véhicule en plein milieu d'un champ_TAT_W9.mp4",
+                "duration_text": "3 min 01",
+                "duration_sec": 181,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "236",
+                "video_name": "Il montre ses parties intimes aux gendarmes !_TAT_W9.mp4",
+                "duration_text": "1 min 51",
+                "duration_sec": 111,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "238",
+                "video_name": "À 1kmh près il sauve son permis !_TAT_W9.mp4",
+                "duration_text": "1 min 45",
+                "duration_sec": 105,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "239",
+                "video_name": "DSTP_MYTHO.mp4",
+                "duration_text": "1 min 44",
+                "duration_sec": 104,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "240",
+                "video_name": "6ter - LRDLR - Clémence évite l'accident.mp4",
+                "duration_text": "0 min 54",
+                "duration_sec": 54,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "242",
+                "video_name": "W9 - LPHDF - La fameuse volte.mp4",
+                "duration_text": "3 min 37",
+                "duration_sec": 217,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "242",
+                "video_name": "W9 - LPHDF - Petit appui technique.mp4",
+                "duration_text": "3 min 31",
+                "duration_sec": 211,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "242",
+                "video_name": "W9 - LPHDF - Sel made man.mp4",
+                "duration_text": "3 min 34",
+                "duration_sec": 214,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "245",
+                "video_name": "Gulli - UDPP - Il est le sosie de Zlatan.mp4",
+                "duration_text": "0 min 56",
+                "duration_sec": 56,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "251",
+                "video_name": "UJUD - DECOUVERTE.mp4",
+                "duration_text": "1 min 39",
+                "duration_sec": 99,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "256",
+                "video_name": "Gulli - Totally Spies - Les Spies au repos.mp4",
+                "duration_text": "0 min 29",
+                "duration_sec": 29,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "256",
+                "video_name": "Gulli - Totally Spies - Les rôles sont inversés.mp4",
+                "duration_text": "0 min 53",
+                "duration_sec": 53,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "259",
+                "video_name": "M6+ - CLF - EXTRAIT 1 (Diffusé à J- 1 avant le début de l'AVP) EP1 – Les Tanti abordent le sujet du divorce.mp4",
+                "duration_text": "2 min 28",
+                "duration_sec": 148,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "263",
+                "video_name": "PP - Ronin - Jean Reno et Robert De Niro.mp4",
+                "duration_text": "0 min 42",
+                "duration_sec": 42,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "265",
+                "video_name": "PP - Parker - Il se déguise en médecin pour s'échapper.mp4",
+                "duration_text": "1 min 12",
+                "duration_sec": 72,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "267",
+                "video_name": "Extrait 8 - Son gâteau trompe-l’œil donne des frissons à Cyril Lignac_TAT_M6.mp4",
+                "duration_text": "0 min 58",
+                "duration_sec": 58,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "268",
+                "video_name": "Elle reconnaît son vileur dans le journal !.mp4",
+                "duration_text": "3 min 03",
+                "duration_sec": 183,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "268",
+                "video_name": "Extrait 5 - Elle a les larmes aux yeux en découvrant son erreur_TAT_M6.mp4",
+                "duration_text": "1 min 24",
+                "duration_sec": 84,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "268",
+                "video_name": "Il dénonce son meilleur ami meurtrier.mp4",
+                "duration_text": "3 min 20",
+                "duration_sec": 200,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "270",
+                "video_name": "Gulli - Ma Super Ligue 1 - Hugo interviewe Lucas Tousart.mp4",
+                "duration_text": "1 min 43",
+                "duration_sec": 103,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "271",
+                "video_name": "Gulli - Ma Super Ligue 1 - La jolie surprise de L.Openda.mp4",
+                "duration_text": "2 min 08",
+                "duration_sec": 128,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "271",
+                "video_name": "Gulli - Ma Super Ligue 1 - L’interview « Quand j’était petit » de Diego Coppola.mp4",
+                "duration_text": "1 min 01",
+                "duration_sec": 61,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "271",
+                "video_name": "Gulli - Ma super ligue 1 - Les enfants commentent les plus beaux arrêts de Ligue 1.mp4",
+                "duration_text": "1 min 37",
+                "duration_sec": 97,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "272",
+                "video_name": "EE - Vendeurs à la sauvette.mp4",
+                "duration_text": "2 min 49",
+                "duration_sec": 169,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "277",
+                "video_name": "Greg fait une déclaration d’amour à Maeva.mp4",
+                "duration_text": "3 min 18",
+                "duration_sec": 198,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "277",
+                "video_name": "Il remporte le jackpot à plus de 12 000 euros !.mp4",
+                "duration_text": "3 min 33",
+                "duration_sec": 213,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "277",
+                "video_name": "Julien et Manon annoncent qu’ils quittent l’aventure car leurs enfants leur manque.mp4",
+                "duration_text": "3 min 19",
+                "duration_sec": 199,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "277",
+                "video_name": "Paga et Giuseppa parlent avenir et comment ils se voient dans 10 ans.mp4",
+                "duration_text": "3 min 15",
+                "duration_sec": 195,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "280",
+                "video_name": "UJUD - CONSTRUCTION.mp4",
+                "duration_text": "3 min 14",
+                "duration_sec": 194,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "280",
+                "video_name": "UJUD - VISITE EXPERT.mp4",
+                "duration_text": "3 min 23",
+                "duration_sec": 203,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "291",
+                "video_name": "EM6_SHORT 10 000 pas_E3325911.mp4",
+                "duration_text": "1 min 02",
+                "duration_sec": 62,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "296",
+                "video_name": "PP - ANNIVERSAIRE - Anconina.mp4",
+                "duration_text": "0 min 34",
+                "duration_sec": 34,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "296",
+                "video_name": "PP- ANNIVERSAIRE - BLAGUE DARMON.mp4",
+                "duration_text": "1 min 20",
+                "duration_sec": 80,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "296",
+                "video_name": "Un appartement à gare du Nord à 2,5 millions d'euros !.mp4",
+                "duration_text": "1 min 58",
+                "duration_sec": 118,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "296",
+                "video_name": "Une fête tamoule en plein cœur de Paris !.mp4",
+                "duration_text": "2 min 52",
+                "duration_sec": 172,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "306",
+                "video_name": "Les anciens agriculteurs réagissent à la chute en jet-ski de Jean-Marie et Corinne !.mp4",
+                "duration_text": "1 min 46",
+                "duration_sec": 106,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "311",
+                "video_name": "PP - LRDP - Chanson country Yann Stotz.mp4",
+                "duration_text": "2 min 56",
+                "duration_sec": 176,
+                "category_label": "standard",
+                "montant": "8,00"
+            },
+            {
+                "lot": "311",
+                "video_name": "PP - LRDP - Jacques Mailhot.mp4",
+                "duration_text": "1 min 30",
+                "duration_sec": 90,
+                "category_label": "courte",
+                "montant": "4,00"
+            },
+            {
+                "lot": "311",
+                "video_name": "PP - LRDP - Michel Guidoni en Marine Le Pen.mp4",
+                "duration_text": "1 min 23",
+                "duration_sec": 83,
+                "category_label": "courte",
+                "montant": "4,00"
+            }
+        ],
+        "annex_declared_count": 134,
+        "annex_summary": {
+            "total_videos": "134",
+            "total_ht": "712.00",
+            "category_rows": [
+                "91 × Recadrage - vidéo courte (moins de 2 min) 364,00",
+                "42 × Recadrage - vidéo standard (de 2 à 5 min) 336,00",
+                "1 × Recadrage - vidéo moyenne (de 5 à 8 min) 12,00"
+            ],
+            "pages": [
+                2,
+                3,
+                4,
+                5,
+                6
+            ]
+        },
+        "layout": {
+            "fingerprint": "index | description | quantite | taux | montant",
+            "expected": "index | description | quantite | taux | montant",
+            "changed": false,
+            "columns": [
+                {
+                    "name": "index",
+                    "label": "#"
+                },
+                {
+                    "name": "description",
+                    "label": "Description"
+                },
+                {
+                    "name": "quantite",
+                    "label": "Quantité"
+                },
+                {
+                    "name": "taux",
+                    "label": "Taux"
+                },
+                {
+                    "name": "montant",
+                    "label": "Montant"
+                }
+            ]
+        },
+        "warnings": [],
+        "status": "ok",
+        "source_filename": "BDC-M6-0001.pdf"
+    }
+]

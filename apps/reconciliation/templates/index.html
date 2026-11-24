@@ -9,8 +9,8 @@
   {% set categories = [
     ("short", "Courte (<2 min)"),
     ("standard", "Standard (2-5 min)"),
-    ("medium", "Moyenne (5-7 min)"),
-    ("long", "Longue (≥7 min)")
+    ("medium", "Moyenne (5-8 min)"),
+    ("long", "Longue (≥8 min)")
   ] %}
   <div class="inspector__grid">
     <section class="inspector__column">
@@ -144,6 +144,21 @@
                       {% if detail.is_near_boundary and detail.near_threshold %}
                         <span class="badge badge--warn badge--xs" title="Durée {{ '%.1f'|format(detail.duration_sec) }}s à moins de 3s du seuil {{ '%.0f'|format(detail.near_threshold) }}s (explication du surplus)">⏱ Seuil {{ '%.0f'|format(detail.near_threshold) }}s</span>
                       {% endif %}
+                      {% set annex = detail.annex_match|default(None) %}
+                      {% if annex and annex.status == 'matched' %}
+                        <span class="badge badge--ok badge--xs" title="Vidéo retrouvée dans l'annexe du BDC">✓ Annexe</span>
+                        {% if annex.extension_differs %}
+                          <span class="badge badge--neutral badge--xs" title="Extension différente entre l'annexe ({{ annex.annex_name }}) et l'archive">ℹ .mov ↔ .mp4</span>
+                        {% endif %}
+                        {% if annex.match_kind == 'radical' %}
+                          <span class="badge badge--neutral badge--xs" title="Correspondance après retrait du suffixe studio (_TAT_*)">ℹ Radical studio</span>
+                        {% endif %}
+                        {% if annex.duration_drift %}
+                          <span class="badge badge--neutral badge--xs" title="Durée BDC {{ '%.0f'|format(annex.bdc_duration_sec) }} s vs archive {{ '%.1f'|format(detail.duration_sec) }} s — catégorie identique">⏱ {{ '%.0f'|format(annex.bdc_duration_sec) }} s BDC / {{ '%.1f'|format(detail.duration_sec) }} s archive</span>
+                        {% endif %}
+                      {% elif annex and annex.status == 'not_listed' %}
+                        <span class="badge badge--warn badge--xs" title="Fichier produit dans ce lot mais absent de l'annexe du BDC">⚠ Non listée sur BDC</span>
+                      {% endif %}
                     </span>
                   </span>
                   <span class="file-line__duration">
@@ -165,6 +180,52 @@
       Lots facturés sans dossier vidéo ce mois-ci :
       {{ cluster.missing_reporting_ids|join(', ') }}
     </p>
+  {% endif %}
+
+  {% set video_rec = cluster.video_reconciliation|default(None) %}
+  {% if video_rec %}
+    <div class="panel panel--stack mt-md">
+      <div class="flex-row">
+        <span class="badge badge--ok badge--xs">
+          Annexe détaillée ({{ video_rec.annex_total }} vidéos)
+        </span>
+        <span class="badge badge--{% if video_rec.match_rate >= 100 %}ok{% elif video_rec.match_rate >= 90 %}warn{% else %}danger{% endif %} badge--xs">
+          Correspondance vidéo : {{ video_rec.match_rate }} %
+        </span>
+        {% set vr_counts = video_rec.counts|default({}) %}
+        {% if vr_counts.missing_in_production %}
+          <span class="badge badge--danger badge--xs">
+            {{ vr_counts.missing_in_production }} facturée(s) absente(s) de l'archive
+          </span>
+        {% endif %}
+        {% if vr_counts.extra_in_production %}
+          <span class="badge badge--warn badge--xs">
+            {{ vr_counts.extra_in_production }} produite(s) non listée(s)
+          </span>
+        {% endif %}
+        {% if vr_counts.category_mismatch %}
+          <span class="badge badge--warn badge--xs">
+            {{ vr_counts.category_mismatch }} catégorie(s) divergente(s)
+          </span>
+        {% endif %}
+        {% if vr_counts.duration_drift %}
+          <span class="badge badge--neutral badge--xs" title="Durée BDC et durée d'archive diffèrent de plus de 5 s, la catégorie reste identique">
+            {{ vr_counts.duration_drift }} dérive(s) de durée
+          </span>
+        {% endif %}
+      </div>
+      {% if vr_counts.missing_in_production %}
+        <ul class="mt-sm">
+          {% for item in video_rec.items %}
+            {% if item.status == 'missing_in_production' %}
+              <li class="muted">
+                Lot {{ item.lot }} — {{ item.name }} (facturée sur le BDC, absente de la production)
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      {% endif %}
+    </div>
   {% endif %}
 
   {% set diag_list = cluster.diagnostics if (cluster.diagnostics is defined and cluster.diagnostics) else ([cluster.diagnostic] if cluster.diagnostic else []) %}
@@ -428,8 +489,8 @@
           {% for cat, label in [
             ("short", "Courtes (<2 min)"),
             ("standard", "Standards (2-5 min)"),
-            ("medium", "Moyennes (5-7 min)"),
-            ("long", "Longues (≥7 min)")
+            ("medium", "Moyennes (5-8 min)"),
+            ("long", "Longues (≥8 min)")
           ] %}
             {% set item = view_model.balance[cat] if view_model.balance and cat in view_model.balance else {"billed": 0, "actual": 0, "delta": 0} %}
             {% set max_value = [item.billed, item.actual, 1]|max %}
@@ -612,8 +673,8 @@
                   {% for cat, label in [
                     ("short", "Courte (<2m)"),
                     ("standard", "Standard (2-5m)"),
-                    ("medium", "Moyenne (5-7m)"),
-                    ("long", "Longue (≥7m)")
+                    ("medium", "Moyenne (5-8m)"),
+                    ("long", "Longue (≥8m)")
                   ] %}
                     {% set cat_data = group.categories[cat] if group.categories and cat in group.categories else {} %}
                     <tr>

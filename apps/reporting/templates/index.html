@@ -133,8 +133,8 @@
           {% for cat, label in [
             ("short", "Courte (<2 min)"),
             ("standard", "Standard (2-5 min)"),
-            ("medium", "Moyenne (5-7 min)"),
-            ("long", "Longue (≥7 min)")
+            ("medium", "Moyenne (5-8 min)"),
+            ("long", "Longue (≥8 min)")
           ] %}
             {% if category_totals[cat] %}
               <span
@@ -192,14 +192,14 @@
                 {% endif %}
               </div>
               <div>
-                <p class="muted metric-label">Moyenne (5-7 min)</p>
+                <p class="muted metric-label">Moyenne (5-8 min)</p>
                 <p class="metric-value">{{ group.categories['medium'].count|fmt_count }}</p>
                 {% if group.categories['medium'].files %}
                   <div class="file-dump">{{ group.categories['medium'].files | join('\n') }}</div>
                 {% endif %}
               </div>
               <div>
-                <p class="muted metric-label">Longue (≥7 min)</p>
+                <p class="muted metric-label">Longue (≥8 min)</p>
                 <p class="metric-value">{{ group.categories['long'].count|fmt_count }}</p>
                 {% if group.categories['long'].files %}
                   <div class="file-dump">{{ group.categories['long'].files | join('\n') }}</div>

@@ -400,5 +400,140 @@ class TestExtractionStatus:
         assert any("sans article" in warning for warning in batch.warnings)
 
 
+class TestDetailedFormat:
+    """Nouveau format détaillé : lots explicites et annexe vidéo."""
+
+    @pytest.mark.parametrize(
+        "description,expected",
+        [
+            ("Recadrage - vidéo moyenne (de 5 à 8 min)", VideoCategory.MEDIUM),
+            ("Recadrage - vidéo moyenne (entre 5 et 8 minutes)", VideoCategory.MEDIUM),
+            ("Recadrage - vidéo standard (de 2 à 5 min)", VideoCategory.STANDARD),
+            ("Recadrage - vidéo longue (8 min et plus)", VideoCategory.LONG),
+            ("Recadrage - vidéo courte (moins de 2 min)", VideoCategory.SHORT),
+        ],
+    )
+    def test_infer_new_bdc_labels(self, description, expected):
+        assert infer_category_from_description(description) == expected
+
+    def _detailed_bdc(self):
+        return [
+            {
+                "numero_bdc": "BDC-M6-0001",
+                "date_commande": "24/11/2026",
+                "date_livraison": "24/11/2026",
+                "reference": "LOTS 42 À 311",
+                "references": ["LOTS 42 à 311"],
+                "bdc_format": "detailed",
+                "period": "Lots 42 et + · 11/2026",
+                "concerned_lots": ["42", "45"],
+                "articles": [
+                    {
+                        "description": "Recadrage - vidéo courte (moins de 2 min)",
+                        "quantite": "2,00",
+                        "taux": "4,00",
+                        "montant": "8,00",
+                    }
+                ],
+                "annex_videos": [
+                    {
+                        "lot": "42",
+                        "video_name": "a.mp4",
+                        "duration_text": "0 min 18",
+                        "duration_sec": 18,
+                        "category_label": "courte",
+                        "montant": "4,00",
+                    },
+                    {
+                        "lot": "45",
+                        "video_name": "b.mp4",
+                        "duration_text": "1 min 20",
+                        "duration_sec": 80,
+                        "category_label": "courte",
+                        "montant": "4,00",
+                    },
+                ],
+                "totals": {"subtotal": "8,00", "total": "8,00"},
+                "status": "ok",
+            }
+        ]
+
+    def test_parse_hydrates_detailed_fields(self):
+        orders = parse_bdc_json_to_orders(self._detailed_bdc())
+
+        assert len(orders) == 1
+        order = orders[0]
+        assert order.bdc_format == "detailed"
+        assert order.period == "Lots 42 et + · 11/2026"
+        assert order.concerned_lots == ["42", "45"]
+        assert len(order.annex_videos) == 2
+        assert order.annex_videos[0].video_name == "a.mp4"
+        assert order.annex_videos[0].inferred_category == VideoCategory.SHORT
+
+    def test_detailed_batch_uses_annex_entries(self):
+        batch = create_monthly_batch_from_data(self._detailed_bdc(), batch_id="2026-11")
+
+        assert len(batch.video_entries) == 2
+        entry = batch.video_entries[0]
+        assert entry.id_camille == "42"
+        assert entry.video_name == "a.mp4"
+        assert entry.duration_sec == 18
+        assert entry.duration_source == "bdc_annex"
+        assert entry.month == "2026-11"
+        assert any("détaillé" in warning for warning in batch.warnings)
+
+    def test_detailed_format_detected_from_concerned_lots(self):
+        data = self._detailed_bdc()
+        data[0].pop("bdc_format")
+        data[0].pop("annex_videos")
+
+        orders = parse_bdc_json_to_orders(data)
+
+        assert orders[0].bdc_format == "detailed"
+
+    def test_annex_entry_without_duration_uses_category(self):
+        data = self._detailed_bdc()
+        data[0]["annex_videos"] = [
+            {
+                "lot": "42",
+                "video_name": "a.mp4",
+                "category_label": "standard",
+                "montant": "8,00",
+            }
+        ]
+
+        batch = create_monthly_batch_from_data(data, batch_id="2026-11")
+
+        assert batch.video_entries[0].duration_source == "bdc_annex_category"
+        assert batch.video_entries[0].duration_sec == 240
+        assert any("sans durée explicite" in warning for warning in batch.warnings)
+
+    def test_simplified_order_still_replicates_articles(self):
+        bdc_data = [
+            {
+                "numero_bdc": "BDC-26-1882",
+                "date_commande": "03/11/2026",
+                "date_livraison": "03/11/2026",
+                "reference": "LOTS 2/8",
+                "references": ["LOTS 2", "8"],
+                "articles": [
+                    {
+                        "description": "Recadrage - vidéo courte (moins de 2 min)",
+                        "quantite": "3,00",
+                        "taux": "4,00",
+                        "montant": "12,00",
+                    }
+                ],
+                "totals": {"subtotal": "12,00", "total": "12,00"},
+            }
+        ]
+
+        batch = create_monthly_batch_from_data(bdc_data, batch_id="2026-11")
+
+        assert len(batch.video_entries) == 3
+        assert batch.video_entries[0].duration_source == "bdc_inferred"
+        assert batch.orders[0].bdc_format == "simplified"
+
+
 if __name__ == "__main__":
     pytest.main([__file__])

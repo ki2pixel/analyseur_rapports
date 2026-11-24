@@ -91,6 +91,10 @@ def _build_documents(results, overlap_map) -> list[dict]:
                 "articles_count": len(result.get("articles") or []),
                 "status": result.get("status", "ok"),
                 "layout": result.get("layout"),
+                "bdc_format": result.get("bdc_format") or "simplified",
+                "period": result.get("period"),
+                "concerned_lots_count": len(result.get("concerned_lots") or []),
+                "annex_videos_count": len(result.get("annex_videos") or []),
                 "warnings": [
                     issue.get("message") if isinstance(issue, dict) else str(issue)
                     for issue in result.get("warnings", [])

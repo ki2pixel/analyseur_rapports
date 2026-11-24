@@ -50,6 +50,20 @@
       "expected": "BDC-26-1879.json",
       "external": "external/parseur/BDC-26-1879.json",
       "notes": "Date PDF 03/11/2026 = 3 novembre. Parseur indique 2026-03-11 (lecture US erronée). Référence libre '309 310 septembre'."
+    },
+    {
+      "filename": "BDC-26-1882.pdf",
+      "sha256": "bd8325018f527bb64492ee044343d507ce7ea8a7a9ae5e089efbab968b263eb5",
+      "expected": "BDC-26-1882.json",
+      "external": null,
+      "notes": "BDC simplifié novembre 2026 (5 lots, 11 vidéos, 48,00 €)."
+    },
+    {
+      "filename": "BDC-M6-0001.pdf",
+      "sha256": "5ab7d108e3bcb4cbb2de4dfefd1480cf61613a53c3b91458625324acb65f4e72",
+      "expected": "BDC-M6-0001.json",
+      "external": null,
+      "notes": "BDC détaillé novembre 2026 : annexe 6 pages, 73 lots, 134 vidéos, 712,00 €."
     }
   ]
 }

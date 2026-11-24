@@ -19,8 +19,8 @@ CATEGORY_KEYS = ("short", "standard", "medium", "long")
 CATEGORY_LABELS = {
     "short": "Courte (< 2 min)",
     "standard": "Standard (2 – 5 min)",
-    "medium": "Moyenne (5 – 7 min)",
-    "long": "Longue (≥ 7 min)",
+    "medium": "Moyenne (5 – 8 min)",
+    "long": "Longue (≥ 8 min)",
 }
 
 CATEGORY_SHORT_LABELS = {

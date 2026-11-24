@@ -1,5 +1,7 @@
 """Tests du moteur de rapprochement : plages, chevauchements, score et diagnostics."""
 
+import pytest
+
 from libs.reconciliation.comparison import (
     compare_reports,
     detect_bdc_overlaps,
@@ -543,3 +545,358 @@ def test_production_lots_file_annotation():
 
     assert lot_20_files[0]["name"] == "clip_dup.mp4"
     assert lot_20_files[0]["is_duplicate"] is True
+
+
+def _detailed_order(number, lots, annex, articles=None):
+    articles = articles or [
+        {
+            "description": "Recadrage - vidéo courte (moins de 2 min)",
+            "quantite": f"{len(annex)},00",
+            "taux": "4,00",
+            "montant": f"{4 * len(annex)},00",
+        }
+    ]
+    return {
+        "numero_bdc": number,
+        "reference": "LOTS 42 À 311",
+        "references": ["LOTS 42 À 311"],
+        "concerned_lots": [str(lot) for lot in lots],
+        "bdc_format": "detailed",
+        "articles": articles,
+        "annex_videos": annex,
+    }
+
+
+class TestConcernedLotsPriority:
+    def test_concerned_lots_override_range_expansion(self):
+        order = _detailed_order("BDC-M6-0001", [42, 45], [])
+
+        ids = extract_reference_ids(order)
+
+        assert ids == ("42", "45")
+
+    def test_range_still_used_without_concerned_lots(self):
+        order = _order("BDC-26-1882", "LOTS 2/8/20", [])
+
+        ids = extract_reference_ids(order)
+
+        assert ids == ("2", "8", "20")
+
+    def test_bdc_identifier_never_produces_phantom_lots(self):
+        order = {
+            "numero_bdc": "BDC-M6-0001",
+            "reference": None,
+            "references": [],
+        }
+
+        ids = extract_reference_ids(order)
+
+        assert ids == ("BDC-M6-0001",)
+
+    def test_overlaps_do_not_manufacture_intermediate_lots(self):
+        first = _detailed_order("BDC-M6-0001", [42, 45], [])
+        second = _detailed_order("BDC-M6-0002", [45, 50], [])
+
+        overlaps = detect_bdc_overlaps([first, second])
+
+        assert overlaps == [{"lot": "45", "bdc_numbers": ["BDC-M6-0001", "BDC-M6-0002"]}]
+
+
+class TestDuplicateAcrossLots:
+    def test_duplicate_billed_on_both_lots_is_not_suspicious(self):
+        report = _report(
+            {
+                "209": {"short": _category(1, ["adele.mp4"], [73.2])},
+                "219": {"short": _category(1, ["adele.mp4"], [73.2])},
+            }
+        )
+        bdc = [
+            _detailed_order(
+                "BDC-M6-0001",
+                [209, 219],
+                [
+                    {
+                        "lot": "209",
+                        "video_name": "adele.mp4",
+                        "duration_sec": 73,
+                        "category_label": "courte",
+                    },
+                    {
+                        "lot": "219",
+                        "video_name": "adele.mp4",
+                        "duration_sec": 73,
+                        "category_label": "courte",
+                    },
+                ],
+                articles=[
+                    {
+                        "description": "Recadrage - vidéo courte (moins de 2 min)",
+                        "quantite": "2,00",
+                        "taux": "4,00",
+                        "montant": "8,00",
+                    }
+                ],
+            )
+        ]
+
+        result = compare_reports(report, bdc)
+        cluster = result["cluster_results"][0]
+
+        assert cluster["delta"]["short"] == 0
+        assert cluster["has_jingle_or_duplicate"] is False
+        assert cluster["video_reconciliation"]["counts"] == {"matched": 2}
+
+    def test_duplicate_not_billed_stays_suspicious(self):
+        report = _report({"10": {"short": _category(2, ["clip.mp4", "clip.mp4"], [60, 60])}})
+        bdc = [
+            _order(
+                "BDC-26-1000",
+                "LOT 10",
+                [
+                    {
+                        "description": "Recadrage - vidéo courte (moins de 2 min)",
+                        "quantite": "1,00",
+                        "taux": "4,00",
+                        "montant": "4,00",
+                    }
+                ],
+            )
+        ]
+
+        result = compare_reports(report, bdc)
+        cluster = result["cluster_results"][0]
+
+        assert cluster["has_jingle_or_duplicate"] is True
+
+
+class TestVideoReconciliation:
+    def test_mov_and_mp4_are_interchangeable(self):
+        report = _report({"112": {"short": _category(1, ["clip.mp4"], [29.5])}})
+        bdc = [
+            _detailed_order(
+                "BDC-M6-0001",
+                [112],
+                [
+                    {
+                        "lot": "112",
+                        "video_name": "clip.mov",
+                        "duration_sec": 30,
+                        "category_label": "courte",
+                    }
+                ],
+            )
+        ]
+
+        result = compare_reports(report, bdc)
+        cluster = result["cluster_results"][0]
+
+        assert cluster["has_video_detail"] is True
+        assert cluster["video_reconciliation"]["counts"] == {"matched": 1}
+        details = cluster["production_lots"][0]["categories"]["short"]["file_details"]
+        assert details[0]["annex_match"]["extension_differs"] is True
+
+    def test_studio_suffix_fallback_matches_within_lot(self):
+        report = _report({"185": {"short": _category(1, ["booder .mp4"], [71.56])}})
+        bdc = [
+            _detailed_order(
+                "BDC-M6-0001",
+                [185],
+                [
+                    {
+                        "lot": "185",
+                        "video_name": "booder _TAT_M6.mp4",
+                        "duration_sec": 3,
+                        "category_label": "courte",
+                    }
+                ],
+            )
+        ]
+
+        result = compare_reports(report, bdc)
+        cluster = result["cluster_results"][0]
+        item = cluster["video_reconciliation"]["items"][0]
+
+        assert item["match_kind"] == "radical"
+        assert item["status"] == "duration_drift"
+        assert item["duration_drift_sec"] == pytest.approx(68.56)
+        # Une dérive de durée reste appariée : le taux ne la pénalise pas.
+        assert cluster["video_reconciliation"]["match_rate"] == 100.0
+
+    def test_duration_drift_is_non_blocking(self):
+        report = _report({"185": {"short": _category(1, ["booder .mp4"], [71.56])}})
+        bdc = [
+            _detailed_order(
+                "BDC-M6-0001",
+                [185],
+                [
+                    {
+                        "lot": "185",
+                        "video_name": "booder _TAT_M6.mp4",
+                        "duration_sec": 3,
+                        "category_label": "courte",
+                    }
+                ],
+            )
+        ]
+
+        result = compare_reports(report, bdc)
+        cluster = result["cluster_results"][0]
+        codes = {diag["code"]: diag["severity"] for diag in cluster["diagnostics"]}
+
+        assert cluster["is_compliant"] is True
+        assert codes["video_duration_drift"] == "info"
+
+    def test_compensated_lot_mismatch_keeps_cluster_compliant(self):
+        report = _report(
+            {
+                "10": {"short": _category(1, ["a.mp4"], [30])},
+                "11": {"short": _category(3, ["b.mp4", "c.mp4", "e.mp4"], [30, 30, 30])},
+            }
+        )
+        bdc = [
+            _detailed_order(
+                "BDC-M6-0009",
+                [10, 11],
+                [
+                    {
+                        "lot": "10",
+                        "video_name": "a.mp4",
+                        "duration_sec": 30,
+                        "category_label": "courte",
+                    },
+                    {
+                        "lot": "10",
+                        "video_name": "zzz.mp4",
+                        "duration_sec": 30,
+                        "category_label": "courte",
+                    },
+                    {
+                        "lot": "11",
+                        "video_name": "b.mp4",
+                        "duration_sec": 30,
+                        "category_label": "courte",
+                    },
+                    {
+                        "lot": "11",
+                        "video_name": "d.mp4",
+                        "duration_sec": 30,
+                        "category_label": "courte",
+                    },
+                ],
+                articles=[
+                    {
+                        "description": "Recadrage - vidéo courte (moins de 2 min)",
+                        "quantite": "4,00",
+                        "taux": "4,00",
+                        "montant": "16,00",
+                    }
+                ],
+            )
+        ]
+
+        result = compare_reports(report, bdc)
+        cluster = result["cluster_results"][0]
+        codes = {diag["code"]: diag["severity"] for diag in cluster["diagnostics"]}
+
+        assert cluster["delta"]["short"] == 0
+        assert cluster["is_compliant"] is True
+        assert codes["compensated_lot_mismatch"] == "warn"
+
+    def test_simplified_cluster_has_no_video_detail(self):
+        report = _report({"10": {"short": _category(1, ["a.mp4"], [30])}})
+        bdc = [
+            _order(
+                "BDC-26-1000",
+                "LOT 10",
+                [
+                    {
+                        "description": "Recadrage - vidéo courte (moins de 2 min)",
+                        "quantite": "1,00",
+                        "taux": "4,00",
+                        "montant": "4,00",
+                    }
+                ],
+            )
+        ]
+
+        result = compare_reports(report, bdc)
+        cluster = result["cluster_results"][0]
+
+        assert cluster["has_video_detail"] is False
+        assert cluster["video_reconciliation"] is None
+        assert cluster["bdc_format"] == "simplified"
+
+
+class TestVideoDetailSummary:
+    def _analysis(self):
+        report = _report(
+            {
+                "185": {"short": _category(1, ["booder .mp4"], [71.56])},
+                "40": {"short": _category(1, ["other.mp4"], [60])},
+            }
+        )
+        bdc = [
+            _detailed_order(
+                "BDC-M6-0001",
+                [185],
+                [
+                    {
+                        "lot": "185",
+                        "video_name": "booder _TAT_M6.mp4",
+                        "duration_sec": 3,
+                        "category_label": "courte",
+                    }
+                ],
+            )
+        ]
+        return compare_reports(report, bdc)
+
+    def test_summary_aggregates_detailed_clusters(self):
+        from apps.reconciliation.app import _build_video_detail_summary
+
+        analysis = self._analysis()
+        summary = _build_video_detail_summary(
+            analysis["cluster_results"], analysis["missing_invoices"]
+        )
+
+        assert summary is not None
+        assert summary["bdc_numbers"] == ["BDC-M6-0001"]
+        assert summary["annex_total"] == 1
+        assert summary["matched"] == 1
+        assert summary["match_rate"] == 100.0
+        assert len(summary["duration_drifts"]) == 1
+        assert summary["duration_drifts"][0]["lot"] == "185"
+        assert summary["missing_lots"] == ["40"]
+
+    def test_summary_is_none_without_detailed_bdc(self):
+        from apps.reconciliation.app import _build_video_detail_summary
+
+        report = _report({"10": {"short": _category(1, ["a.mp4"], [30])}})
+        bdc = [
+            _order(
+                "BDC-26-1000",
+                "LOT 10",
+                [
+                    {
+                        "description": "Recadrage - vidéo courte (moins de 2 min)",
+                        "quantite": "1,00",
+                        "taux": "4,00",
+                        "montant": "4,00",
+                    }
+                ],
+            )
+        ]
+        analysis = compare_reports(report, bdc)
+
+        assert (
+            _build_video_detail_summary(analysis["cluster_results"], analysis["missing_invoices"])
+            is None
+        )
+
+    def test_view_model_exposes_video_detail(self):
+        from apps.reconciliation.app import _build_view_model
+
+        view_model = _build_view_model(self._analysis())
+
+        assert view_model["video_detail"]["annex_total"] == 1
+        assert view_model["video_detail"]["match_rate"] == 100.0

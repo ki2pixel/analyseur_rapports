@@ -24,23 +24,29 @@ NUMBER_CAPTURE = re.compile(r"\d+")
 # being parsed as lots 26..1689.  Dates and BDC identifiers are filtered
 # explicitly in ``_numbers_from_token``.
 RANGE_PATTERN = re.compile(r"(?<![\w-])(\d+)\s*(?:à|au|to|a|-)\s*(\d+)(?![\w-])", re.IGNORECASE)
-BDC_IDENTIFIER_PATTERN = re.compile(r"\bBDC[-\s]?\d", re.IGNORECASE)
+BDC_IDENTIFIER_PATTERN = re.compile(
+    r"\bBDC-(?:[A-Z0-9]{1,12}-)+\d{1,8}\b|\bBDC[-\s]?\d", re.IGNORECASE
+)
 DATE_IDENTIFIER_PATTERN = re.compile(
     r"^(?:\d{4}-\d{2}(?:-\d{2})?|\d{2}/\d{2}/\d{4}|(?:0[1-9]|1[0-2])-\d{4})$"
 )
 LOT_IDENTIFIER_PATTERN = re.compile(r"^\d+(?:\s*\([^)]*\))?$")
 MAX_RANGE_WIDTH = int(os.environ.get("RECONCILIATION_MAX_RANGE_WIDTH", "5000"))
 NEAR_BOUNDARY_SECONDS = 3.0
-THRESHOLD_BOUNDARIES = (120.0, 300.0, 420.0)
+THRESHOLD_BOUNDARIES = (120.0, 300.0, 480.0)
 THRESHOLD_CATEGORIES = {
     120.0: ("short", "standard"),
     300.0: ("standard", "medium"),
-    420.0: ("medium", "long"),
+    480.0: ("medium", "long"),
 }
 # Same file name + same category + nearly identical duration = duplicate.
 # A one-second tolerance absorbs re-encoding jitter without merging two
 # genuinely different videos that happen to share a title.
 DUPLICATE_DURATION_TOLERANCE_SECONDS = 1.0
+# Tolérance de dérive de durée entre l'annexe BDC et l'archive avant badge info.
+ANNEX_DURATION_DRIFT_SECONDS = 5.0
+VIDEO_EXTENSION_PATTERN = re.compile(r"\.(?:mp4|mov|mxf|avi|mkv)$", re.IGNORECASE)
+STUDIO_SUFFIX_PATTERN = re.compile(r"[_\s]*_TAT_[A-Za-z0-9À-ÿ]+$", re.IGNORECASE)
 
 
 def _init_category_counter() -> Dict[str, int]:
@@ -149,11 +155,52 @@ def _extract_reference_ids(
     """
     Identifie les numéros de lots à partir des champs `references` / `reference`.
 
+    Un BDC détaillé expose ``concerned_lots`` : cette liste explicite prime sur
+    l'expansion de la plage ``LOTS 42 À 311``, qui ne doit pas revendiquer les
+    lots intermédiaires non facturés.
+
     Lorsque ``known_reporting_ids`` est fourni, les plages sont intersectées avec
     les lots réellement présents dans le rapport de production.  Un même numéro
     de base peut correspondre à plusieurs dossiers désambiguïsés
     (ex. ``309 (2026-10-01)`` et ``309 (2026-10-27)``) : tous sont rattachés.
     """
+    normalized: List[str] = []
+    seen: Set[str] = set()
+
+    def add_lot(candidate: str) -> None:
+        if candidate and candidate not in seen:
+            seen.add(candidate)
+            normalized.append(candidate)
+
+    def resolve(candidate: str) -> None:
+        cleaned = _normalize_lot_id(candidate)
+        if known_reporting_ids:
+            base = _base_lot_id(cleaned)
+            candidates = sorted(
+                (cid for cid in known_reporting_ids if _base_lot_id(cid) == base),
+                key=_sort_key,
+            )
+            if candidates:
+                for item in candidates:
+                    add_lot(item)
+                return
+        add_lot(cleaned)
+
+    concerned_lots = order.get("concerned_lots") or []
+    if isinstance(concerned_lots, (list, tuple)) and concerned_lots:
+        for raw in concerned_lots:
+            text = str(raw).strip()
+            if not text:
+                continue
+            if LOT_IDENTIFIER_PATTERN.match(text) or text.isdigit():
+                resolve(text)
+                continue
+            for number in NUMBER_CAPTURE.findall(text):
+                resolve(number)
+        if normalized:
+            normalized.sort(key=_sort_key)
+            return tuple(normalized)
+
     tokens: List[str] = []
     references = order.get("references") or []
     if isinstance(references, str):
@@ -170,27 +217,8 @@ def _extract_reference_ids(
             continue
         numbers.extend(_numbers_from_token(str(token), known_reporting_ids))
 
-    normalized: List[str] = []
-    seen: Set[str] = set()
-
-    def add_lot(candidate: str) -> None:
-        if candidate and candidate not in seen:
-            seen.add(candidate)
-            normalized.append(candidate)
-
     for raw in numbers:
-        cleaned = _normalize_lot_id(raw)
-        if known_reporting_ids:
-            base = _base_lot_id(cleaned)
-            candidates = sorted(
-                (cid for cid in known_reporting_ids if _base_lot_id(cid) == base),
-                key=_sort_key,
-            )
-            if candidates:
-                for candidate in candidates:
-                    add_lot(candidate)
-                continue
-        add_lot(cleaned)
+        resolve(raw)
 
     if normalized:
         normalized.sort(key=_sort_key)
@@ -359,7 +387,9 @@ def _near_boundary_threshold(duration: float, delta: Dict[str, int]) -> Optional
     return None
 
 
-def _duplicate_extras(production_files: List[dict]) -> List[dict]:
+def _duplicate_extras(
+    production_files: List[dict], annex_index: Optional[Dict[str, List[dict]]] = None
+) -> List[dict]:
     """
     Return the surplus occurrences of duplicate files.
 
@@ -367,6 +397,10 @@ def _duplicate_extras(production_files: List[dict]) -> List[dict]:
     the same category and a duration within ``DUPLICATE_DURATION_TOLERANCE_SECONDS``.
     The first occurrence is kept as representative; every additional one is an
     extra that may explain a positive delta.
+
+    Lorsqu'un BDC détaillé facture explicitement les deux occurrences sur deux
+    lots distincts (ex. « Mortelle Adèle » sur les lots 209 et 219), la seconde
+    n'est pas un doublon suspect : elle est réellement commandée.
     """
     groups: Dict[Tuple[str, str], List[Tuple[Optional[float], dict]]] = defaultdict(list)
     for item in production_files:
@@ -379,6 +413,8 @@ def _duplicate_extras(production_files: List[dict]) -> List[dict]:
     extras: List[dict] = []
     for entries in groups.values():
         if len(entries) < 2:
+            continue
+        if annex_index and _all_occurrences_billed(entries, annex_index):
             continue
         ordered = sorted(
             entries,
@@ -409,17 +445,39 @@ def _duplicate_extras(production_files: List[dict]) -> List[dict]:
     return extras
 
 
+def _all_occurrences_billed(
+    entries: Sequence[Tuple[Optional[float], dict]], annex_index: Dict[str, List[dict]]
+) -> bool:
+    """Vrai si chaque occurrence est facturée sur son propre lot dans une annexe."""
+    lots = {str(item.get("lot") or "") for _, item in entries}
+    if len(lots) < 2:
+        return False
+    for _, item in entries:
+        lot = str(item.get("lot") or "")
+        if not lot:
+            return False
+        name_key = _video_match_key(str(item.get("name") or ""))
+        billed = any(
+            annex["key"] == name_key or annex["key_no_studio"] == name_key
+            for annex in annex_index.get(lot, [])
+        )
+        if not billed:
+            return False
+    return True
+
+
 def _annotate_production_lots(
     production_lots: List[dict],
     delta: Dict[str, int],
     production_files: List[dict],
+    annex_index: Optional[Dict[str, List[dict]]] = None,
 ) -> List[dict]:
     """Enrichit chaque fichier de production avec son statut d'écart, doublon ou frontière."""
     flat_details: List[dict] = []
     for lot in production_lots:
         for cat_info in (lot.get("categories") or {}).values():
             flat_details.extend(cat_info.get("file_details") or [])
-    duplicate_ids = {id(item) for item in _duplicate_extras(flat_details)}
+    duplicate_ids = {id(item) for item in _duplicate_extras(flat_details, annex_index)}
     annotated_lots: List[dict] = []
 
     for lot in production_lots:
@@ -450,6 +508,15 @@ def _annotate_production_lots(
                 if is_suspect:
                     lot_has_suspects = True
 
+                annex_match = None
+                if annex_index:
+                    annex_match = _annex_match_for_file(
+                        annex_index,
+                        str(lot.get("id_camille") or ""),
+                        name,
+                        dur,
+                    )
+
                 annotated_details.append(
                     {
                         **detail,
@@ -459,6 +526,7 @@ def _annotate_production_lots(
                         "is_suspect": is_suspect,
                         "near_threshold": near_th,
                         "category_delta": cat_delta,
+                        "annex_match": annex_match,
                     }
                 )
             annotated_categories[cat] = {
@@ -471,6 +539,293 @@ def _annotate_production_lots(
         annotated_lots.append(annotated_lot)
 
     return annotated_lots
+
+
+def _annex_match_for_file(
+    annex_index: Dict[str, List[dict]],
+    lot: str,
+    name: str,
+    duration: Any,
+) -> Optional[Dict[str, Any]]:
+    """Décrit la correspondance d'un fichier de production avec l'annexe du lot."""
+    lot_annex = annex_index.get(str(lot))
+    if not lot_annex:
+        return None
+    key = _video_match_key(name)
+    key_no_studio = _video_match_key(name, drop_studio_suffix=True)
+    for annex in lot_annex:
+        kind = None
+        if annex["key"] == key:
+            kind = "strict"
+        elif annex["key_no_studio"] == key_no_studio:
+            kind = "radical"
+        if kind is None:
+            continue
+        bdc_duration = annex.get("duration_sec")
+        production_duration = _float_or_none(duration)
+        drift = None
+        if bdc_duration is not None and production_duration is not None:
+            drift = round(production_duration - bdc_duration, 2)
+        extension_differs = False
+        annex_name = str(annex.get("name") or "")
+        prod_ext = VIDEO_EXTENSION_PATTERN.search(name)
+        annex_ext = VIDEO_EXTENSION_PATTERN.search(annex_name)
+        if prod_ext and annex_ext:
+            extension_differs = prod_ext.group(0).lower() != annex_ext.group(0).lower()
+        return {
+            "status": "matched",
+            "match_kind": kind,
+            "annex_name": annex_name,
+            "bdc_duration_sec": bdc_duration,
+            "duration_drift_sec": drift,
+            "duration_drift": drift is not None and abs(drift) > ANNEX_DURATION_DRIFT_SECONDS,
+            "extension_differs": extension_differs,
+        }
+    return {
+        "status": "not_listed",
+        "match_kind": None,
+        "annex_name": None,
+        "bdc_duration_sec": None,
+        "duration_drift_sec": None,
+        "duration_drift": False,
+        "extension_differs": False,
+    }
+
+
+def _video_match_key(name: str, *, drop_studio_suffix: bool = False) -> str:
+    """Clé de rapprochement vidéo tolérante.
+
+    Le nom est normalisé (NFC/NFKC, espaces, minuscules), l'extension est
+    supprimée pour rendre ``.mov`` et ``.mp4`` interchangeables, ainsi que
+    l'espace parasite inséré avant l'extension lors d'un saut de ligne PDF.
+    """
+    value = normalize_video_name(name)
+    value = re.sub(r"\s+(?=\.[a-z0-9]+$)", "", value)
+    value = VIDEO_EXTENSION_PATTERN.sub("", value)
+    if drop_studio_suffix:
+        value = STUDIO_SUFFIX_PATTERN.sub("", value)
+    return value.strip()
+
+
+def _build_annex_video_index(bdc_orders: Sequence[dict]) -> Dict[str, List[dict]]:
+    """Indexe les vidéos d'annexe par lot, avec leurs clés de rapprochement."""
+    index: Dict[str, List[dict]] = defaultdict(list)
+    for order in bdc_orders:
+        number = str(order.get("numero_bdc") or "")
+        for item in order.get("annex_videos") or []:
+            if not isinstance(item, dict):
+                continue
+            lot = str(item.get("lot") or "").strip()
+            name = str(item.get("video_name") or "").strip()
+            if not lot or not name:
+                continue
+            index[lot].append(
+                {
+                    "bdc": number,
+                    "lot": lot,
+                    "name": name,
+                    "key": _video_match_key(name),
+                    "key_no_studio": _video_match_key(name, drop_studio_suffix=True),
+                    "duration_sec": _float_or_none(item.get("duration_sec")),
+                    "category": _category_key(item.get("category_label")),
+                    "montant": item.get("montant"),
+                }
+            )
+    return index
+
+
+def _category_key(value: Any) -> str:
+    normalized = str(value or "").strip().lower()
+    mapping = {
+        "courte": "short",
+        "court": "short",
+        "short": "short",
+        "standard": "standard",
+        "moyenne": "medium",
+        "moyen": "medium",
+        "medium": "medium",
+        "longue": "long",
+        "long": "long",
+    }
+    return mapping.get(normalized, "")
+
+
+def _float_or_none(value: Any) -> Optional[float]:
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _reconcile_cluster_videos(
+    cluster_ids: Sequence[str],
+    bdc_orders: Sequence[dict],
+    production_files: List[dict],
+) -> Optional[Dict[str, Any]]:
+    """Rapproche les vidéos d'annexe BDC et la production, lot par lot.
+
+    Retourne ``None`` quand aucun BDC du cluster ne détaille ses vidéos
+    (rétrocompatibilité des BDC simplifiés).
+    """
+    annex_index = _build_annex_video_index(bdc_orders)
+    if not annex_index:
+        return None
+
+    cluster_lots = {str(lot) for lot in cluster_ids}
+    relevant_lots = [lot for lot in annex_index if lot in cluster_lots] or list(annex_index)
+
+    production_by_lot: Dict[str, List[dict]] = defaultdict(list)
+    for item in production_files:
+        production_by_lot[str(item.get("lot") or "")].append(item)
+
+    statuses: List[dict] = []
+    for lot in sorted(relevant_lots, key=_sort_key):
+        annex_items = annex_index.get(lot, [])
+        production = production_by_lot.get(lot, [])
+        used_production: Set[int] = set()
+        unmatched_annex = list(annex_items)
+
+        # 1. Correspondance stricte (extension ignorée).
+        remaining: List[dict] = []
+        for annex in unmatched_annex:
+            match_index = next(
+                (
+                    index
+                    for index, prod in enumerate(production)
+                    if index not in used_production
+                    and _video_match_key(str(prod.get("name") or "")) == annex["key"]
+                ),
+                None,
+            )
+            if match_index is None:
+                remaining.append(annex)
+                continue
+            used_production.add(match_index)
+            statuses.append(
+                _video_status(annex, production[match_index], "matched", lot, lot_match="strict")
+            )
+
+        # 2. Repli sur le radical sans suffixe studio (même lot).
+        still_remaining: List[dict] = []
+        for annex in remaining:
+            match_index = next(
+                (
+                    index
+                    for index, prod in enumerate(production)
+                    if index not in used_production
+                    and _video_match_key(str(prod.get("name") or ""), drop_studio_suffix=True)
+                    == annex["key_no_studio"]
+                ),
+                None,
+            )
+            if match_index is None:
+                still_remaining.append(annex)
+                continue
+            used_production.add(match_index)
+            statuses.append(
+                _video_status(annex, production[match_index], "matched", lot, lot_match="radical")
+            )
+
+        for annex in still_remaining:
+            statuses.append(
+                {
+                    "lot": lot,
+                    "bdc": annex["bdc"],
+                    "name": annex["name"],
+                    "bdc_duration_sec": annex["duration_sec"],
+                    "bdc_category": annex["category"],
+                    "production_duration_sec": None,
+                    "production_category": "",
+                    "status": "missing_in_production",
+                    "category_matches": None,
+                    "duration_drift_sec": None,
+                    "match_kind": None,
+                }
+            )
+
+        for index, prod in enumerate(production):
+            if index in used_production:
+                continue
+            statuses.append(
+                {
+                    "lot": lot,
+                    "bdc": "",
+                    "name": str(prod.get("name") or ""),
+                    "bdc_duration_sec": None,
+                    "bdc_category": "",
+                    "production_duration_sec": _float_or_none(prod.get("duration_sec")),
+                    "production_category": str(prod.get("category") or ""),
+                    "status": "extra_in_production",
+                    "category_matches": None,
+                    "duration_drift_sec": None,
+                    "match_kind": None,
+                }
+            )
+
+    counts: Dict[str, int] = defaultdict(int)
+    for item in statuses:
+        counts[item["status"]] += 1
+
+    matched = counts.get("matched", 0)
+    # Une dérive de durée reste une vidéo appariée dans la bonne catégorie :
+    # elle compte dans le taux et reste signalée par un badge ``info``.
+    matched_with_drift = matched + counts.get("duration_drift", 0)
+    total_annex = sum(1 for item in statuses if item["bdc"])
+    return {
+        "has_detail": True,
+        "lots": sorted({item["lot"] for item in statuses}, key=_sort_key),
+        "annex_total": total_annex,
+        "matched": matched,
+        "match_rate": (round(100 * matched_with_drift / total_annex, 1) if total_annex else 0.0),
+        "counts": dict(counts),
+        "items": statuses,
+        "duration_drifts": [item for item in statuses if item["status"] == "duration_drift"],
+        "bdc_numbers": sorted(
+            {
+                str(order.get("numero_bdc") or "")
+                for order in bdc_orders
+                if order.get("annex_videos")
+            },
+            key=_bdc_sort_key,
+        ),
+    }
+
+
+def _video_status(
+    annex: dict, production: dict, status: str, lot: str, *, lot_match: str
+) -> Dict[str, Any]:
+    bdc_duration = annex.get("duration_sec")
+    prod_duration = _float_or_none(production.get("duration_sec"))
+    prod_category = str(production.get("category") or "")
+    bdc_category = annex.get("category") or ""
+
+    resolved_status = status
+    category_matches: Optional[bool] = None
+    drift: Optional[float] = None
+    if bdc_category and prod_category:
+        category_matches = bdc_category == prod_category
+        if not category_matches:
+            resolved_status = "category_mismatch"
+    if bdc_duration is not None and prod_duration is not None:
+        drift = round(prod_duration - bdc_duration, 2)
+        if resolved_status == "matched" and abs(drift) > ANNEX_DURATION_DRIFT_SECONDS:
+            resolved_status = "duration_drift"
+
+    return {
+        "lot": lot,
+        "bdc": annex.get("bdc") or "",
+        "name": annex.get("name") or "",
+        "bdc_duration_sec": bdc_duration,
+        "bdc_category": bdc_category,
+        "production_duration_sec": prod_duration,
+        "production_category": prod_category,
+        "status": resolved_status,
+        "category_matches": category_matches,
+        "duration_drift_sec": drift,
+        "match_kind": lot_match,
+    }
 
 
 def _billed_counts_for_order(order: dict) -> Dict[str, int]:
@@ -763,7 +1118,7 @@ def _expected_category(duration: float) -> str:
         return VideoCategory.SHORT.value
     if duration < 300:
         return VideoCategory.STANDARD.value
-    if duration < 420:
+    if duration < 480:
         return VideoCategory.MEDIUM.value
     return VideoCategory.LONG.value
 
@@ -771,6 +1126,116 @@ def _expected_category(duration: float) -> str:
 def _format_duration(seconds: float) -> str:
     total = int(round(seconds))
     return f"{total // 60}m{total % 60:02d}s"
+
+
+def _video_reconciliation_diagnostics(
+    video_reconciliation: Dict[str, Any],
+    delta: Dict[str, int],
+) -> List[dict]:
+    """Diagnostics non bloquants issus du rapprochement lot/vidéo."""
+    diagnostics: List[dict] = []
+    items = video_reconciliation.get("items") or []
+    counts = video_reconciliation.get("counts") or {}
+
+    missing = [item for item in items if item.get("status") == "missing_in_production"]
+    extra = [item for item in items if item.get("status") == "extra_in_production"]
+    mismatched = [item for item in items if item.get("status") == "category_mismatch"]
+    drifts = [item for item in items if item.get("status") == "duration_drift"]
+
+    delta_is_zero = all(value == 0 for value in delta.values())
+    # Option A : des écarts internes compensés n'invalident pas le BDC.
+    if delta_is_zero and (missing or extra or mismatched):
+        details = []
+        for lot in sorted({item["lot"] for item in missing + extra + mismatched}, key=_sort_key):
+            lot_missing = sum(1 for item in missing if item["lot"] == lot)
+            lot_extra = sum(1 for item in extra if item["lot"] == lot)
+            parts = []
+            if lot_missing:
+                parts.append(f"{lot_missing} absente(s) de l'archive")
+            if lot_extra:
+                parts.append(f"{lot_extra} non listée(s) sur le BDC")
+            if parts:
+                details.append(f"lot {lot} : " + ", ".join(parts))
+        diagnostics.append(
+            {
+                "code": "compensated_lot_mismatch",
+                "title": "Écarts internes compensés",
+                "severity": "warn",
+                "message": (
+                    "Le total du BDC est conforme mais des écarts se compensent entre lots"
+                    + (" (" + " ; ".join(details[:6]) + ")." if details else ".")
+                    + " La facturation reste calculée au niveau du BDC."
+                ),
+                "lots": sorted(
+                    {item["lot"] for item in missing + extra + mismatched}, key=_sort_key
+                ),
+                "missing": missing[:5],
+                "extra": extra[:5],
+            }
+        )
+
+    if drifts:
+        first = drifts[0]
+        bdc_duration = first.get("bdc_duration_sec")
+        prod_duration = first.get("production_duration_sec")
+        diagnostics.append(
+            {
+                "code": "video_duration_drift",
+                "title": "Dérive de durée annexe",
+                "severity": "info",
+                "message": (
+                    f"« {first.get('name')} » (lot {first.get('lot')}) est facturée à "
+                    f"{_format_duration(float(bdc_duration)) if bdc_duration is not None else '?'} "
+                    f"mais mesurée à "
+                    f"{_format_duration(float(prod_duration)) if prod_duration is not None else '?'}"
+                    " dans l'archive : la catégorie reste identique."
+                ),
+                "drift_files": drifts[:5],
+            }
+        )
+
+    if mismatched:
+        diagnostics.append(
+            {
+                "code": "video_category_mismatch",
+                "title": "Catégorie vidéo divergente",
+                "severity": "warn",
+                "message": (
+                    f"{len(mismatched)} vidéo(s) facturée(s) dans une catégorie différente "
+                    "de celle mesurée dans l'archive."
+                ),
+                "mismatch_files": mismatched[:5],
+            }
+        )
+
+    if missing:
+        diagnostics.append(
+            {
+                "code": "video_missing_in_production",
+                "title": "Vidéos facturées absentes de l'archive",
+                "severity": "warn",
+                "message": (
+                    f"{len(missing)} vidéo(s) figurent sur l'annexe du BDC mais sont "
+                    "introuvables dans la production (tolérance .mov/.mp4 et radical studio)."
+                ),
+                "missing_files": missing[:5],
+            }
+        )
+
+    if counts.get("matched") and not (missing or extra or mismatched or drifts):
+        diagnostics.append(
+            {
+                "code": "video_reconciled",
+                "title": "Annexe détaillée rapprochée",
+                "severity": "info",
+                "message": (
+                    f"{counts.get('matched')} vidéo(s) de l'annexe retrouvée(s) "
+                    f"dans la production ({video_reconciliation.get('match_rate', 0)} %)."
+                ),
+            }
+        )
+
+    return diagnostics
 
 
 def _build_cluster_diagnostic(
@@ -783,6 +1248,8 @@ def _build_cluster_diagnostic(
     production_files: List[dict],
     overlap_map: Dict[str, List[str]],
     adjacent_index: Dict[str, Dict[str, Any]],
+    annex_index: Optional[Dict[str, List[dict]]] = None,
+    video_reconciliation: Optional[Dict[str, Any]] = None,
 ) -> Tuple[Optional[dict], List[dict], Dict[str, bool]]:
     diagnostics: List[dict] = []
     billed_unknown = _normalize_count(billed.get("unknown"))
@@ -790,7 +1257,7 @@ def _build_cluster_diagnostic(
     jingles = [
         item for item in production_files if is_excluded_video_name(str(item.get("name") or ""))
     ]
-    duplicate_extras = _duplicate_extras(production_files)
+    duplicate_extras = _duplicate_extras(production_files, annex_index)
 
     near_boundary = []
     for item in production_files:
@@ -911,6 +1378,9 @@ def _build_cluster_diagnostic(
                 "near_files": near_boundary[:5],
             }
         )
+
+    if video_reconciliation:
+        diagnostics.extend(_video_reconciliation_diagnostics(video_reconciliation, delta))
 
     if overlap_lots:
         other_numbers = sorted(
@@ -1050,6 +1520,10 @@ def compare_reports(
     clusters = bdc_summary["clusters"]
     assert isinstance(clusters, dict)
 
+    orders_by_cluster: Dict[str, List[dict]] = defaultdict(list)
+    for order, summary in zip(bdc_content, bdc_summary["order_summaries"]):
+        orders_by_cluster[str(summary["cluster_key"])].append(order)
+
     for cluster_key, cluster_data in clusters.items():
         cluster_ids = cluster_data["cluster_ids"]
         billed_counts = cluster_data["counts"]
@@ -1057,6 +1531,11 @@ def compare_reports(
             _collect_cluster_production(reporting_groups, cluster_ids)
         )
         missing_reporting_ids = list(raw_missing_reporting_ids)
+        cluster_orders = orders_by_cluster.get(str(cluster_key), [])
+        annex_index = _build_annex_video_index(cluster_orders)
+        video_reconciliation = _reconcile_cluster_videos(
+            cluster_ids, cluster_orders, production_files
+        )
         billed_unknown = _normalize_count(billed_counts.get("unknown"))
 
         delta = {
@@ -1078,6 +1557,8 @@ def compare_reports(
             production_files=production_files,
             overlap_map=overlap_map,
             adjacent_index=adjacent_index,
+            annex_index=annex_index or None,
+            video_reconciliation=video_reconciliation,
         )
 
         justification_eligible = bool(flags.get("justification_eligible"))
@@ -1098,6 +1579,7 @@ def compare_reports(
             production_lots=production_lots,
             delta=delta,
             production_files=production_files,
+            annex_index=annex_index or None,
         )
 
         cluster_result = {
@@ -1122,6 +1604,9 @@ def compare_reports(
             "justification_hint": justification_hint,
             "diagnostic": diagnostic,
             "diagnostics": diagnostics,
+            "bdc_format": "detailed" if video_reconciliation else "simplified",
+            "has_video_detail": bool(video_reconciliation),
+            "video_reconciliation": video_reconciliation,
             **flags,
         }
         cluster_results.append(cluster_result)

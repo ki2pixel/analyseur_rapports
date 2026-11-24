@@ -314,6 +314,19 @@
                         </span>
                       {% endif %}
                     {% endfor %}
+                    {% if line.detail.bdc_format == 'detailed' %}
+                      <span class="badge badge--ok badge--xs" title="Bon de commande détaillé : annexe vidéo extraite">
+                        Détaillé{% if line.detail.annex_videos %} ({{ line.detail.annex_videos }} vidéos){% endif %}
+                      </span>
+                      {% set summary = line.detail.video_match_summary|default({}) %}
+                      {% if summary.match_rate is defined %}
+                        <span class="badge badge--neutral badge--xs" title="Rapprochement annexe ↔ production">
+                          Annexe : {{ summary.match_rate }} %
+                        </span>
+                      {% endif %}
+                    {% elif line.detail.bdc_format %}
+                      <span class="badge badge--neutral badge--xs">Simplifié</span>
+                    {% endif %}
                   {% endif %}
                 </td>
                 <td class="num">{{ line.quantity|qty }}</td>

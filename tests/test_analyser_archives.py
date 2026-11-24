@@ -190,8 +190,8 @@ def test_range_reference_parsing():
         (120, "standard"),
         (299.9, "standard"),
         (300, "medium"),
-        (419.9, "medium"),
-        (420, "long"),
+        (479.9, "medium"),
+        (480, "long"),
         (500, "long"),
     ],
 )

@@ -52,14 +52,14 @@
                 {% endif %}
               </div>
               <div class="cat-box">
-                <div class="cat-title">Moyenne (5 - 7 min)</div>
+                <div class="cat-title">Moyenne (5 - 8 min)</div>
                 <div class="cat-count">{{ group.categories['medium'].count }}</div>
                 {% if group.categories['medium'].files %}
                   <div class="files">{{ group.categories['medium'].files | join('\n') }}</div>
                 {% endif %}
               </div>
               <div class="cat-box">
-                <div class="cat-title">Longue (≥ 7 min)</div>
+                <div class="cat-title">Longue (≥ 8 min)</div>
                 <div class="cat-count">{{ group.categories['long'].count }}</div>
                 {% if group.categories['long'].files %}
                   <div class="files">{{ group.categories['long'].files | join('\n') }}</div>

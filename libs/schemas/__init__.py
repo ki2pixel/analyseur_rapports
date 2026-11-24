@@ -59,6 +59,19 @@ class OrderArticle:
 
 
 @dataclass
+class AnnexeVideoItem:
+    """Vidéo listée dans l'annexe détaillée d'un BDC (format détaillé uniquement)."""
+
+    lot: str
+    video_name: str
+    duration_text: Optional[str] = None
+    duration_sec: Optional[int] = None
+    category_label: Optional[str] = None
+    inferred_category: VideoCategory = VideoCategory.UNKNOWN
+    montant: Optional[str] = None
+
+
+@dataclass
 class PurchaseOrder:
     """Représentation pivot d'un bon de commande extrait depuis un PDF."""
 
@@ -68,10 +81,16 @@ class PurchaseOrder:
     reference: Optional[str]
     references: List[str]
     articles: List[OrderArticle] = field(default_factory=list)
+    bdc_format: str = "simplified"
+    period: Optional[str] = None
+    concerned_lots: List[str] = field(default_factory=list)
+    annex_videos: List[AnnexeVideoItem] = field(default_factory=list)
 
     def __post_init__(self):
         if not self.numero_bdc:
             raise ValueError("PurchaseOrder.numero_bdc est obligatoire")
+        if self.bdc_format not in {"simplified", "detailed"}:
+            raise ValueError("PurchaseOrder.bdc_format doit être 'simplified' ou 'detailed'")
 
 
 @dataclass

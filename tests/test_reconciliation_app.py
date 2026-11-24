@@ -931,3 +931,103 @@ def test_pdf_zoom_caps_page_height():
     assert _pdf_zoom_for_page_height(10_000) == 1.0
     assert _pdf_zoom_for_page_height(28_800) == pytest.approx(0.5)
     assert _pdf_zoom_for_page_height(0) == 1.0
+
+
+def test_export_includes_video_reconciliation_summary(tmp_path, monkeypatch):
+    """Un BDC détaillé expose le rapprochement vidéo dans l'export."""
+    _store.clear()
+    reporting_dir = tmp_path / "reporting"
+    bdc_dir = tmp_path / "bdc"
+    reporting_dir.mkdir()
+    bdc_dir.mkdir()
+
+    report = {
+        "report": [
+            {
+                "id_camille": "185",
+                "person": "Camille",
+                "categories": {
+                    "short": {
+                        "count": 1,
+                        "files": ["booder .mp4"],
+                        "files_detail": [{"name": "booder .mp4", "duration_sec": 71.56}],
+                    },
+                    "standard": {"count": 0, "files": [], "files_detail": []},
+                    "medium": {"count": 0, "files": [], "files_detail": []},
+                    "long": {"count": 0, "files": [], "files_detail": []},
+                },
+            },
+            {
+                "id_camille": "40",
+                "person": "Camille",
+                "categories": {
+                    "short": {
+                        "count": 1,
+                        "files": ["hors-bdc.mp4"],
+                        "files_detail": [{"name": "hors-bdc.mp4", "duration_sec": 60}],
+                    },
+                    "standard": {"count": 0, "files": [], "files_detail": []},
+                    "medium": {"count": 0, "files": [], "files_detail": []},
+                    "long": {"count": 0, "files": [], "files_detail": []},
+                },
+            },
+        ]
+    }
+    bdc = [
+        {
+            "numero_bdc": "BDC-M6-0001",
+            "reference": "LOTS 42 À 311",
+            "references": ["LOTS 42 à 311"],
+            "concerned_lots": ["185"],
+            "bdc_format": "detailed",
+            "articles": [
+                {
+                    "description": "Recadrage - vidéo courte (moins de 2 min)",
+                    "quantite": "1,00",
+                    "taux": "4,00",
+                    "montant": "4,00",
+                }
+            ],
+            "annex_videos": [
+                {
+                    "lot": "185",
+                    "video_name": "booder _TAT_M6.mp4",
+                    "duration_text": "0 min 03",
+                    "duration_sec": 3,
+                    "category_label": "courte",
+                    "montant": "4,00",
+                }
+            ],
+        }
+    ]
+    (reporting_dir / "rapport-2026-11.json").write_text(json.dumps(report), encoding="utf-8")
+    (bdc_dir / "convert_bdc_11-2026.json").write_text(json.dumps(bdc), encoding="utf-8")
+
+    monkeypatch.setattr("apps.reconciliation.app.REPORTING_DIR", reporting_dir)
+    monkeypatch.setattr("apps.reconciliation.app.BDC_DIR", bdc_dir)
+    reconciliation_app.config.update(TESTING=True, WTF_CSRF_ENABLED=False)
+
+    with reconciliation_app.test_client() as client:
+        client.set_cookie("admin_token", reconciliation_app.config["ADMIN_TOKEN"])
+        post = client.post(
+            "/",
+            data={
+                "reporting_filename": "rapport-2026-11.json",
+                "bdc_filename": "convert_bdc_11-2026.json",
+            },
+        )
+        assert post.status_code == 200
+        token_match = re.search(r"/export/html\?token=([a-f0-9]+)", post.get_data(as_text=True))
+        assert token_match is not None
+
+        export_html = client.get(f"/export/html?token={token_match.group(1)}")
+        body = export_html.get_data(as_text=True)
+
+    assert export_html.status_code == 200
+    assert "Rapprochement vidéo" in body
+    assert "BDC-M6-0001" in body
+    assert "1 / 1" in body
+    assert "100,0 %" in body
+    assert "dérive de durée" in body
+    assert "Lot 185" in body
+    assert "Lots produits sans BDC" in body

@@ -55,7 +55,7 @@ class TestAnalyzeBatch:
                 month="2025-12",
                 video_name="video3.mp4",
                 video_path="/fake/path/video3.mp4",
-                duration_sec=400,  # 400 < 420 -> medium
+                duration_sec=400,  # 400 < 480 -> medium
                 duration_source="test",
                 archive_folder="/fake/archive",
             ),
@@ -67,8 +67,8 @@ class TestAnalyzeBatch:
         thresholds = CategoryThresholds(
             short_lt=120,  # < 2 min
             standard_lt=300,  # < 5 min
-            medium_lt=420,  # < 7 min
-            long_ge=420,  # >= 7 min
+            medium_lt=480,  # < 8 min
+            long_ge=480,  # >= 8 min
         )
 
         reports = analyze_batch(batch, thresholds)
@@ -130,7 +130,7 @@ class TestAnalyzeBatch:
                 month="2025-12",
                 video_name="vid3.mp4",
                 video_path="/fake/vid3.mp4",
-                duration_sec=500,  # > 420 -> long
+                duration_sec=500,  # > 480 -> long
                 duration_source="test",
                 archive_folder="/fake",
             ),

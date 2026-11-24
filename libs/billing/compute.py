@@ -57,6 +57,19 @@ def _unique(items: Iterable[str]) -> List[str]:
     return result
 
 
+def _video_match_summary(cluster: Dict[str, Any]) -> Dict[str, Any]:
+    """Synthèse compacte du rapprochement vidéo d'un cluster (BDC détaillé)."""
+    reconciliation = cluster.get("video_reconciliation") or {}
+    if not reconciliation:
+        return {}
+    return {
+        "annex_total": _int(reconciliation.get("annex_total")),
+        "matched": _int(reconciliation.get("matched")),
+        "match_rate": reconciliation.get("match_rate", 0.0),
+        "counts": reconciliation.get("counts") or {},
+    }
+
+
 def _order_facts(order: Dict[str, Any]) -> Dict[str, Any]:
     """Per-BDC quantities, amounts and rates by inferred category."""
     number = str(order.get("numero_bdc") or "").strip()
@@ -72,6 +85,9 @@ def _order_facts(order: Dict[str, Any]) -> Dict[str, Any]:
         "category_rates": {cat: [] for cat in CATEGORY_KEYS},
         "unknown_quantity": 0,
         "unknown_amount": ZERO,
+        "bdc_format": str(order.get("bdc_format") or "simplified"),
+        "annex_videos": len(order.get("annex_videos") or []),
+        "concerned_lots": len(order.get("concerned_lots") or []),
     }
 
     computed_total = ZERO
@@ -351,6 +367,20 @@ def build_draft(
         actual = {cat: _int((cluster.get("actual") or {}).get(cat)) for cat in CATEGORY_KEYS}
         billed_unknown = _int(cluster.get("billed_unknown"))
 
+        for diagnostic in cluster.get("diagnostics") or []:
+            if diagnostic.get("code") != "compensated_lot_mismatch":
+                continue
+            _add_issue(
+                issues,
+                _issue(
+                    "compensated_lot_mismatch",
+                    "info",
+                    "Écarts internes compensés entre lots sur "
+                    f"{', '.join(bdc_numbers)} : le total reste facturé au niveau du BDC.",
+                    cluster=cluster_key,
+                ),
+            )
+
         orders = [facts.get(number) for number in bdc_numbers]
         known_orders = [order for order in orders if order is not None]
         for number in bdc_numbers:
@@ -489,6 +519,10 @@ def build_draft(
                         "cluster_ids": cluster.get("cluster_ids") or [],
                         "billed_total": _int(cluster.get("billed_total")),
                         "actual_total": _int(cluster.get("actual_total")),
+                        "bdc_format": order.get("bdc_format") or "simplified",
+                        "annex_videos": _int(order.get("annex_videos")),
+                        "concerned_lots": _int(order.get("concerned_lots")),
+                        "video_match_summary": _video_match_summary(cluster),
                     },
                 )
             )

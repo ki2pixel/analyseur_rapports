@@ -1,0 +1,3563 @@
+{
+  "month": "2026-11",
+  "total_mp4": 150,
+  "group_totals": {
+    "2 Camille": 3,
+    "8 Camille": 5,
+    "20 Camille": 1,
+    "35 Camille": 1,
+    "37 Camille": 1,
+    "40 Camille": 5,
+    "42 Camille": 1,
+    "45 Camille": 1,
+    "50 Camille": 1,
+    "54 Camille": 1,
+    "58 Camille": 1,
+    "62 Camille": 2,
+    "68 Camille": 1,
+    "77 Camille": 2,
+    "78 Camille": 1,
+    "79 Camille": 2,
+    "80 Camille": 2,
+    "81 Camille": 3,
+    "82 Camille": 1,
+    "86 Camille": 2,
+    "89 Camille": 1,
+    "104 Camille": 5,
+    "105 Camille": 3,
+    "106 Camille": 5,
+    "112 Camille": 1,
+    "113 Camille": 1,
+    "114 Camille": 1,
+    "115 Camille": 1,
+    "116 Camille": 1,
+    "117 Camille": 1,
+    "131 Camille": 2,
+    "136 Camille": 2,
+    "158 Camille": 3,
+    "166 Camille": 1,
+    "173 Camille": 1,
+    "179 Camille": 3,
+    "181 Camille": 1,
+    "183 Camille": 1,
+    "185 Camille": 4,
+    "186 Camille": 3,
+    "194 Camille": 1,
+    "195 Camille": 2,
+    "196 Camille": 1,
+    "200 Camille": 4,
+    "201 Camille": 5,
+    "209 Camille": 4,
+    "213 Camille": 3,
+    "215 Camille": 3,
+    "216 Camille": 2,
+    "219 Camille": 1,
+    "223 Camille": 1,
+    "226 Camille": 1,
+    "229 Camille": 1,
+    "230 Camille": 1,
+    "231 Camille": 1,
+    "233 Camille": 1,
+    "235 Camille": 1,
+    "236 Camille": 2,
+    "238 Camille": 1,
+    "239 Camille": 1,
+    "240 Camille": 1,
+    "242 Camille": 3,
+    "245 Camille": 1,
+    "251 Camille": 1,
+    "256 Camille": 2,
+    "259 Camille": 1,
+    "263 Camille": 1,
+    "265 Camille": 1,
+    "267 Camille": 1,
+    "268 Camille": 3,
+    "270 Camille": 1,
+    "271 Camille": 3,
+    "272 Camille": 1,
+    "277 Camille": 4,
+    "280 Camille": 2,
+    "291 Camille": 1,
+    "296 Camille": 4,
+    "306 Camille": 1,
+    "311 Camille": 3
+  },
+  "report": [
+    {
+      "id_camille": "2",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "La tuerie de masse prend une ampleur internationale !.mp4",
+            "Marianne James offre son Golden Buzzer à ce couple de 95 et 97 ans.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "La tuerie de masse prend une ampleur internationale !.mp4",
+              "duration_sec": 106.75999999999999,
+              "category": "short"
+            },
+            {
+              "name": "Marianne James offre son Golden Buzzer à ce couple de 95 et 97 ans.mp4",
+              "duration_sec": 74.16,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Cet humoriste revient sur ses 15 ans dans l’armée .mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Cet humoriste revient sur ses 15 ans dans l’armée .mp4",
+              "duration_sec": 174.64,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "8",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 5,
+          "files": [
+            "Gulli - Totally Spies - Sam est malade.mp4",
+            "Gulli - Totally Spies - Volley ball.mp4",
+            "Reco - Gulli - UDPP 1.mp4",
+            "Reco - Gulli - UDPP 2.mp4",
+            "Reco - Gulli - UDPP 4.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - Totally Spies - Sam est malade.mp4",
+              "duration_sec": 65.76,
+              "category": "short"
+            },
+            {
+              "name": "Gulli - Totally Spies - Volley ball.mp4",
+              "duration_sec": 67.84,
+              "category": "short"
+            },
+            {
+              "name": "Reco - Gulli - UDPP 1.mp4",
+              "duration_sec": 65.6,
+              "category": "short"
+            },
+            {
+              "name": "Reco - Gulli - UDPP 2.mp4",
+              "duration_sec": 37.12,
+              "category": "short"
+            },
+            {
+              "name": "Reco - Gulli - UDPP 4.mp4",
+              "duration_sec": 48.04,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "20",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Saurez-vous trouver les 3 trompe-l'œil .mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Saurez-vous trouver les 3 trompe-l'œil .mp4",
+              "duration_sec": 103.88,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "35",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Gulli - La Grande Gulli Party - Partie de cache cache.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - La Grande Gulli Party - Partie de cache cache.mp4",
+              "duration_sec": 71.96000000000001,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "37",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "WANTED - SOIREE EM5 rs1.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "WANTED - SOIREE EM5 rs1.mp4",
+              "duration_sec": 60.16,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "40",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 3,
+          "files": [
+            "66M - ABHARTACH.mp4",
+            "66M - CIMETIERE.mp4",
+            "6ter - La petite maison dans la prairie - Il tombe amoureux de cette belle inconnue.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "66M - ABHARTACH.mp4",
+              "duration_sec": 115.24000000000001,
+              "category": "short"
+            },
+            {
+              "name": "66M - CIMETIERE.mp4",
+              "duration_sec": 91.2,
+              "category": "short"
+            },
+            {
+              "name": "6ter - La petite maison dans la prairie - Il tombe amoureux de cette belle inconnue.mp4",
+              "duration_sec": 58.8,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 2,
+          "files": [
+            "66M - CITROUILLES.mp4",
+            "66M - FOOTBALLEUR ESCROC.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "66M - CITROUILLES.mp4",
+              "duration_sec": 178.68,
+              "category": "standard"
+            },
+            {
+              "name": "66M - FOOTBALLEUR ESCROC.mp4",
+              "duration_sec": 199.07999999999998,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "42",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Le lapsus d’Olivier Minne déclenche un fou rire sur le plateau.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Le lapsus d’Olivier Minne déclenche un fou rire sur le plateau.mp4",
+              "duration_sec": 17.44,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "45",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "M6+ - Younger – Extrait 1 - Liza et Josh au bar.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "M6+ - Younger – Extrait 1 - Liza et Josh au bar.mp4",
+              "duration_sec": 80.03999999999999,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "50",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Cathy s'est fait courtiser par un agriculteur d'une autre saison !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Cathy s'est fait courtiser par un agriculteur d'une autre saison !.mp4",
+              "duration_sec": 84.24,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "54",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "UJUD - CLIENT HOTEL.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "UJUD - CLIENT HOTEL.mp4",
+              "duration_sec": 215.96,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "58",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "UJUD - CROUSTY.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "UJUD - CROUSTY.mp4",
+              "duration_sec": 95.92,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "62",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "SHORT_E=M6 - EP NINO - V3.mp4",
+            "SHORT_oléagineux.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "SHORT_E=M6 - EP NINO - V3.mp4",
+              "duration_sec": 90.52,
+              "category": "short"
+            },
+            {
+              "name": "SHORT_oléagineux.mp4",
+              "duration_sec": 69.84,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "68",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "6ter - De l'autre côté du périph.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "6ter - De l'autre côté du périph.mp4",
+              "duration_sec": 38.84,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "77",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "UJUD - HOTEL POUR CHATS.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "UJUD - HOTEL POUR CHATS.mp4",
+              "duration_sec": 114.56,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "UJUD - CHAT HYPOALLERGENIQUE.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "UJUD - CHAT HYPOALLERGENIQUE.mp4",
+              "duration_sec": 134.92,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "78",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Gulli - MSL1 - Kondogbia co-animateur de « Ma Super Ligue 1 » .mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - MSL1 - Kondogbia co-animateur de « Ma Super Ligue 1 » .mp4",
+              "duration_sec": 40.88,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "79",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "Gulli - MSL1 - Léo, 7 ans, interviewe Matthis Abline .mp4",
+            "Gulli - MSL1 - Ripart fait une surprise à ces deux supporters.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - MSL1 - Léo, 7 ans, interviewe Matthis Abline .mp4",
+              "duration_sec": 118.64,
+              "category": "short"
+            },
+            {
+              "name": "Gulli - MSL1 - Ripart fait une surprise à ces deux supporters.mp4",
+              "duration_sec": 115.56,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "80",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "Gulli - MSL1 - L’interview « Quand j’étais petit » d’Igor Paixão.mp4",
+            "Leur belle-mère leur pourrit la vie !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - MSL1 - L’interview « Quand j’étais petit » d’Igor Paixão.mp4",
+              "duration_sec": 79.16,
+              "category": "short"
+            },
+            {
+              "name": "Leur belle-mère leur pourrit la vie !.mp4",
+              "duration_sec": 88.48,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "81",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 3,
+          "files": [
+            "Elles refusent 500 000 euros d'héritage !.mp4",
+            "Ils pensent que leur belle-mère n'est là que pour l'argent !.mp4",
+            "Sa fille l’accuse d’avoir un cancer à cause de lui !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Elles refusent 500 000 euros d'héritage !.mp4",
+              "duration_sec": 68.92,
+              "category": "short"
+            },
+            {
+              "name": "Ils pensent que leur belle-mère n'est là que pour l'argent !.mp4",
+              "duration_sec": 99.88,
+              "category": "short"
+            },
+            {
+              "name": "Sa fille l’accuse d’avoir un cancer à cause de lui !.mp4",
+              "duration_sec": 81.28,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "82",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Il tue cette femme car elle s’est mal garée !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Il tue cette femme car elle s’est mal garée !.mp4",
+              "duration_sec": 173.16,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "86",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "Extrait 3 - EM6 (Duo Hair Suspension)  Elle soulève sa partenaire à plusieurs mètres du sol par les cheveux.mp4",
+            "Extrait 4 - (Roman Rozier)  Il joue du piano comme un véritable virtuose.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Extrait 3 - EM6 (Duo Hair Suspension)  Elle soulève sa partenaire à plusieurs mètres du sol par les cheveux.mp4",
+              "duration_sec": 58.68,
+              "category": "short"
+            },
+            {
+              "name": "Extrait 4 - (Roman Rozier)  Il joue du piano comme un véritable virtuose.mp4",
+              "duration_sec": 84.56,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "89",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "M6 - Le seigneur des anneaux les anneaux de pouvoir - Troll des neiges.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "M6 - Le seigneur des anneaux les anneaux de pouvoir - Troll des neiges.mp4",
+              "duration_sec": 85.8,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "104",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 4,
+          "files": [
+            "Extrait 5 - EM6 (Morph)  Une chorégraphie inspirée de la maladie de Parkinson de son grand-père _TAT_M6.mp4",
+            "Extrait 6 - EM6 (Gildo Gomes)  Il fond en larmes en répondant à la question d'Éric Antoine _TAT_M6.mp4",
+            "Extrait 7 - EM6 (Afonso the echo man)  Sa voix est capable de créer un effet d’écho_TAT_M6.mp4",
+            "Il déteste la communauté LGBTQIA+.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Extrait 5 - EM6 (Morph)  Une chorégraphie inspirée de la maladie de Parkinson de son grand-père _TAT_M6.mp4",
+              "duration_sec": 60.0,
+              "category": "short"
+            },
+            {
+              "name": "Extrait 6 - EM6 (Gildo Gomes)  Il fond en larmes en répondant à la question d'Éric Antoine _TAT_M6.mp4",
+              "duration_sec": 34.12,
+              "category": "short"
+            },
+            {
+              "name": "Extrait 7 - EM6 (Afonso the echo man)  Sa voix est capable de créer un effet d’écho_TAT_M6.mp4",
+              "duration_sec": 88.0,
+              "category": "short"
+            },
+            {
+              "name": "Il déteste la communauté LGBTQIA+.mp4",
+              "duration_sec": 109.32,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Manifestations  antifascistes VS ultradroite !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Manifestations  antifascistes VS ultradroite !.mp4",
+              "duration_sec": 177.84,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "105",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 3,
+          "files": [
+            "Ces militants nationalistes apprennent à se battre.mp4",
+            "Extrait 8 - EM6 (Diane)  Elle décroche le Golden Buzzer de Karine Le Marchand_TAT_M6.mp4",
+            "M6_EM6_ampoules short.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Ces militants nationalistes apprennent à se battre.mp4",
+              "duration_sec": 77.2,
+              "category": "short"
+            },
+            {
+              "name": "Extrait 8 - EM6 (Diane)  Elle décroche le Golden Buzzer de Karine Le Marchand_TAT_M6.mp4",
+              "duration_sec": 66.28,
+              "category": "short"
+            },
+            {
+              "name": "M6_EM6_ampoules short.mp4",
+              "duration_sec": 66.2,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "106",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 5,
+          "files": [
+            "Extrait 2 - Le remarquable jeu d’actrice de Nellie .mp4",
+            "Gulli - Totally Spies - Clover ne comprend pas le langage des jeunes.mp4",
+            "Gulli - Totally Spies - Le cauchemar de Clover.mp4",
+            "LMCR - Extrait 1.mp4",
+            "LMCR - Extrait 2.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Extrait 2 - Le remarquable jeu d’actrice de Nellie .mp4",
+              "duration_sec": 48.72,
+              "category": "short"
+            },
+            {
+              "name": "Gulli - Totally Spies - Clover ne comprend pas le langage des jeunes.mp4",
+              "duration_sec": 38.16,
+              "category": "short"
+            },
+            {
+              "name": "Gulli - Totally Spies - Le cauchemar de Clover.mp4",
+              "duration_sec": 70.92,
+              "category": "short"
+            },
+            {
+              "name": "LMCR - Extrait 1.mp4",
+              "duration_sec": 109.72,
+              "category": "short"
+            },
+            {
+              "name": "LMCR - Extrait 2.mp4",
+              "duration_sec": 31.8,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "112",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "LMCR3 - EP26 CVDL 1 RS EXTRAIT 1.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "LMCR3 - EP26 CVDL 1 RS EXTRAIT 1.mp4",
+              "duration_sec": 29.52,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "113",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "LMCR3 - EP26 CVDL 1 RS EXTRAIT 2.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "LMCR3 - EP26 CVDL 1 RS EXTRAIT 2.mp4",
+              "duration_sec": 122.64,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "114",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "LMF - Qui trouvera le meilleur jeu de mot avec « Rhino ».mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "LMF - Qui trouvera le meilleur jeu de mot avec « Rhino ».mp4",
+              "duration_sec": 27.64,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "115",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "LMF - Tout se joue sur la dernière question !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "LMF - Tout se joue sur la dernière question !.mp4",
+              "duration_sec": 117.2,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "116",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "SDM - Liliane et josé.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "SDM - Liliane et josé.mp4",
+              "duration_sec": 51.44,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "117",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "BUDGET.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "BUDGET.mp4",
+              "duration_sec": 221.44,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "131",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "Raymond.mp4",
+            "SDM - Leslie et Léo.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Raymond.mp4",
+              "duration_sec": 28.2,
+              "category": "short"
+            },
+            {
+              "name": "SDM - Leslie et Léo.mp4",
+              "duration_sec": 47.16,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "136",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "M6+ - THE 100 – Extrait 7 – Lexa Promesse.mp4",
+            "M6+ - THE 100 – Extrait 8 – Bellamy croit que Clarke est morte.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "M6+ - THE 100 – Extrait 7 – Lexa Promesse.mp4",
+              "duration_sec": 44.36,
+              "category": "short"
+            },
+            {
+              "name": "M6+ - THE 100 – Extrait 8 – Bellamy croit que Clarke est morte.mp4",
+              "duration_sec": 45.52,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "158",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "CABINE TELEPHONE_TAT_Téva.mp4",
+            "JEREMSTAR_TAT_Téva.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "CABINE TELEPHONE_TAT_Téva.mp4",
+              "duration_sec": 67.56,
+              "category": "short"
+            },
+            {
+              "name": "JEREMSTAR_TAT_Téva.mp4",
+              "duration_sec": 68.4,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "CAMERAS_TAT_Téva.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "CAMERAS_TAT_Téva.mp4",
+              "duration_sec": 169.16,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "166",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 1,
+          "files": [
+            "PP - LRDP - Karine Dubernet en pilleur.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "PP - LRDP - Karine Dubernet en pilleur.mp4",
+              "duration_sec": 460.52,
+              "category": "medium"
+            }
+          ]
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "173",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "W9 - LPHDF - ISOLATION DANGEREUSE.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "W9 - LPHDF - ISOLATION DANGEREUSE.mp4",
+              "duration_sec": 211.68,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "179",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 3,
+          "files": [
+            "Chirurgie esthétique, elle n’aime pas ses fesses.mp4",
+            "Complexée, elle refuse de montrer son visage en public.mp4",
+            "Elle paye 7500 euros pour changer la couleur de ses yeux !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Chirurgie esthétique, elle n’aime pas ses fesses.mp4",
+              "duration_sec": 131.72,
+              "category": "standard"
+            },
+            {
+              "name": "Complexée, elle refuse de montrer son visage en public.mp4",
+              "duration_sec": 142.16,
+              "category": "standard"
+            },
+            {
+              "name": "Elle paye 7500 euros pour changer la couleur de ses yeux !.mp4",
+              "duration_sec": 208.36,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "181",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Vrai ou faux  quand la date est dépassée, il faut jeter .mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Vrai ou faux  quand la date est dépassée, il faut jeter .mp4",
+              "duration_sec": 60.84,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "183",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Extrait 1 - EM7 (Sandra Miso)  Elle fait rire le jury avec son sketch sur les applis de rencontre_TAT_M6.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Extrait 1 - EM7 (Sandra Miso)  Elle fait rire le jury avec son sketch sur les applis de rencontre_TAT_M6.mp4",
+              "duration_sec": 131.44,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "185",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 3,
+          "files": [
+            "Booder n'a pas oublié ses profs… et leurs petites piques .mp4",
+            "Elodie se clash avec une québécoise sur le français_TAT_M6.mp4",
+            "Jarry et Élodie révisent leurs langues...à leur manière _TAT_M6.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Booder n'a pas oublié ses profs… et leurs petites piques .mp4",
+              "duration_sec": 71.56,
+              "category": "short"
+            },
+            {
+              "name": "Elodie se clash avec une québécoise sur le français_TAT_M6.mp4",
+              "duration_sec": 86.12,
+              "category": "short"
+            },
+            {
+              "name": "Jarry et Élodie révisent leurs langues...à leur manière _TAT_M6.mp4",
+              "duration_sec": 62.32,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Quand tu te retrouve dans un train low cost_TAT_M6.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Quand tu te retrouve dans un train low cost_TAT_M6.mp4",
+              "duration_sec": 132.68,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "186",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "Extrait 3 - EM7 (Vello Vaher)  À 62 ans, il laisse le jury sans voix_TAT_M6.mp4",
+            "Extrait 6 - EM7 (Franck)  Sa prestation vocale déclenche un fou rire chez le jury _TAT_M6.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Extrait 3 - EM7 (Vello Vaher)  À 62 ans, il laisse le jury sans voix_TAT_M6.mp4",
+              "duration_sec": 66.24,
+              "category": "short"
+            },
+            {
+              "name": "Extrait 6 - EM7 (Franck)  Sa prestation vocale déclenche un fou rire chez le jury _TAT_M6.mp4",
+              "duration_sec": 75.36,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Extrait 4 - EM7 (Enzo)  Sa voix est presque identique à celle de Céline Dion_TAT_M6.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Extrait 4 - EM7 (Enzo)  Sa voix est presque identique à celle de Céline Dion_TAT_M6.mp4",
+              "duration_sec": 122.92,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "194",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "E3325811Short dates de péremptionl_TAT_M6.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "E3325811Short dates de péremptionl_TAT_M6.mp4",
+              "duration_sec": 60.96,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "195",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "Gulli - Totally Spies - Clover et Blaine surfent .mp4",
+            "Gulli - Totally Spies - Les retrouvailles entre Blaine et Clover.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - Totally Spies - Clover et Blaine surfent .mp4",
+              "duration_sec": 60.88,
+              "category": "short"
+            },
+            {
+              "name": "Gulli - Totally Spies - Les retrouvailles entre Blaine et Clover.mp4",
+              "duration_sec": 69.48,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "196",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "PP - Inspecteur Lavardin - Il attend la nuit pour aller enquêter.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "PP - Inspecteur Lavardin - Il attend la nuit pour aller enquêter.mp4",
+              "duration_sec": 96.92,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "200",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Des culottes usagées distribuées dans la rue !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Des culottes usagées distribuées dans la rue !.mp4",
+              "duration_sec": 57.24,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 3,
+          "files": [
+            "Elle est accro aux enchères !.mp4",
+            "Elle se fait incarcérer volontairement !.mp4",
+            "Il traque les agresseurs dans le métro !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Elle est accro aux enchères !.mp4",
+              "duration_sec": 177.92000000000002,
+              "category": "standard"
+            },
+            {
+              "name": "Elle se fait incarcérer volontairement !.mp4",
+              "duration_sec": 161.0,
+              "category": "standard"
+            },
+            {
+              "name": "Il traque les agresseurs dans le métro !.mp4",
+              "duration_sec": 160.44,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "201",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 4,
+          "files": [
+            "Elle loue son aspirateur !.mp4",
+            "Elles vont chez Maxi Bazar toutes les semaines !.mp4",
+            "Il achète 2 télés à 40€ !.mp4",
+            "LMCR2_RS BFC EXTRAIT 2.Copy.01.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Elle loue son aspirateur !.mp4",
+              "duration_sec": 108.03999999999999,
+              "category": "short"
+            },
+            {
+              "name": "Elles vont chez Maxi Bazar toutes les semaines !.mp4",
+              "duration_sec": 103.56,
+              "category": "short"
+            },
+            {
+              "name": "Il achète 2 télés à 40€ !.mp4",
+              "duration_sec": 64.24,
+              "category": "short"
+            },
+            {
+              "name": "LMCR2_RS BFC EXTRAIT 2.Copy.01.mp4",
+              "duration_sec": 86.2,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Il achète un robot de cuisine à 1000€ !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Il achète un robot de cuisine à 1000€ !.mp4",
+              "duration_sec": 120.6,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "209",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 3,
+          "files": [
+            "COUPLE LIBRE_TAT_Téva.mp4",
+            "Gulli - Mortelle Adèle - Adèle piège son gâteau d'anniversaire.mp4",
+            "VICTIMES QUI RESTENT_TAT_Téva.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "COUPLE LIBRE_TAT_Téva.mp4",
+              "duration_sec": 89.2,
+              "category": "short"
+            },
+            {
+              "name": "Gulli - Mortelle Adèle - Adèle piège son gâteau d'anniversaire.mp4",
+              "duration_sec": 73.24,
+              "category": "short"
+            },
+            {
+              "name": "VICTIMES QUI RESTENT_TAT_Téva.mp4",
+              "duration_sec": 60.48,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "TEMOIGNAGE VICTIME_TAT_Téva.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "TEMOIGNAGE VICTIME_TAT_Téva.mp4",
+              "duration_sec": 120.0,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "213",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 3,
+          "files": [
+            "Hillary se motive et veut s’essayer au gogo dancing.mp4",
+            "Jérémy est toujours très énervé contre Sophie parce qu’il pense qu’elle lui a menti.mp4",
+            "Les Ch’tis ont réussis leur soirée puis Marion et Jordan s’embrassent.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Hillary se motive et veut s’essayer au gogo dancing.mp4",
+              "duration_sec": 185.4,
+              "category": "standard"
+            },
+            {
+              "name": "Jérémy est toujours très énervé contre Sophie parce qu’il pense qu’elle lui a menti.mp4",
+              "duration_sec": 204.88,
+              "category": "standard"
+            },
+            {
+              "name": "Les Ch’tis ont réussis leur soirée puis Marion et Jordan s’embrassent.mp4",
+              "duration_sec": 204.84,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "215",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 3,
+          "files": [
+            "66M - SPEED DATING.mp4",
+            "66M - TABLES.mp4",
+            "66M - VOITURE ADO.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "66M - SPEED DATING.mp4",
+              "duration_sec": 162.52,
+              "category": "standard"
+            },
+            {
+              "name": "66M - TABLES.mp4",
+              "duration_sec": 151.84,
+              "category": "standard"
+            },
+            {
+              "name": "66M - VOITURE ADO.mp4",
+              "duration_sec": 144.44,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "216",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "Alice et Sofiane.mp4",
+            "Liliane et José.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Alice et Sofiane.mp4",
+              "duration_sec": 43.44,
+              "category": "short"
+            },
+            {
+              "name": "Liliane et José.mp4",
+              "duration_sec": 49.4,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "219",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Gulli - Mortelle Adèle - Adèle piège son gâteau d'anniversaire.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - Mortelle Adèle - Adèle piège son gâteau d'anniversaire.mp4",
+              "duration_sec": 73.24,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "223",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "LRDLR - Maïlys doit refaire toute la route en marche arrière.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "LRDLR - Maïlys doit refaire toute la route en marche arrière.mp4",
+              "duration_sec": 101.36,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "226",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "LRDLR - Marie roule dans des conditions très difficiles.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "LRDLR - Marie roule dans des conditions très difficiles.mp4",
+              "duration_sec": 43.88,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "229",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "LRDLR - Marie gère un chargement délicat.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "LRDLR - Marie gère un chargement délicat.mp4",
+              "duration_sec": 70.32,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "230",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "LRDLR - Adeline face à une situation à haut risque.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "LRDLR - Adeline face à une situation à haut risque.mp4",
+              "duration_sec": 44.68,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "231",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "6ter - Kong Skull Island - Ils foncent droit dans ce nuage.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "6ter - Kong Skull Island - Ils foncent droit dans ce nuage.mp4",
+              "duration_sec": 86.92,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "233",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "AVDP  Les anciens agriculteurs s’intéressent à l’intimité de Jean-Marie et Corinne.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "AVDP  Les anciens agriculteurs s’intéressent à l’intimité de Jean-Marie et Corinne.mp4",
+              "duration_sec": 59.36,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "235",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "extrait ps2 - Ce candidat fait craquer notre jury.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "extrait ps2 - Ce candidat fait craquer notre jury.mp4",
+              "duration_sec": 31.76,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "236",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Il montre ses parties intimes aux gendarmes !_TAT_W9.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Il montre ses parties intimes aux gendarmes !_TAT_W9.mp4",
+              "duration_sec": 111.36,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Il brûle son véhicule en plein milieu d'un champ_TAT_W9.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Il brûle son véhicule en plein milieu d'un champ_TAT_W9.mp4",
+              "duration_sec": 181.08,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "238",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "À 1kmh près il sauve son permis !_TAT_W9.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "À 1kmh près il sauve son permis !_TAT_W9.mp4",
+              "duration_sec": 105.12,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "239",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "DSTP_MYTHO.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "DSTP_MYTHO.mp4",
+              "duration_sec": 103.64,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "240",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "6ter - LRDLR - Clémence évite l'accident.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "6ter - LRDLR - Clémence évite l'accident.mp4",
+              "duration_sec": 53.64,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "242",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 3,
+          "files": [
+            "W9 - LPHDF - La fameuse volte.mp4",
+            "W9 - LPHDF - Petit appui technique.mp4",
+            "W9 - LPHDF - Sel made man.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "W9 - LPHDF - La fameuse volte.mp4",
+              "duration_sec": 217.04,
+              "category": "standard"
+            },
+            {
+              "name": "W9 - LPHDF - Petit appui technique.mp4",
+              "duration_sec": 210.76,
+              "category": "standard"
+            },
+            {
+              "name": "W9 - LPHDF - Sel made man.mp4",
+              "duration_sec": 213.4,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "245",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Gulli - UDPP - Il est le sosie de Zlatan.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - UDPP - Il est le sosie de Zlatan.mp4",
+              "duration_sec": 55.96,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "251",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "UJUD - DECOUVERTE.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "UJUD - DECOUVERTE.mp4",
+              "duration_sec": 99.36,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "256",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "Gulli - Totally Spies - Les Spies au repos.mp4",
+            "Gulli - Totally Spies - Les rôles sont inversés.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - Totally Spies - Les Spies au repos.mp4",
+              "duration_sec": 28.8,
+              "category": "short"
+            },
+            {
+              "name": "Gulli - Totally Spies - Les rôles sont inversés.mp4",
+              "duration_sec": 52.92,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "259",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "M6+ - CLF - EXTRAIT 1 (Diffusé à J- 1 avant le début de l'AVP) EP1 – Les Tanti abordent le sujet du divorce.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "M6+ - CLF - EXTRAIT 1 (Diffusé à J- 1 avant le début de l'AVP) EP1 – Les Tanti abordent le sujet du divorce.mp4",
+              "duration_sec": 147.68,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "263",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "PP - Ronin - Jean Reno et Robert De Niro.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "PP - Ronin - Jean Reno et Robert De Niro.mp4",
+              "duration_sec": 42.36,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "265",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "PP - Parker - Il se déguise en médecin pour s'échapper.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "PP - Parker - Il se déguise en médecin pour s'échapper.mp4",
+              "duration_sec": 71.6,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "267",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Extrait 8 - Son gâteau trompe-l’œil donne des frissons à Cyril Lignac_TAT_M6.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Extrait 8 - Son gâteau trompe-l’œil donne des frissons à Cyril Lignac_TAT_M6.mp4",
+              "duration_sec": 57.56,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "268",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Extrait 5 - Elle a les larmes aux yeux en découvrant son erreur_TAT_M6.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Extrait 5 - Elle a les larmes aux yeux en découvrant son erreur_TAT_M6.mp4",
+              "duration_sec": 84.36,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 2,
+          "files": [
+            "Elle reconnaît son vileur dans le journal !.mp4",
+            "Il dénonce son meilleur ami meurtrier .mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Elle reconnaît son vileur dans le journal !.mp4",
+              "duration_sec": 183.16,
+              "category": "standard"
+            },
+            {
+              "name": "Il dénonce son meilleur ami meurtrier .mp4",
+              "duration_sec": 199.44,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "270",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Gulli - Ma Super Ligue 1 - Hugo interviewe Lucas Tousart.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - Ma Super Ligue 1 - Hugo interviewe Lucas Tousart.mp4",
+              "duration_sec": 102.75999999999999,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "271",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "Gulli - Ma Super Ligue 1 - L’interview « Quand j’était petit » de Diego Coppola.mp4",
+            "Gulli - Ma super ligue 1 - Les enfants commentent les plus beaux arrêts de Ligue 1.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - Ma Super Ligue 1 - L’interview « Quand j’était petit » de Diego Coppola.mp4",
+              "duration_sec": 61.24,
+              "category": "short"
+            },
+            {
+              "name": "Gulli - Ma super ligue 1 - Les enfants commentent les plus beaux arrêts de Ligue 1.mp4",
+              "duration_sec": 97.03999999999999,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Gulli - Ma Super Ligue 1 - La jolie surprise de L.Openda.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Gulli - Ma Super Ligue 1 - La jolie surprise de L.Openda.mp4",
+              "duration_sec": 127.92,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "272",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "EE - Vendeurs à la sauvette.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "EE - Vendeurs à la sauvette.mp4",
+              "duration_sec": 169.24,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "277",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 4,
+          "files": [
+            "Greg fait une déclaration d’amour à Maeva.mp4",
+            "Il remporte le jackpot à plus de 12 000 euros !.mp4",
+            "Julien et Manon annoncent qu’ils quittent l’aventure car leurs enfants leur manque.mp4",
+            "Paga et Giuseppa parlent avenir et comment ils se voient dans 10 ans.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Greg fait une déclaration d’amour à Maeva.mp4",
+              "duration_sec": 198.0,
+              "category": "standard"
+            },
+            {
+              "name": "Il remporte le jackpot à plus de 12 000 euros !.mp4",
+              "duration_sec": 213.36,
+              "category": "standard"
+            },
+            {
+              "name": "Julien et Manon annoncent qu’ils quittent l’aventure car leurs enfants leur manque.mp4",
+              "duration_sec": 198.68,
+              "category": "standard"
+            },
+            {
+              "name": "Paga et Giuseppa parlent avenir et comment ils se voient dans 10 ans.mp4",
+              "duration_sec": 194.64,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "280",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 2,
+          "files": [
+            "UJUD - CONSTRUCTION.mp4",
+            "UJUD - VISITE EXPERT.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "UJUD - CONSTRUCTION.mp4",
+              "duration_sec": 194.2,
+              "category": "standard"
+            },
+            {
+              "name": "UJUD - VISITE EXPERT.mp4",
+              "duration_sec": 203.16,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "291",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "EM6_SHORT 10 000 pas_E3325911.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "EM6_SHORT 10 000 pas_E3325911.mp4",
+              "duration_sec": 62.2,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "296",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 3,
+          "files": [
+            "PP - ANNIVERSAIRE - Anconina.mp4",
+            "PP- ANNIVERSAIRE - BLAGUE DARMON.mp4",
+            "Un appartement à gare du Nord à 2,5 millions d'euros !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "PP - ANNIVERSAIRE - Anconina.mp4",
+              "duration_sec": 34.44,
+              "category": "short"
+            },
+            {
+              "name": "PP- ANNIVERSAIRE - BLAGUE DARMON.mp4",
+              "duration_sec": 79.76,
+              "category": "short"
+            },
+            {
+              "name": "Un appartement à gare du Nord à 2,5 millions d'euros !.mp4",
+              "duration_sec": 117.4,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "Une fête tamoule en plein cœur de Paris !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Une fête tamoule en plein cœur de Paris !.mp4",
+              "duration_sec": 171.8,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "306",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 1,
+          "files": [
+            "Les anciens agriculteurs réagissent à la chute en jet-ski de Jean-Marie et Corinne !.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "Les anciens agriculteurs réagissent à la chute en jet-ski de Jean-Marie et Corinne !.mp4",
+              "duration_sec": 105.44,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    },
+    {
+      "id_camille": "311",
+      "person": "Camille",
+      "categories": {
+        "short": {
+          "label": "vidéo courte (moins de 2 min)",
+          "count": 2,
+          "files": [
+            "PP - LRDP - Jacques Mailhot.mp4",
+            "PP - LRDP - Michel Guidoni en Marine Le Pen.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "PP - LRDP - Jacques Mailhot.mp4",
+              "duration_sec": 89.96000000000001,
+              "category": "short"
+            },
+            {
+              "name": "PP - LRDP - Michel Guidoni en Marine Le Pen.mp4",
+              "duration_sec": 83.16,
+              "category": "short"
+            }
+          ]
+        },
+        "standard": {
+          "label": "vidéo standard (entre 2 et 5 minutes)",
+          "count": 1,
+          "files": [
+            "PP - LRDP - Chanson country Yann Stotz.mp4"
+          ],
+          "files_detail": [
+            {
+              "name": "PP - LRDP - Chanson country Yann Stotz.mp4",
+              "duration_sec": 175.88,
+              "category": "standard"
+            }
+          ]
+        },
+        "medium": {
+          "label": "vidéo moyenne (entre 5 et 8 minutes)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        },
+        "long": {
+          "label": "vidéo longue (8 min et plus)",
+          "count": 0,
+          "files": [],
+          "files_detail": []
+        }
+      }
+    }
+  ],
+  "warnings": [
+    "Format ignoré : MOTION_FIN_EM6_V03.mov (lot 105).",
+    "Format ignoré : 9_16_RDV_PROGRAMME_EM6_V02_5MIN.mov (lot 105).",
+    "Format ignoré : m6+.mov (lot 136).",
+    "Format ignoré : m6+.mov (lot 181).",
+    "Format ignoré : MOTION_FIN_EM6_V03.mov (lot 194).",
+    "Format ignoré : 9_16_RDV_PROGRAMME_EM6_V02_5MIN.mov (lot 194).",
+    "Format ignoré : m6+.mov (lot 2).",
+    "Format ignoré : m6+.mov (lot 20).",
+    "Format ignoré : m6+.mov (lot 259).",
+    "Format ignoré : MOTION_FIN_EM6_V03.mov (lot 291).",
+    "Format ignoré : 9_16_RDV_PROGRAMME_EM6_V02_5MIN.mov (lot 291).",
+    "Format ignoré : m6+.mov (lot 45).",
+    "Format ignoré : MSL1.mov (lot 78).",
+    "Format ignoré : MSL1.mov (lot 79).",
+    "Format ignoré : MSL1.mov (lot 80).",
+    "1 bon(s) de commande détaillé(s) : vidéos issues de l'annexe."
+  ]
+}
